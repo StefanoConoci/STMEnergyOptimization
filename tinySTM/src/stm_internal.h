@@ -1119,11 +1119,13 @@ stm_rollback(stm_tx_t *tx, unsigned int reason)
     tx->saturating_counter++;
 
     if((tx->saturating_counter >  sca_saturating_threshold) && (tx->contention_bit)){
-    	while(1) {
-    		while(sca_serializing_lock==1) {};
-    		if (ATOMIC_CAS_FULL(&sca_serializing_lock, 0, 1) != 0){
-    			tx->sca_serializing_lock_acquired=1;
-    			break;
+    	if (tx->sca_serializing_lock_acquired!=1) {
+    		while(1) {
+    			while(sca_serializing_lock==1) {};
+    			if (ATOMIC_CAS_FULL(&sca_serializing_lock, 0, 1) != 0){
+    				tx->sca_serializing_lock_acquired=1;
+    				break;
+    			}
     		}
     	}
     }
