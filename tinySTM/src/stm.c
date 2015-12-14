@@ -673,6 +673,7 @@ stm_start_tx(stm_tx_t *tx, stm_tx_attr_t attr)
 /*
  * Called by the CURRENT thread to commit a transaction.
  */
+__thread unsigned int inc;
 
 _CALLCONV int
 stm_commit(void)
@@ -689,6 +690,10 @@ stm_commit(void)
 
 	tx->contention_bit = 0;
     tx->saturating_counter = 0;
+
+    inc++;
+    printf("Committed: %i\r", inc);
+    fflush(stdout);
 
 #endif //STM_SCA
 
