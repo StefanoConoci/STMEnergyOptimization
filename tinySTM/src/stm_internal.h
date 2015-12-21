@@ -1123,6 +1123,7 @@ stm_rollback(stm_tx_t *tx, unsigned int reason)
     		while(1) {
     			while(sca_serializing_lock==1) {};
     			if (ATOMIC_CAS_FULL(&sca_serializing_lock, 0, 1) != 0){
+    				printf("\nTid: %lu lock acquired", pthread_self());
     				tx->sca_serializing_lock_acquired=1;
     				break;
     			}
