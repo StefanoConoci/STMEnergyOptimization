@@ -686,6 +686,7 @@ stm_commit(void)
 #ifdef STM_SCA
 	if(tx->sca_serializing_lock_acquired == 1){
 		sca_serializing_lock=0;
+		tx->sca_serializing_lock_acquired = 0;
     }
 
 	tx->contention_bit = 0;
