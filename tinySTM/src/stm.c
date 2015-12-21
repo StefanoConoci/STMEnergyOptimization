@@ -686,7 +686,6 @@ stm_commit(void)
 #ifdef STM_SCA
 	if(tx->sca_serializing_lock_acquired == 1){
 		sca_serializing_lock=0;
-		printf("\nTid: %lu lock released", pthread_self());
 		tx->sca_serializing_lock_acquired = 0;
     }
 

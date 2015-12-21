@@ -35,7 +35,7 @@
 
 #ifdef STM_SCA
 	unsigned int sca_saturating_threshold;
-	volatile unsigned int sca_serializing_lock;
+	volatile stm_word_t sca_serializing_lock;
 #endif /* STM_SCA */
 
 /* ################################################################### *
@@ -1118,18 +1118,17 @@ stm_rollback(stm_tx_t *tx, unsigned int reason)
   	tx->contention_bit = 1;
     tx->saturating_counter++;
 
-    //if((tx->saturating_counter >  sca_saturating_threshold) && (tx->contention_bit)){
+    if((tx->saturating_counter >  sca_saturating_threshold) && (tx->contention_bit)){
     	if (tx->sca_serializing_lock_acquired!=1) {
     		while(1) {
     			while(sca_serializing_lock==1) {};
     			if (ATOMIC_CAS_FULL(&sca_serializing_lock, 0, 1) != 0){
-    				printf("\nTid: %lu lock acquired", pthread_self());
     				tx->sca_serializing_lock_acquired=1;
     				break;
     			}
     		}
     	}
-    //}
+    }
 #endif
 
   LONGJMP(tx->env, reason);
