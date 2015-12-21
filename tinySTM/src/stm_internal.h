@@ -1118,7 +1118,7 @@ stm_rollback(stm_tx_t *tx, unsigned int reason)
   	tx->contention_bit = 1;
     tx->saturating_counter++;
 
-    if((tx->saturating_counter >  sca_saturating_threshold) && (tx->contention_bit)){
+    //if((tx->saturating_counter >  sca_saturating_threshold) && (tx->contention_bit)){
     	if (tx->sca_serializing_lock_acquired!=1) {
     		while(1) {
     			while(sca_serializing_lock==1) {};
@@ -1128,7 +1128,7 @@ stm_rollback(stm_tx_t *tx, unsigned int reason)
     			}
     		}
     	}
-    }
+    //}
 #endif
 
   LONGJMP(tx->env, reason);
