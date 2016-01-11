@@ -692,9 +692,9 @@ stm_commit(void)
 	tx->contention_bit = 0;
     tx->saturating_counter = 0;
 
-    inc++;
-    printf("Committed: %i\r", inc);
-    fflush(stdout);
+    //inc++;
+    //printf("Committed: %i\r", inc);
+    //fflush(stdout);
 
 #endif //STM_SCA
 
