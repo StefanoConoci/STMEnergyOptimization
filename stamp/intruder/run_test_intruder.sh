@@ -14,8 +14,8 @@ while [ $nthread -le $maxThread ]
 	k=0
 	while [ $k -lt $runPerThread ]
 		do
-		echo nice -20 ./intruder a8 -l176 -n109187 -t$nthread 			
-		nice -20 ./intruder a8 -l176 -n109187 -t$nthread >> results_analysis.txt
+		echo nice -20 ./intruder -a8 -l176 -n109187 -t$nthread 			
+		nice -20 ./intruder -a8 -l176 -n109187 -t$nthread >> results_analysis.txt
 		k=$[$k+1]
 	done
 	nthread=$[$nthread+1]
