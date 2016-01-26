@@ -1,0 +1,55 @@
+-i inputs/random-x32-y32-z3-n64.txt -t1
+labyrinth
+Threads: 1	Elapsed time: 0.014725	Commits: 130	Aborts: 0	Throughput: 8828.540989
+Threads: 2	Elapsed time: 0.013308	Commits: 132	Aborts: 9	Throughput: 9918.809846
+Threads: 3	Elapsed time: 0.010433	Commits: 134	Aborts: 18	Throughput: 12843.618282
+Threads: 4	Elapsed time: 0.011353	Commits: 136	Aborts: 25	Throughput: 11979.195766
+Threads: 5	Elapsed time: 0.013549	Commits: 138	Aborts: 26	Throughput: 10185.365524
+Threads: 6	Elapsed time: 0.014771	Commits: 140	Aborts: 28	Throughput: 9478.041127
+Threads: 7	Elapsed time: 0.017679	Commits: 142	Aborts: 36	Throughput: 8032.139391
+Threads: 8	Elapsed time: 0.017929	Commits: 144	Aborts: 27	Throughput: 8031.645957
+Threads: 9	Elapsed time: 0.015350	Commits: 146	Aborts: 37	Throughput: 9511.484328
+Threads: 10	Elapsed time: 0.015187	Commits: 148	Aborts: 29	Throughput: 9745.313699
+Threads: 11	Elapsed time: 0.014430	Commits: 150	Aborts: 29	Throughput: 10394.977199
+Threads: 12	Elapsed time: 0.013731	Commits: 152	Aborts: 29	Throughput: 11069.839700
+Threads: 13	Elapsed time: 0.018490	Commits: 154	Aborts: 37	Throughput: 8328.792129
+Threads: 14	Elapsed time: 0.015999	Commits: 156	Aborts: 33	Throughput: 9750.706724
+Threads: 15	Elapsed time: 0.017193	Commits: 158	Aborts: 34	Throughput: 9189.871755
+Threads: 16	Elapsed time: 0.017984	Commits: 160	Aborts: 38	Throughput: 8896.839984
+-i inputs/random-x32-y32-z3-n96.txt -t1
+labyrinth
+Threads: 1	Elapsed time: 0.021525	Commits: 194	Aborts: 0	Throughput: 9012.815135
+Threads: 2	Elapsed time: 0.013041	Commits: 196	Aborts: 12	Throughput: 15029.499872
+Threads: 3	Elapsed time: 0.014572	Commits: 198	Aborts: 20	Throughput: 13587.568586
+Threads: 4	Elapsed time: 0.014324	Commits: 200	Aborts: 26	Throughput: 13962.629205
+Threads: 5	Elapsed time: 0.016598	Commits: 202	Aborts: 44	Throughput: 12170.151084
+Threads: 6	Elapsed time: 0.013272	Commits: 204	Aborts: 30	Throughput: 15370.926885
+Threads: 7	Elapsed time: 0.013670	Commits: 206	Aborts: 31	Throughput: 15069.530906
+Threads: 8	Elapsed time: 0.016060	Commits: 208	Aborts: 47	Throughput: 12951.340271
+Threads: 9	Elapsed time: 0.015941	Commits: 210	Aborts: 57	Throughput: 13173.459364
+Threads: 10	Elapsed time: 0.016337	Commits: 212	Aborts: 50	Throughput: 12976.743936
+Threads: 11	Elapsed time: 0.015075	Commits: 214	Aborts: 50	Throughput: 14195.493532
+Threads: 12	Elapsed time: 0.015926	Commits: 216	Aborts: 41	Throughput: 13562.826192
+Threads: 13	Elapsed time: 0.015670	Commits: 218	Aborts: 52	Throughput: 13912.091047
+Threads: 14	Elapsed time: 0.017678	Commits: 220	Aborts: 52	Throughput: 12444.830944
+Threads: 15	Elapsed time: 0.016939	Commits: 222	Aborts: 59	Throughput: 13105.724130
+Threads: 16	Elapsed time: 0.019130	Commits: 224	Aborts: 56	Throughput: 11709.362214
+-i inputs/random-x32-y32-z3-n96.txt -t1
+labyrinth
+Threads: 1	Elapsed time: 0.069887	Commits: 130	Aborts: 0	Throughput: 1860.147718
+Threads: 2	Elapsed time: 0.042003	Commits: 132	Aborts: 5	Throughput: 3142.638929
+Threads: 3	Elapsed time: 0.033573	Commits: 134	Aborts: 11	Throughput: 3991.284627
+Threads: 4	Elapsed time: 0.033687	Commits: 136	Aborts: 18	Throughput: 4037.180497
+Threads: 5	Elapsed time: 0.034955	Commits: 138	Aborts: 28	Throughput: 3947.930265
+Threads: 6	Elapsed time: 0.029080	Commits: 140	Aborts: 22	Throughput: 4814.280116
+Threads: 7	Elapsed time: 0.029812	Commits: 142	Aborts: 28	Throughput: 4763.205118
+Threads: 8	Elapsed time: 0.031691	Commits: 144	Aborts: 27	Throughput: 4543.900332
+Threads: 9	Elapsed time: 0.029684	Commits: 146	Aborts: 34	Throughput: 4918.503040
+Threads: 10	Elapsed time: 0.037738	Commits: 148	Aborts: 26	Throughput: 3921.767647
+Threads: 11	Elapsed time: 0.033593	Commits: 150	Aborts: 27	Throughput: 4465.224026
+Threads: 12	Elapsed time: 0.043925	Commits: 152	Aborts: 30	Throughput: 3460.459025
+Threads: 13	Elapsed time: 0.045185	Commits: 154	Aborts: 29	Throughput: 3408.203968
+Threads: 14	Elapsed time: 0.043441	Commits: 156	Aborts: 37	Throughput: 3591.072825
+Threads: 15	Elapsed time: 0.050284	Commits: 158	Aborts: 35	Throughput: 3142.158270
+Threads: 16	Elapsed time: 0.043197	Commits: 160	Aborts: 43	Throughput: 3703.968076
+labyrinth
