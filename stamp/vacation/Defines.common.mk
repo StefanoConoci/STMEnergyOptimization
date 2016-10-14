@@ -22,6 +22,7 @@ SRCS += \
 	$(LIB)/random.c \
 	$(LIB)/rbtree.c \
 	$(LIB)/thread.c \
+	hack.c \
 #
 OBJS := ${SRCS:.c=.o}
 

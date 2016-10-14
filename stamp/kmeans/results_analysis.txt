@@ -62,3 +62,7 @@ Threads: 13	Elapsed time: 4.176060	Commits: 8739400	Aborts: 2860607	Throughput: 
 Threads: 14	Elapsed time: 4.358519	Commits: 9351265	Aborts: 3120530	Throughput: 2145514.298354
 Threads: 15	Elapsed time: 4.081426	Commits: 8826996	Aborts: 3072471	Throughput: 2162723.568911
 Threads: 16	Elapsed time: 3.421265	Commits: 7516142	Aborts: 2582751	Throughput: 2196889.819574
+kmeans
+kmeans
+kmeans
+kmeans

@@ -429,7 +429,7 @@
 #      include <mod_stats.h>
 #ifdef STM_F2C2
 #      define TM_STARTUP(nthreads) \
-										if (sizeof(long) != sizeof(void *)) { \
+										                    if (sizeof(long) != sizeof(void *)) { \
                                           fprintf(stderr, "Error: unsupported long and pointer sizes\n"); \
                                           exit(1); \
                                         } \
@@ -437,10 +437,10 @@
                                         mod_mem_init(0); \
                                         if (getenv("STM_STATS") != NULL) { \
                                           mod_stats_init(); \
-                                        }
+                                        } 
 #else
 #define TM_STARTUP(nthreads) \
-										if (sizeof(long) != sizeof(void *)) { \
+										                    if (sizeof(long) != sizeof(void *)) { \
                                           fprintf(stderr, "Error: unsupported long and pointer sizes\n"); \
                                           exit(1); \
                                         } \
@@ -448,7 +448,11 @@
                                         mod_mem_init(0); \
                                         if (getenv("STM_STATS") != NULL) { \
                                           mod_stats_init(); \
-                                        }
+                                        } \
+										                    init_thread_management(nthreads); \
+                                        init_DVFS_management(); \
+                                        start_stats_thread(); \
+                                        start_manager_thread()
 #endif
 
 #      define TM_SHUTDOWN()             if (getenv("STM_STATS") != NULL) { \
@@ -458,9 +462,12 @@
                                           if (stm_get_global_stats("global_nb_aborts", &v) != 0) \
                                             printf("\tAborts: %lu", v); \
                                         } \
-                                        stm_exit()
+                                        stm_exit(); \
+										                    set_job_completed()
 
-#      define TM_THREAD_ENTER()			stm_pre_init_thread(thread_getId())
+#      define TM_THREAD_ENTER()			stm_pre_init_thread(thread_getId()); \
+										                set_pthread_id(thread_getId())	
+										
 
 #      define TM_THREAD_EXIT()          stm_exit_thread()
 
@@ -484,19 +491,21 @@
 
 #  else /* !OTM */
 
-#    define TM_START(id,ro)                do { \
-                                            stm_tx_attr_t _a = {id, ro}; \
-                                            sigjmp_buf *_e = stm_start(_a); \
-                                            if (_e != NULL) sigsetjmp(*_e, 0); \
+#    define TM_START(id,ro)             do { \
+                                          check_running_array(thread_getId()); \
+                                          stm_tx_attr_t _a = {id, ro}; \
+                                          sigjmp_buf *_e = stm_start(_a); \
+                                          if (_e != NULL) sigsetjmp(*_e, 0); \
                                         } while (0)
 
 #    define TM_BEGIN(id)                TM_START(id,0)
 
-#    define TM_BEGIN()                TM_START(0,0)
+#    define TM_BEGIN()                  TM_START(0,0)
 
 #    define TM_BEGIN_RO()               TM_START(1)
 
 #    define TM_END()                    stm_commit()
+
 #    define TM_RESTART()                stm_abort(0)
 
 #    define TM_EARLY_RELEASE(var)       /* nothing */
