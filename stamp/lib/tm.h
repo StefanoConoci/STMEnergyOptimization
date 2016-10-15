@@ -427,7 +427,7 @@
 
 #      include <mod_mem.h>
 #      include <mod_stats.h>
-#ifdef STM_F2C2
+#ifdef STM_HOPE
 #      define TM_STARTUP(nthreads) \
 										if (sizeof(long) != sizeof(void *)) { \
                                           fprintf(stderr, "Error: unsupported long and pointer sizes\n"); \

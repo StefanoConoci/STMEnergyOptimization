@@ -76,7 +76,8 @@
 # define _STM_H_
 
 //#define STM_MCATS
-#define STM_SCA
+//#define STM_SCA
+#define STM_HOPE
 
 #ifdef STM_MCATS
 
