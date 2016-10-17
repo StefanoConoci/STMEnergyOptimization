@@ -388,6 +388,10 @@ typedef struct stm_tx {                 /* Transaction descriptor */
   unsigned int saturating_counter;
   unsigned int sca_serializing_lock_acquired;
 #endif /* ! STM_SCA */
+
+# ifdef STM_HOPE
+  int thread_number;
+#endif
 } stm_tx_t;
 
 /* This structure should be ordered by hot and cold variables */

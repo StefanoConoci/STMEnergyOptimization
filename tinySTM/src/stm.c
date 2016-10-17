@@ -83,6 +83,9 @@ global_t _tinystm =
 	int pstate[32];			// Array of p-states initialized at startup with available scaling frequencies 
 	int max_pstate;			// Maximum number of available pstate for the running machine 
 	int current_pstate;		// Value of current pstate, index of pstate array which contains frequencies
+	int transaction_number = 1;
+	int goSleep = 1;
+
 #endif/* ! STM_HOPE */
 
 
@@ -202,15 +205,41 @@ global_t _tinystm =
 	inline void check_running_array(int threadId){
 		
 		while(running_array[threadId] == 0){
-			printf("Pausing thread %d\n", threadId);
 			pause();
 		}
 	}
 
 	// Executed at: TM_THREAD_ENTER
 	void set_pthread_id(int threadId){
+		
 		pthread_ids[threadId] = pthread_self();
 		printf("Setting pthread_ids[%d]=%lu\n", threadId, pthread_ids[threadId]);
+	}
+
+	// Used by the heuristics to tune the number of active threads 
+	inline int wake_up_thread(int thread_id){
+		
+		if( running_array[thread_id] == 1){
+			printf("Waking up a thread already running\n");
+			return -1;
+		}
+
+		running_array[thread_id] = 1;
+		printf("Waking up thread %d\n", thread_id);
+		pthread_kill(pthread_ids[thread_id], SIGUSR1);
+		return 0;
+	}
+
+	// Used by the heuristics to tune the number of active threads 
+	inline int pause_thread(int thread_id){
+
+		if( running_array[thread_id] == 0 ){
+			printf("Pausing a thread already paused\n");
+			return -1;
+		}
+
+		printf("Pausing thread %d\n", thread_id);
+		running_array[thread_id] = 0;
 	}
 
 
@@ -510,13 +539,31 @@ stm_exit_thread_tx(stm_tx_t *tx)
 _CALLCONV sigjmp_buf *
 stm_start(stm_tx_attr_t attr)
 {
-  #ifdef STM_HOPE
-	check_running_array(attr.id);
-  #endif 
 
   TX_GET;
   sigjmp_buf * ret;
-  stm_wait(attr.id);
+  #ifdef STM_HOPE
+  	if( tx->thread_number == 0){
+		transaction_number++;
+
+		if( (transaction_number % 1000000) == 0 ){
+			printf("Multiple of transactions\n");
+  			if(goSleep == 1){
+  				pause_thread(1);
+  				goSleep = 0; 
+  			}
+  			else {
+  				printf("Trying to wake up thread\n");
+  				wake_up_thread(1);
+  				goSleep = 1;
+  			}
+  		}
+  	}
+  	
+  	stm_wait(tx->thread_number);
+  #else
+  	stm_wait(attr.id);
+  #endif
   ret=int_stm_start(tx, attr);
 
   return ret;
@@ -524,16 +571,21 @@ stm_start(stm_tx_attr_t attr)
 
 
 _CALLCONV stm_tx_t *stm_pre_init_thread(int id){
-	
 	#ifdef STM_HOPE
-	set_pthread_id(id);
-	#endif
+		stm_tx_t *tx;
+		tx=stm_init_thread();
 
-	return stm_init_thread();
+		tx->thread_number = id;
+		set_pthread_id(id);
+	#else
+		return stm_init_thread();
+	#endif
 }
 
 void stm_wait(int id) {
-
+	#ifdef STM_HOPE
+  		check_running_array(id);
+  	#endif
 }
 
 
