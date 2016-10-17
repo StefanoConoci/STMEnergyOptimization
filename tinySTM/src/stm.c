@@ -520,8 +520,15 @@ stm_init_thread(void)
 _CALLCONV void
 stm_exit_thread(void)
 {
-	TX_GET;
-
+  
+  TX_GET;
+  #ifdef STM_HOPE
+  	if(tx->thread_number == 0){
+  		for(int i=1; i< total_threads; i++){
+  			wake_up_thread(i);
+  		}	
+  	}
+  #endif
 
   int_stm_exit_thread(tx);
 }
@@ -546,17 +553,17 @@ stm_start(stm_tx_attr_t attr)
   	if( tx->thread_number == 0){
 		transaction_number++;
 
-		if( (transaction_number % 1000000) == 0 ){
-			printf("Multiple of transactions\n");
-  			if(goSleep == 1){
+		if( (transaction_number % 100000) == 0 ){
+  			/*if(goSleep == 1){
   				pause_thread(1);
   				goSleep = 0; 
   			}
   			else {
-  				printf("Trying to wake up thread\n");
   				wake_up_thread(1);
   				goSleep = 1;
-  			}
+  			}*/
+  			pause_thread(1);
+
   		}
   	}
   	
