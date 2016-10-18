@@ -27,6 +27,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include <pthread.h>
 #include <sched.h>
@@ -80,11 +81,25 @@ global_t _tinystm =
 	int total_threads;		// Total number of threads that could be used by the transcational operation 
 	int active_threads;		// Number of currently active threads, reflects the number of 1's in running_array
 	int nb_cores; 			// Number of cores. Detected at startup and used to set DVFS parameters for all cores
+	int cache_line_size;	// Size in byte of the cache line. Detected at startup and used to alloc memory cache aligned 
 	int pstate[32];			// Array of p-states initialized at startup with available scaling frequencies 
-	int max_pstate;			// Maximum number of available pstate for the running machine 
+	int max_pstate;			// Maximum index of available pstate for the running machine 
 	int current_pstate;		// Value of current pstate, index of pstate array which contains frequencies
-	int transaction_number = 1;
-	int goSleep = 1;
+
+	typedef struct stats{
+		int collector;		// While set to 1 thread collects data for this round  
+		int size_round;		// Defined as number of commits for the current round
+		int commit_round;	// Number of commits in the current round
+		int abort_round;		// Number of aborts in the current round
+		int tx_round;		// Number of total transactions started in this round 
+		long start_energy;	// Value of energy consumption taken at the start of the round, expressed in micro joule
+		long end_energy;	// Value of energy consumption taken at the end of the round, expressed in micro joule
+		long start_time;	// Start time of the current round
+		long end_time;		// End time of the current round
+
+	} stats_t;
+
+	stats_t** stats_array;	// Pointer to pointers of struct stats_s, one for each thread 	
 
 #endif/* ! STM_HOPE */
 
@@ -240,6 +255,38 @@ global_t _tinystm =
 
 		printf("Pausing thread %d\n", thread_id);
 		running_array[thread_id] = 0;
+	}
+
+	// Executed inside: stm_init
+	void init_stats_array_pointer(int threads){
+
+		// Allocate memory for the pointers of stats_t
+		stats_array = malloc(sizeof(stats_t*)*threads); 
+
+		cache_line_size = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
+		printf("D1 cache line size: %d bytes\n", cache_line_size);
+	}
+
+	stats_t* alloc_stats_buffer(int thread_number){
+		
+		stats_t* stats_ptr = stats_array[thread_number];
+
+		int ret = posix_memalign(&stats_ptr, cache_line_size, sizeof(stats_t));
+		if ( ret != 0 ){
+			printf("Error allocating stats_t for thread %d\n", thread_number);
+			exit(0);
+		}
+
+		stats_ptr->size_round = 0;
+		stats_ptr->commit_round = 0;
+		stats_ptr->abort_round = 0;
+		stats_ptr->tx_round = 0;
+		stats_ptr->start_energy = 0;
+		stats_ptr->end_energy = 0;
+		stats_ptr->start_time = 0;
+		stats_ptr->end_time = 0;
+
+		return stats_ptr;
 	}
 
 
@@ -418,6 +465,7 @@ void stm_init(int threads) {
 	printf("TinySTM - STM_HOPE mode started\n");
 	init_DVFS_management();
 	init_thread_management(threads);
+	init_stats_array_pointer(threads);
 	
 #else
 
@@ -550,23 +598,6 @@ stm_start(stm_tx_attr_t attr)
   TX_GET;
   sigjmp_buf * ret;
   #ifdef STM_HOPE
-  	if( tx->thread_number == 0){
-		transaction_number++;
-
-		if( (transaction_number % 100000) == 0 ){
-  			/*if(goSleep == 1){
-  				pause_thread(1);
-  				goSleep = 0; 
-  			}
-  			else {
-  				wake_up_thread(1);
-  				goSleep = 1;
-  			}*/
-  			pause_thread(1);
-
-  		}
-  	}
-  	
   	stm_wait(tx->thread_number);
   #else
   	stm_wait(attr.id);
