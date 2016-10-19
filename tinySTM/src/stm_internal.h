@@ -265,6 +265,22 @@ enum {                                  /* Transaction status */
 # define MAX_SPECIFIC                   7
 #endif /* MAX_SPECIFIC */
 
+#ifdef STM_HOPE
+
+typedef struct stats{
+    int collector;        // While set to 1 thread collects data for this round  
+    int total_commits;       // Defined as number of commits for the current round
+    int commits;     // Number of commits in the current round
+    int aborts;      // Number of aborts in the current round
+    int nb_tx;         // Number of total transactions started in this round 
+    long start_energy;    // Value of energy consumption taken at the start of the round, expressed in micro joule
+    long end_energy;      // Value of energy consumption taken at the end of the round, expressed in micro joule
+    long start_time;      // Start time of the current round
+    long end_time;        // End time of the current round
+
+  } stats_t;
+
+#endif
 
 typedef struct r_entry {                /* Read set entry */
   stm_word_t version;                   /* Version read */
@@ -390,7 +406,8 @@ typedef struct stm_tx {                 /* Transaction descriptor */
 #endif /* ! STM_SCA */
 
 # ifdef STM_HOPE
-  int thread_number;
+  int thread_number;  // Number from 0 to Max_thread to identify threads inside the application
+  stats_t* stats_ptr;    // Pointer to stats struct for the current thread. This allows faster access
 #endif
 } stm_tx_t;
 
@@ -1109,30 +1126,11 @@ stm_rollback(stm_tx_t *tx, unsigned int reason)
 #else /* ! IRREVOCABLE_ENABLED */
   reason |= STM_PATH_INSTRUMENTED;
 #endif /* ! IRREVOCABLE_ENABLED */
-#ifdef STM_MCATS
-  if(tx->i_am_the_collector_thread){
-	  stm_time_t conflict_time=STM_TIMER_READ();
-	  tx->total_tx_wasted_per_active_transactions[tx->last_k]+=conflict_time - tx->last_start_tx_time;
-	  tx->last_start_tx_time=conflict_time;
+
+#ifdef STM_HOPE
+  if(tx->stats_ptr->collector == 1){
+    tx->stats_ptr->aborts++;
   }
-#endif
-
-#ifdef STM_SCA
-
-  	tx->contention_bit = 1;
-    tx->saturating_counter++;
-
-    if((tx->saturating_counter >  sca_saturating_threshold) && (tx->contention_bit)){
-    	if (tx->sca_serializing_lock_acquired!=1) {
-    		while(1) {
-    			while(sca_serializing_lock==1) {};
-    			if (ATOMIC_CAS_FULL(&sca_serializing_lock, 0, 1) != 0){
-    				tx->sca_serializing_lock_acquired=1;
-    				break;
-    			}
-    		}
-    	}
-    }
 #endif
 
   LONGJMP(tx->env, reason);

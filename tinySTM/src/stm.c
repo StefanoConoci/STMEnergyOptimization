@@ -85,20 +85,7 @@ global_t _tinystm =
 	int pstate[32];			// Array of p-states initialized at startup with available scaling frequencies 
 	int max_pstate;			// Maximum index of available pstate for the running machine 
 	int current_pstate;		// Value of current pstate, index of pstate array which contains frequencies
-
-	typedef struct stats{
-		int collector;		// While set to 1 thread collects data for this round  
-		int size_round;		// Defined as number of commits for the current round
-		int commit_round;	// Number of commits in the current round
-		int abort_round;		// Number of aborts in the current round
-		int tx_round;		// Number of total transactions started in this round 
-		long start_energy;	// Value of energy consumption taken at the start of the round, expressed in micro joule
-		long end_energy;	// Value of energy consumption taken at the end of the round, expressed in micro joule
-		long start_time;	// Start time of the current round
-		long end_time;		// End time of the current round
-
-	} stats_t;
-
+	int total_commits_round= 100000;	// Number of total commits for each heuristics step 
 	stats_t** stats_array;	// Pointer to pointers of struct stats_s, one for each thread 	
 
 #endif/* ! STM_HOPE */
@@ -134,7 +121,7 @@ global_t _tinystm =
 		}
 		current_pstate = input_pstate;
 		
-		printf("Set processor to p-state %d - %d MHz\n", input_pstate, frequency);
+		printf("Set processor to p-state %d (%d MHz)\n", input_pstate, frequency/100);
 		return 0;
 	}
 
@@ -224,13 +211,6 @@ global_t _tinystm =
 		}
 	}
 
-	// Executed at: TM_THREAD_ENTER
-	void set_pthread_id(int threadId){
-		
-		pthread_ids[threadId] = pthread_self();
-		printf("Setting pthread_ids[%d]=%lu\n", threadId, pthread_ids[threadId]);
-	}
-
 	// Used by the heuristics to tune the number of active threads 
 	inline int wake_up_thread(int thread_id){
 		
@@ -277,18 +257,54 @@ global_t _tinystm =
 			exit(0);
 		}
 
-		stats_ptr->size_round = 0;
-		stats_ptr->commit_round = 0;
-		stats_ptr->abort_round = 0;
-		stats_ptr->tx_round = 0;
+		stats_ptr->total_commits = total_commits_round/active_threads;
+		stats_ptr->commits = 0;
+		stats_ptr->aborts = 0;
+		stats_ptr->nb_tx = 0;
 		stats_ptr->start_energy = 0;
 		stats_ptr->end_energy = 0;
 		stats_ptr->start_time = 0;
 		stats_ptr->end_time = 0;
 
+		stats_array[thread_number] = stats_ptr;
+
 		return stats_ptr;
 	}
 
+	void heuristic(){
+		printf("Heuristic function called\n");
+	}
+
+
+	// Returns energy consumption of package 0 in micro Joule
+	long get_energy(){
+		
+		long power;
+
+		FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj", "r");
+		if(power_file == NULL){
+			printf("Error opening power file\n");		
+		}
+		fscanf(power_file,"%ld",&power);
+		fclose(power_file);
+		return power;
+	}
+
+
+	long get_time(){
+		//long time = STM_TIMER_READ();
+		//return time;
+
+		return 202020202020;
+	}
+
+	void print_stats_array(){
+		for(int i=0; i<active_threads; i++){
+			printf("Thread=%d - Total_commits=%d - nb_tx=%d commits=%d - aborts=%d\nStart_energy=%ld - end_energy=%ld - start_time =%ld - end_time=%ld\n",
+					i, stats_array[i]->total_commits, stats_array[i]->nb_tx, stats_array[i]->commits, stats_array[i]->aborts, 
+					stats_array[i]->start_energy, stats_array[i]->end_energy, stats_array[i]->start_time, stats_array[i]->end_time);
+		}
+	}
 
 #endif/* ! STM_HOPE */
 
@@ -599,6 +615,25 @@ stm_start(stm_tx_attr_t attr)
   sigjmp_buf * ret;
   #ifdef STM_HOPE
   	stm_wait(tx->thread_number);
+
+  	// Retrive stats if collector 
+  	if(tx->stats_ptr->collector == 1){
+
+  		stats_t* stats = tx->stats_ptr;
+  		
+  		// First tx for this round
+  		if(stats->nb_tx == 0){ 
+  			
+  			stats->commits = 0;
+  			stats->aborts = 0;
+
+  			stats->start_energy = get_energy();
+  			stats->start_time = get_time();
+  		}
+
+  		stats->nb_tx++;
+  	}
+
   #else
   	stm_wait(attr.id);
   #endif
@@ -614,7 +649,15 @@ _CALLCONV stm_tx_t *stm_pre_init_thread(int id){
 		tx=stm_init_thread();
 
 		tx->thread_number = id;
-		set_pthread_id(id);
+		pthread_ids[id] = pthread_self();
+		tx->stats_ptr = alloc_stats_buffer(id);
+
+		// Thread 0 sets itself as a collector 
+		if( id == 0)
+			tx->stats_ptr->collector = 1;
+
+		return tx;
+	
 	#else
 		return stm_init_thread();
 	#endif
@@ -647,59 +690,47 @@ stm_commit(void)
 
 	ret=int_stm_commit(tx);
 
-#ifdef STM_SCA
-	if(tx->sca_serializing_lock_acquired == 1){
-		sca_serializing_lock=0;
-		tx->sca_serializing_lock_acquired = 0;
-    }
+#ifdef STM_HOPE
+	
+	// Retrive stats if collector 
+  	if(tx->stats_ptr->collector == 1){
+  		
+  		stats_t* stats = tx->stats_ptr;
+  		stats->commits++;
 
-	tx->contention_bit = 0;
-    tx->saturating_counter = 0;
+  		// Round completed 
+  		if(stats->commits == stats->total_commits){
 
-    //inc++;
-    //printf("Committed: %i\r", inc);
-    //fflush(stdout);
+  			stats->end_energy = get_energy();
+  			stats->end_time = get_time();
+  			stats->collector = 0;
 
-#endif //STM_SCA
+  			// Call heuristic and start again 
+  			if(tx->thread_number == (active_threads-1)){
 
-    //tx->last_k=running_transactions;
-#ifdef STM_MCATS
-	tx->committed_transactions++;
-	if (tx->i_am_the_collector_thread==1 && ret==1) {
-		stm_word_t active=running_transactions;
-		tx->start_no_tx_time=STM_TIMER_READ();
-		ATOMIC_FETCH_DEC_FULL(&running_transactions);
+  				// Used for debugging
+  				print_stats_array();
 
-		stm_time_t useful = tx->start_no_tx_time - tx->last_start_tx_time;
-		tx->total_wasted_time+=tx->last_start_tx_time-tx->first_start_tx_time;
-		tx->committed_transactions_as_a_collector_thread++;
-		tx->total_tx_useful_per_active_transactions[active]+=useful;
-		tx->total_tx_committed_per_active_transactions[active]++;
-		tx->total_useful_time+=useful;
-		if(tx->committed_transactions_as_a_collector_thread==tx_per_tuning_cycle){
-			if(tx->thread_identifier==max_concurrent_threads - 1) stm_tune_scheduler();
-			current_collector_thread =(current_collector_thread + 1)% max_concurrent_threads;
-			tx->i_am_the_collector_thread=0;
-		}
+  				// The magic is here
+  				heuristic();
+  			
+  				//Setup next round
+  				int slice = total_commits_round/active_threads;
+  				for(int i=0; i<active_threads; i++){
+  					stats_array[i]->nb_tx = 0;
+  					stats_array[i]->total_commits = slice; 
+  				}
+  				stats_array[0]->collector = 1;
+  			}
+  			// Set next thread as collector
+  			else{  				
+  				int next = (tx->thread_number)+1;
+  				stats_array[next]->collector = 1;
+  			}
+  		}
+  	}
 
-	}else if(current_collector_thread==tx->thread_identifier){
-		tx->start_no_tx_time=STM_TIMER_READ();
-		ATOMIC_FETCH_DEC_FULL(&running_transactions);
-		tx->i_am_the_collector_thread=1;
-	}else ATOMIC_FETCH_DEC_FULL(&running_transactions);
-	stm_tx_t *transaction=_tinystm.threads;
-	int i;
-	for (i=1;i< max_concurrent_threads-1;i++){
-		if(transaction==NULL)
-			break;
-		if(transaction->i_am_waiting==1){
-			transaction->i_am_waiting=0;
-			break;
-		}
-	transaction=transaction->next;
-	}
 #endif
-
 
   return ret;
 }

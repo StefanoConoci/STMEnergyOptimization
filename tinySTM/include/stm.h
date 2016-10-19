@@ -79,24 +79,18 @@
 //#define STM_SCA
 #define STM_HOPE
 
-#ifdef STM_MCATS
+#ifdef STM_HOPE
+  
+  #define STM_TIMER_READ() ({ \
+    unsigned int lo; \
+    unsigned int hi; \
+    __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi)); \
+    ((stm_time_t)hi) << 32 | lo; \
+  })
+  
+#endif
 
-#define INVISIBLE_TRACKING
-#define STM_TUNING
 
-
-	#define TX_CLASSES 1
-
-	#define STM_TIMER_READ() ({ \
-		unsigned int lo; \
-		unsigned int hi; \
-		__asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi)); \
-		((stm_time_t)hi) << 32 | lo; \
-	})
-
-	typedef unsigned long long stm_time_t;
-
-#endif /* STM_MCATS */
 
 # include <setjmp.h>
 # include <stdint.h>
