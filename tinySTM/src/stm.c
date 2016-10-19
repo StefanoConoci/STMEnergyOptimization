@@ -40,6 +40,10 @@
 #include "gc.h"
 #include "../../rapl-power/rapl.h"
 
+#ifdef STM_HOPE
+	#include <time.h>
+#endif
+
 /* ################################################################### *
  * DEFINES
  * ################################################################### */
@@ -85,7 +89,7 @@ global_t _tinystm =
 	int pstate[32];			// Array of p-states initialized at startup with available scaling frequencies 
 	int max_pstate;			// Maximum index of available pstate for the running machine 
 	int current_pstate;		// Value of current pstate, index of pstate array which contains frequencies
-	int total_commits_round= 100000;	// Number of total commits for each heuristics step 
+	int total_commits_round= 1000000;	// Number of total commits for each heuristics step 
 	stats_t** stats_array;	// Pointer to pointers of struct stats_s, one for each thread 	
 
 #endif/* ! STM_HOPE */
@@ -271,7 +275,8 @@ global_t _tinystm =
 		return stats_ptr;
 	}
 
-	void heuristic(){
+	// Takes decision on frequency and number of active threads based on statistics of current round 
+	void heuristic(double throughput, double  abort_rate, double power){
 		printf("Heuristic function called\n");
 	}
 
@@ -291,11 +296,17 @@ global_t _tinystm =
 	}
 
 
+	// Return time as a monotomically increasing long expressed as nanoseconds 
 	long get_time(){
-		//long time = STM_TIMER_READ();
-		//return time;
+		
+		long time =0;
+		struct timespec ts;
 
-		return 202020202020;
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        time += (ts.tv_sec*1000000000);
+        time += ts.tv_nsec;
+
+		return time;
 	}
 
 	void print_stats_array(){
@@ -708,11 +719,35 @@ stm_commit(void)
   			// Call heuristic and start again 
   			if(tx->thread_number == (active_threads-1)){
 
-  				// Used for debugging
-  				print_stats_array();
+  				// Compute aggregated statistics for the current round
+  				
+  				double throughput;		// Expressed as commit per second
+  				double power;			// Expressed in Watt
+  				double abort_rate; 
+
+
+  				long energy_sum = 0;	// Expressed in micro Joule
+  				long time_sum = 0;		// Expressed in nano seconds 
+  				long aborts_sum = 0; 
+  				long commits_sum = 0;
+
+  				for(int i=0; i<active_threads; i++){
+  					energy_sum += ((stats_array[i]->end_energy) - (stats_array[i]->start_energy));
+  					time_sum += ((stats_array[i]->end_time) - (stats_array[i]->start_time));
+  					aborts_sum += stats_array[i]->aborts;
+  					commits_sum += stats_array[i]->commits;
+  				}
+
+  				throughput = (((double) commits_sum)*active_threads) / ( ((double) time_sum) / 1000000000 );
+  				abort_rate = (((double) aborts_sum) / (aborts_sum+commits_sum))*100; 
+  				power = ((double) energy_sum) / ( (double) time_sum / 1000 );
+
+  				// DEBUG
+  				//printf("Time interval %f s - Committed %ld\n", ( ((double) (time_sum))/1000000000), commits_sum);
+  				printf("Throughput: %f tx/sec - Abort rate: %f percent - Power: %f Watt\n", throughput, abort_rate, power);
 
   				// The magic is here
-  				heuristic();
+  				heuristic(throughput, abort_rate, power);
   			
   				//Setup next round
   				int slice = total_commits_round/active_threads;
