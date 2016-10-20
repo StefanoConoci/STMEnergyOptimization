@@ -80,17 +80,18 @@ global_t _tinystm =
 
 
 #ifdef STM_HOPE
-	int* running_array;		// Array of integers that defines if a thread should be running
-	pthread_t* pthread_ids;	// Array of pthread id's to be used with signals
-	int total_threads;		// Total number of threads that could be used by the transcational operation 
-	int active_threads;		// Number of currently active threads, reflects the number of 1's in running_array
-	int nb_cores; 			// Number of cores. Detected at startup and used to set DVFS parameters for all cores
-	int cache_line_size;	// Size in byte of the cache line. Detected at startup and used to alloc memory cache aligned 
-	int pstate[32];			// Array of p-states initialized at startup with available scaling frequencies 
-	int max_pstate;			// Maximum index of available pstate for the running machine 
-	int current_pstate;		// Value of current pstate, index of pstate array which contains frequencies
-	int total_commits_round= 1000000;	// Number of total commits for each heuristics step 
-	stats_t** stats_array;	// Pointer to pointers of struct stats_s, one for each thread 	
+	int* running_array;				// Array of integers that defines if a thread should be running
+	pthread_t* pthread_ids;			// Array of pthread id's to be used with signals
+	int total_threads;				// Total number of threads that could be used by the transcational operation 
+	volatile int active_threads;	// Number of currently active threads, reflects the number of 1's in running_array
+	int nb_cores; 					// Number of cores. Detected at startup and used to set DVFS parameters for all cores
+	int cache_line_size;			// Size in byte of the cache line. Detected at startup and used to alloc memory cache aligned 
+	int pstate[32];					// Array of p-states initialized at startup with available scaling frequencies 
+	int max_pstate;					// Maximum index of available pstate for the running machine 
+	int current_pstate;				// Value of current pstate, index of pstate array which contains frequencies
+	int total_commits_round=500000; // Number of total commits for each heuristics step 
+	stats_t** stats_array;			// Pointer to pointers of struct stats_s, one for each thread 	
+	volatile int stop_heuristic= 0;	// Variable set by thread 0 to 1 when finished 
 
 #endif/* ! STM_HOPE */
 
@@ -226,6 +227,7 @@ global_t _tinystm =
 		running_array[thread_id] = 1;
 		printf("Waking up thread %d\n", thread_id);
 		pthread_kill(pthread_ids[thread_id], SIGUSR1);
+		active_threads++;
 		return 0;
 	}
 
@@ -239,6 +241,7 @@ global_t _tinystm =
 
 		printf("Pausing thread %d\n", thread_id);
 		running_array[thread_id] = 0;
+		active_threads--;
 	}
 
 	// Executed inside: stm_init
@@ -278,6 +281,10 @@ global_t _tinystm =
 	// Takes decision on frequency and number of active threads based on statistics of current round 
 	void heuristic(double throughput, double  abort_rate, double power){
 		printf("Heuristic function called\n");
+		if(active_threads == total_threads){
+			pause_thread(total_threads-1);
+		}
+		else wake_up_thread(total_threads-1);
 	}
 
 
@@ -309,6 +316,7 @@ global_t _tinystm =
 		return time;
 	}
 
+	// Used for debug
 	void print_stats_array(){
 		for(int i=0; i<active_threads; i++){
 			printf("Thread=%d - Total_commits=%d - nb_tx=%d commits=%d - aborts=%d\nStart_energy=%ld - end_energy=%ld - start_time =%ld - end_time=%ld\n",
@@ -598,8 +606,11 @@ stm_exit_thread(void)
   
   TX_GET;
   #ifdef STM_HOPE
+
+  	// When thread 0 completes wake up all threads 
   	if(tx->thread_number == 0){
-  		for(int i=1; i< total_threads; i++){
+  		stop_heuristic = 1;
+  		for(int i=active_threads; i< total_threads; i++){
   			wake_up_thread(i);
   		}	
   	}
@@ -716,52 +727,55 @@ stm_commit(void)
   			stats->end_time = get_time();
   			stats->collector = 0;
 
-  			// Call heuristic and start again 
-  			if(tx->thread_number == (active_threads-1)){
+  			if(!stop_heuristic){
 
-  				// Compute aggregated statistics for the current round
-  				
-  				double throughput;		// Expressed as commit per second
-  				double power;			// Expressed in Watt
-  				double abort_rate; 
+	  			// Call heuristic and start again 
+	  			if(tx->thread_number == (active_threads-1)){
+
+	  				// Compute aggregated statistics for the current round
+	  				
+	  				double throughput;		// Expressed as commit per second
+	  				double power;			// Expressed in Watt
+	  				double abort_rate; 
 
 
-  				long energy_sum = 0;	// Expressed in micro Joule
-  				long time_sum = 0;		// Expressed in nano seconds 
-  				long aborts_sum = 0; 
-  				long commits_sum = 0;
+	  				long energy_sum = 0;	// Expressed in micro Joule
+	  				long time_sum = 0;		// Expressed in nano seconds 
+	  				long aborts_sum = 0; 
+	  				long commits_sum = 0;
 
-  				for(int i=0; i<active_threads; i++){
-  					energy_sum += ((stats_array[i]->end_energy) - (stats_array[i]->start_energy));
-  					time_sum += ((stats_array[i]->end_time) - (stats_array[i]->start_time));
-  					aborts_sum += stats_array[i]->aborts;
-  					commits_sum += stats_array[i]->commits;
-  				}
+	  				for(int i=0; i<active_threads; i++){
+	  					energy_sum += ((stats_array[i]->end_energy) - (stats_array[i]->start_energy));
+	  					time_sum += ((stats_array[i]->end_time) - (stats_array[i]->start_time));
+	  					aborts_sum += stats_array[i]->aborts;
+	  					commits_sum += stats_array[i]->commits;
+	  				}
 
-  				throughput = (((double) commits_sum)*active_threads) / ( ((double) time_sum) / 1000000000 );
-  				abort_rate = (((double) aborts_sum) / (aborts_sum+commits_sum))*100; 
-  				power = ((double) energy_sum) / ( (double) time_sum / 1000 );
+	  				throughput = (((double) commits_sum)*active_threads) / ( ((double) time_sum) / 1000000000 );
+	  				abort_rate = (((double) aborts_sum) / (aborts_sum+commits_sum))*100; 
+	  				power = ((double) energy_sum) / ( (double) time_sum / 1000 );
 
-  				// DEBUG
-  				//printf("Time interval %f s - Committed %ld\n", ( ((double) (time_sum))/1000000000), commits_sum);
-  				printf("Throughput: %f tx/sec - Abort rate: %f percent - Power: %f Watt\n", throughput, abort_rate, power);
+	  				// DEBUG
+	  				//printf("Time interval %f s - Committed %ld\n", ( ((double) (time_sum))/1000000000), commits_sum);
+	  				printf("Throughput: %f tx/sec - Abort rate: %f percent - Power: %f Watt\n", throughput, abort_rate, power);
 
-  				// The magic is here
-  				heuristic(throughput, abort_rate, power);
-  			
-  				//Setup next round
-  				int slice = total_commits_round/active_threads;
-  				for(int i=0; i<active_threads; i++){
-  					stats_array[i]->nb_tx = 0;
-  					stats_array[i]->total_commits = slice; 
-  				}
-  				stats_array[0]->collector = 1;
-  			}
-  			// Set next thread as collector
-  			else{  				
-  				int next = (tx->thread_number)+1;
-  				stats_array[next]->collector = 1;
-  			}
+	  				// The magic is here
+	  				heuristic(throughput, abort_rate, power);
+	  			
+	  				//Setup next round
+	  				int slice = total_commits_round/active_threads;
+	  				for(int i=0; i<active_threads; i++){
+	  					stats_array[i]->nb_tx = 0;
+	  					stats_array[i]->total_commits = slice; 
+	  				}
+	  				stats_array[0]->collector = 1;
+	  			}
+	  			// Set next thread as collector
+	  			else{  				
+	  				int next = (tx->thread_number)+1;
+	  				stats_array[next]->collector = 1;
+	  			}
+	  		}
   		}
   	}
 
