@@ -89,9 +89,10 @@ global_t _tinystm =
 	int pstate[32];					// Array of p-states initialized at startup with available scaling frequencies 
 	int max_pstate;					// Maximum index of available pstate for the running machine 
 	int current_pstate;				// Value of current pstate, index of pstate array which contains frequencies
-	int total_commits_round=500000; // Number of total commits for each heuristics step 
+	int total_commits_round; 		// Number of total commits for each heuristics step 
 	stats_t** stats_array;			// Pointer to pointers of struct stats_s, one for each thread 	
 	volatile int stop_heuristic= 0;	// Variable set by thread 0 to 1 when finished 
+	double power_limit;				// Maximum power that should be used by the application. Defined in hope_config.txt
 
 #endif/* ! STM_HOPE */
 
@@ -281,10 +282,11 @@ global_t _tinystm =
 	// Takes decision on frequency and number of active threads based on statistics of current round 
 	void heuristic(double throughput, double  abort_rate, double power){
 		printf("Heuristic function called\n");
-		if(active_threads == total_threads){
-			pause_thread(total_threads-1);
+		
+		if(power > power_limit){
+			if(current_pstate != max_pstate)
+				set_p_state(current_pstate+1);			
 		}
-		else wake_up_thread(total_threads-1);
 	}
 
 
@@ -496,11 +498,37 @@ signal_catcher(int sig)
 #  ifdef STM_HOPE
 
 void stm_init(int threads) {
+	
+	int starting_threads;
 
 	printf("TinySTM - STM_HOPE mode started\n");
 	init_DVFS_management();
 	init_thread_management(threads);
 	init_stats_array_pointer(threads);
+
+	// Load config file 
+	FILE* config_file;
+	if ((config_file = fopen("hope_config.txt", "r")) == NULL) {
+		printf("Error opening STM_HOPE configuration file.\n");
+		exit(1);
+	}
+	if (fscanf(config_file, "STARTING_THREADS=%d POWER_LIMIT=%lf COMMITS_ROUND = %d", &starting_threads, &power_limit, &total_commits_round)!=3) {
+		printf("The number of input parameters of the STM_HOPE configuration file does not match the number of required parameters.\n");
+		exit(1);
+	}
+	close(config_file);
+
+	printf("POWER LIMIT: %f\n", power_limit);
+
+	if(starting_threads > total_threads){
+		printf("Starting threads set higher than total threads. Please modify this value in hope_config.txt\n");
+		exit(1);
+	}
+	
+	// Set active_threads to starting_threads
+	for(int i = starting_threads; i<total_threads;i++){
+		pause_thread(i);
+	}
 	
 #else
 
