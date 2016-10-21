@@ -105,6 +105,7 @@ global_t _tinystm =
 
 #ifdef STM_HOPE
 
+	// Used by the heuristic 
 	int set_p_state(int input_pstate){
 		
 		char fname[64];
@@ -131,7 +132,7 @@ global_t _tinystm =
 		return 0;
 	}
 
-	// Executed at TM_STARTUP: sets the governor to userspace and sets the highest frequency
+	// Executed inside stm_init: sets the governor to userspace and sets the highest frequency
 	int init_DVFS_management(){
 		
 		char fname[64];
@@ -184,10 +185,10 @@ global_t _tinystm =
 		return 0;
 	}
 
-	// SIGUSR1 handler. For now doesn't need to execute any code. 
+	// SIGUSR1 handler. Doesn't need to execute any code
 	void sig_func(int sig){}
 
-	// Executed at: TM_STARTUP
+	// Executed inside stm_init
 	void init_thread_management(int threads){
 		
 		// Init total threads and active threads
@@ -209,7 +210,7 @@ global_t _tinystm =
 	}
 
 
-	// Executed at: TM_START
+	// Executed inside stm_init
 	inline void check_running_array(int threadId){
 		
 		while(running_array[threadId] == 0){
@@ -245,7 +246,7 @@ global_t _tinystm =
 		active_threads--;
 	}
 
-	// Executed inside: stm_init
+	// Executed inside stm_init
 	void init_stats_array_pointer(int threads){
 
 		// Allocate memory for the pointers of stats_t
@@ -255,6 +256,7 @@ global_t _tinystm =
 		printf("D1 cache line size: %d bytes\n", cache_line_size);
 	}
 
+	// Executed by each thread inside stm_pre_init_thread
 	stats_t* alloc_stats_buffer(int thread_number){
 		
 		stats_t* stats_ptr = stats_array[thread_number];
@@ -316,15 +318,6 @@ global_t _tinystm =
         time += ts.tv_nsec;
 
 		return time;
-	}
-
-	// Used for debug
-	void print_stats_array(){
-		for(int i=0; i<active_threads; i++){
-			printf("Thread=%d - Total_commits=%d - nb_tx=%d commits=%d - aborts=%d\nStart_energy=%ld - end_energy=%ld - start_time =%ld - end_time=%ld\n",
-					i, stats_array[i]->total_commits, stats_array[i]->nb_tx, stats_array[i]->commits, stats_array[i]->aborts, 
-					stats_array[i]->start_energy, stats_array[i]->end_energy, stats_array[i]->start_time, stats_array[i]->end_time);
-		}
 	}
 
 #endif/* ! STM_HOPE */
@@ -517,8 +510,6 @@ void stm_init(int threads) {
 		exit(1);
 	}
 	close(config_file);
-
-	printf("POWER LIMIT: %f\n", power_limit);
 
 	if(starting_threads > total_threads){
 		printf("Starting threads set higher than total threads. Please modify this value in hope_config.txt\n");
@@ -757,7 +748,7 @@ stm_commit(void)
 
   			if(!stop_heuristic){
 
-	  			// Call heuristic and start again 
+	  			// Call heuristic and start another stats round 
 	  			if(tx->thread_number == (active_threads-1)){
 
 	  				// Compute aggregated statistics for the current round
@@ -782,12 +773,8 @@ stm_commit(void)
 	  				throughput = (((double) commits_sum)*active_threads) / ( ((double) time_sum) / 1000000000 );
 	  				abort_rate = (((double) aborts_sum) / (aborts_sum+commits_sum))*100; 
 	  				power = ((double) energy_sum) / ( (double) time_sum / 1000 );
+					printf("Throughput: %f tx/sec - Abort rate: %f percent - Power: %f Watt\n", throughput, abort_rate, power);
 
-	  				// DEBUG
-	  				//printf("Time interval %f s - Committed %ld\n", ( ((double) (time_sum))/1000000000), commits_sum);
-	  				printf("Throughput: %f tx/sec - Abort rate: %f percent - Power: %f Watt\n", throughput, abort_rate, power);
-
-	  				// The magic is here
 	  				heuristic(throughput, abort_rate, power);
 	  			
 	  				//Setup next round

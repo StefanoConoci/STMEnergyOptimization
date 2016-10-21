@@ -378,31 +378,6 @@ typedef struct stm_tx {                 /* Transaction descriptor */
   unsigned int stat_locked_reads_failed;/* Failed reads of previous value */
 # endif /* READ_LOCKED_DATA */
 #endif /* TM_STATISTICS2 */
-#  ifdef STM_MCATS
-  stm_time_t first_start_tx_time;
-  stm_time_t last_start_tx_time;
-  stm_time_t start_no_tx_time;
-  stm_time_t *total_tx_wasted_per_active_transactions;
-  long *total_tx_committed_per_active_transactions;
-  long *total_conflict_per_active_transactions;
-  stm_time_t *total_tx_useful_per_active_transactions;
-  stm_time_t total_useful_time;
-  stm_time_t total_no_tx_time;
-  stm_time_t total_wasted_time;
-  stm_time_t total_spin_time;
-  int last_k;
-  long committed_transactions_as_a_collector_thread;
-  long committed_transactions;
-  long aborted_transactions;
-  int thread_identifier;
-  int i_am_the_collector_thread;
-  volatile int i_am_waiting;
-#endif /* ! STM_MCATS */
-#  ifdef STM_SCA
-  unsigned int contention_bit;
-  unsigned int saturating_counter;
-  unsigned int sca_serializing_lock_acquired;
-#endif /* ! STM_SCA */
 
 # ifdef STM_HOPE
   int thread_number;  // Number from 0 to Max_thread to identify threads inside the application
