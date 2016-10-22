@@ -281,17 +281,6 @@ global_t _tinystm =
 		return stats_ptr;
 	}
 
-	// Takes decision on frequency and number of active threads based on statistics of current round 
-	void heuristic(double throughput, double  abort_rate, double power){
-		printf("Heuristic function called\n");
-		
-		if(power > power_limit){
-			if(current_pstate != max_pstate)
-				set_p_state(current_pstate+1);			
-		}
-	}
-
-
 	// Returns energy consumption of package 0 in micro Joule
 	long get_energy(){
 		
@@ -319,6 +308,19 @@ global_t _tinystm =
 
 		return time;
 	}
+
+
+	// Takes decision on frequency and number of active threads based on statistics of current round 
+	void heuristic(double throughput, double  abort_rate, double power){
+		printf("Heuristic function called\n");
+		
+		if(power > power_limit){
+			if(current_pstate != max_pstate)
+				set_p_state(current_pstate+1);			
+		}
+	}
+
+
 
 #endif/* ! STM_HOPE */
 
