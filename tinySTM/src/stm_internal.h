@@ -380,8 +380,9 @@ typedef struct stm_tx {                 /* Transaction descriptor */
 #endif /* TM_STATISTICS2 */
 
 # ifdef STM_HOPE
-  int thread_number;  // Number from 0 to Max_thread to identify threads inside the application
-  stats_t* stats_ptr;    // Pointer to stats struct for the current thread. This allows faster access
+	int thread_number;			// Number from 0 to Max_thread to identify threads inside the application
+	stats_t* stats_ptr;			// Pointer to stats struct for the current thread. This allows faster access
+	volatile int running;		// If set to 0 thread should pause. 
 #endif
 } stm_tx_t;
 

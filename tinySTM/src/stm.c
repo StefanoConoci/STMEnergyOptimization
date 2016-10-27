@@ -80,6 +80,7 @@ global_t _tinystm =
 
 
 #ifdef STM_HOPE
+	
 	int* running_array;				// Array of integers that defines if a thread should be running
 	pthread_t* pthread_ids;			// Array of pthread id's to be used with signals
 	int total_threads;				// Total number of threads that could be used by the transcational operation 
@@ -92,7 +93,17 @@ global_t _tinystm =
 	int total_commits_round; 		// Number of total commits for each heuristics step 
 	stats_t** stats_array;			// Pointer to pointers of struct stats_s, one for each thread 	
 	volatile int stop_heuristic= 0;	// Variable set by thread 0 to 1 when finished 
-	double power_limit;				// Maximum power that should be used by the application. Defined in hope_config.txt
+	
+	// Heuristic variables
+	double power_limit;				// Maximum power that should be used by the application expressed in Watt. Defined in hope_config.txt
+	double energy_per_tx_limit;		// Maximum energy per tx that should be drawn by the application expressed in micro Joule. Defined in hope_config.txt
+	int frequency_tuning = 0;		// If 1 next heuristic call should tune the frequency, else should tune the number of threads
+	int frequency_direction = -1;	// 1 stands for increasing, -1 for decreasing
+	int threads_direction = -1;		// 1 stands for increasing, -1 for decreasing
+	double old_throughput = -1;		// Last statistics value used by the heuristic
+	double old_power = -1;			// Last statistics value used by the heuristic
+	double old_abort_rate = 0; 		// Last statistics value used by the heuristic
+	double old_energy_per_tx = 1;	// Last statistics value used by the heuristic
 
 #endif/* ! STM_HOPE */
 
@@ -180,7 +191,7 @@ global_t _tinystm =
 
 
 	  	// Setting processor to state P0
-	  	if(set_p_state(0));
+	  	set_p_state(0);
 
 		return 0;
 	}
@@ -281,12 +292,17 @@ global_t _tinystm =
 		return stats_ptr;
 	}
 
-	// Returns energy consumption of package 0 in micro Joule
+	// Returns energy consumption of package 0 cores in micro Joule
 	long get_energy(){
 		
 		long power;
 
-		FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj", "r");
+		// Package 0 power consumtion
+		//FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj", "r");
+		
+		// Package 0 cores power consumption
+		FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:0/energy_uj", "r");	
+
 		if(power_file == NULL){
 			printf("Error opening power file\n");		
 		}
@@ -311,13 +327,20 @@ global_t _tinystm =
 
 
 	// Takes decision on frequency and number of active threads based on statistics of current round 
-	void heuristic(double throughput, double  abort_rate, double power){
-		printf("Heuristic function called\n");
+	void heuristic(double throughput, double  abort_rate, double power, double energy_per_tx){
 		
+		printf("Heuristic function called\n");
+
 		if(power > power_limit){
 			if(current_pstate != max_pstate)
 				set_p_state(current_pstate+1);			
 		}
+
+		//Update old global variables 
+		old_throughput = throughput;
+		old_abort_rate = abort_rate;
+		old_power = power;
+		old_energy_per_tx = energy_per_tx;
 	}
 
 
@@ -507,7 +530,8 @@ void stm_init(int threads) {
 		printf("Error opening STM_HOPE configuration file.\n");
 		exit(1);
 	}
-	if (fscanf(config_file, "STARTING_THREADS=%d POWER_LIMIT=%lf COMMITS_ROUND = %d", &starting_threads, &power_limit, &total_commits_round)!=3) {
+	if (fscanf(config_file, "STARTING_THREADS=%d POWER_LIMIT=%lf COMMITS_ROUND = %d ENERGY_PER_TX_LIMIT = %lf", 
+			 &starting_threads, &power_limit, &total_commits_round, &energy_per_tx_limit)!=4) {
 		printf("The number of input parameters of the STM_HOPE configuration file does not match the number of required parameters.\n");
 		exit(1);
 	}
@@ -757,7 +781,8 @@ stm_commit(void)
 	  				
 	  				double throughput;		// Expressed as commit per second
 	  				double power;			// Expressed in Watt
-	  				double abort_rate; 
+	  				double abort_rate;
+	  				double energy_per_tx;	// Expressed in micro Joule 
 
 
 	  				long energy_sum = 0;	// Expressed in micro Joule
@@ -775,9 +800,11 @@ stm_commit(void)
 	  				throughput = (((double) commits_sum)*active_threads) / ( ((double) time_sum) / 1000000000 );
 	  				abort_rate = (((double) aborts_sum) / (aborts_sum+commits_sum))*100; 
 	  				power = ((double) energy_sum) / ( (double) time_sum / 1000 );
-					printf("Throughput: %f tx/sec - Abort rate: %f percent - Power: %f Watt\n", throughput, abort_rate, power);
+	  				energy_per_tx = ((double) energy_sum) / (commits_sum*active_threads);
+					printf("Throughput: %f tx/sec - Abort rate: %f percent - Power: %f Watt - Energy per tx: %f micro Joule\n", 
+						    throughput, abort_rate, power, energy_per_tx);
 
-	  				heuristic(throughput, abort_rate, power);
+	  				heuristic(throughput, abort_rate, power, energy_per_tx);
 	  			
 	  				//Setup next round
 	  				int slice = total_commits_round/active_threads;
