@@ -1,4 +1,6 @@
 #!/bin/bash
+rm profiler
+gcc profiler.c -o profiler -lpthread
 cd rapl-power
 make clean
 make

@@ -7,8 +7,8 @@
 #include <unistd.h>
 #include <time.h>
 
-#define SIZE 1000000000
-#define WRITES 100000000
+#define ITERATIONS 100000
+#define STARTING_VALUE 546723060
 
 int threads;
 int pstate[32];					// Array of p-states initialized at startup with available scaling frequencies 
@@ -128,15 +128,25 @@ int init_DVFS_management(){
 	return 0;
 }
 
+int isPrime(int number) {
+    int i;
+    for (i=2; i*i<=number; i++) {
+        if (number % i == 0) return 0;
+    }
+    return 1;
+}
+
+
 void* loop_function(void* params){
-	long num_iterations = 100000000;
-	double last;
-	double current = 1.0;
+	
+	long start_value = STARTING_VALUE;
+	long end_value = STARTING_VALUE+ITERATIONS;
 
-	last = (double) num_iterations;
+	int cont;
 
-	for(long i=0; i<num_iterations; i++){
-		current = (last * 34,5) / current;
+	for(long i=start_value; i<end_value; i++){
+		if(isPrime(i))
+			cont++;
 	}	
 
 }
@@ -144,13 +154,12 @@ void* loop_function(void* params){
 int main(int argc, char *argv[]){
 
 	pthread_t* pthread_array;
-	long start_time;
-	long end_time;
-	long start_energy;
-	long end_energy;
-
+	FILE* profile_file;
+	long start_time, end_time, start_energy, end_energy;
 	long time_interval;
 	long energy_interval;
+
+	profile_file = fopen("profile_file.txt","w");
 	
 	int total_threads = sysconf(_SC_NPROCESSORS_ONLN);
 	printf("Power consumption profiler started\nProfiling on %d cores\n", total_threads);	
@@ -171,7 +180,6 @@ int main(int argc, char *argv[]){
 				}
 			}
 
-
 			for(int i=0; i<threads; i++)
 				pthread_join(pthread_array[i], NULL);		
 
@@ -182,8 +190,7 @@ int main(int argc, char *argv[]){
 			energy_interval = end_energy - start_energy;
 
 			double power = ((double) energy_interval) / ( (double) time_interval / 1000 );
-			printf("Power: %lf Watt\n", power);
-
+			fprintf(profile_file, "%lf\t", power);
 		}
 	}
 

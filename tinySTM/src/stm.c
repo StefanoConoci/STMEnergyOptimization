@@ -93,6 +93,7 @@ global_t _tinystm =
 	int total_commits_round; 		// Number of total commits for each heuristics step 
 	stats_t** stats_array;			// Pointer to pointers of struct stats_s, one for each thread 	
 	volatile int stop_heuristic= 0;	// Variable set by thread 0 to 1 when finished 
+	double** power_profile; 		// Power consumption matrix of the machine. To be precomputed using profiler.c included in root folder
 	
 	// Heuristic variables
 	double power_limit;				// Maximum power that should be used by the application expressed in Watt. Defined in hope_config.txt
@@ -290,6 +291,47 @@ global_t _tinystm =
 		stats_array[thread_number] = stats_ptr;
 
 		return stats_ptr;
+	}
+
+	// Executed inside stm_init to load the precomputed power profile for the current machine and put inside power_profile
+	// Rows are threads, columns are p-states. It has total_threads+1 rows as first row is filled with 0 for the profile with 0 threads 
+	void load_profile_file(){
+
+		double power;
+
+		// Allocate the matrix 
+		power_profile = (double**) malloc(sizeof(double*) * (total_threads+1)); 
+		for (int i = 0; i < (total_threads+1); i++)
+  	   		power_profile[i] = (double *) malloc(sizeof(double) * (max_pstate+1));
+
+  	   	// Init first row with all zeros 
+  	   	for(int i =0; i<=max_pstate; i++){
+  	   		power_profile[0][i] = 0;
+  	   	}
+
+  	   	// Open file and copy to string
+		FILE* profile_file = fopen("profile_file.txt","r");
+		if(profile_file == NULL){
+			printf("Cannot open profile_file. Execute the profiler in root folder to profile the machine power consumption\n");
+			exit(0);
+		}
+		char* profile_string = malloc(sizeof(char)*8192);
+		fgets(profile_string, 8192, profile_file);
+  	   	
+  	   	char * end;
+  	   	int i=1;
+  	   	int j=0; 
+		for (power = strtod(profile_string, &end); profile_string != end; power = strtod(profile_string, &end)){
+			power_profile[i][j] = power;
+			profile_string = end;
+	  		if( j == max_pstate){
+	  			i++;
+	  			j = 0;
+	  		}
+	  		else j++;
+		}
+
+		printf("Power consumption profile loaded\n");
 	}
 
 	// Returns energy consumption of package 0 cores in micro Joule
@@ -522,6 +564,7 @@ void stm_init(int threads) {
 	printf("TinySTM - STM_HOPE mode started\n");
 	init_DVFS_management();
 	init_thread_management(threads);
+	load_profile_file();
 	init_stats_array_pointer(threads);
 
 	// Load config file 

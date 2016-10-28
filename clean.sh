@@ -1,4 +1,5 @@
 #!/bin/bash
+rm profiler
 cd rapl-power
 make clean
 cd ..
