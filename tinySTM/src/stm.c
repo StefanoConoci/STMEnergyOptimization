@@ -135,7 +135,7 @@ global_t _tinystm =
 			}		
 			fprintf(frequency_file, "%d", frequency);
 			fflush(frequency_file);
-			close(frequency_file);
+			fclose(frequency_file);
 		}
 		current_pstate = input_pstate;
 		
@@ -163,7 +163,7 @@ global_t _tinystm =
 			}		
 			fprintf(governor_file, "userspace");
 			fflush(governor_file);
-			close(governor_file);
+			fclose(governor_file);
 		}
 
 		
@@ -187,7 +187,7 @@ global_t _tinystm =
 	  	max_pstate = --i;
 
 	  	printf("Found %d p-states in the range from %d MHz to %d MHz\n", max_pstate, pstate[max_pstate]/1000, pstate[0]/1000);
-	  	close(available_freq_file);
+	  	fclose(available_freq_file);
 
 
 	  	// Setting processor to state P0
@@ -535,7 +535,7 @@ void stm_init(int threads) {
 		printf("The number of input parameters of the STM_HOPE configuration file does not match the number of required parameters.\n");
 		exit(1);
 	}
-	close(config_file);
+	fclose(config_file);
 
 	if(starting_threads > total_threads){
 		printf("Starting threads set higher than total threads. Please modify this value in hope_config.txt\n");
