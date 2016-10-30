@@ -93,18 +93,33 @@ global_t _tinystm =
 	int total_commits_round; 		// Number of total commits for each heuristics step 
 	stats_t** stats_array;			// Pointer to pointers of struct stats_s, one for each thread 	
 	volatile int stop_heuristic= 0;	// Variable set by thread 0 to 1 when finished 
-	double** power_profile; 		// Power consumption matrix of the machine. To be precomputed using profiler.c included in root folder
+	double** power_profile; 		// Power consumption matrix of the machine. Precomputed using profiler.c included in root folder.
+									// Rows are threads, columns are p-states. It has total_threads+1 rows as first row is filled with 0 for the profile with 0 threads 
 	
+	//////////////////////////////
 	// Heuristic variables
+	//////////////////////////////
+
 	double power_limit;				// Maximum power that should be used by the application expressed in Watt. Defined in hope_config.txt
 	double energy_per_tx_limit;		// Maximum energy per tx that should be drawn by the application expressed in micro Joule. Defined in hope_config.txt
-	int frequency_tuning = 0;		// If 1 next heuristic call should tune the frequency, else should tune the number of threads
-	int frequency_direction = -1;	// 1 stands for increasing, -1 for decreasing
-	int threads_direction = -1;		// 1 stands for increasing, -1 for decreasing
+
+	// This variables are not volatile becouse I just to move the heuristic to be executed only by thread 0 
+	
+	// Statistics of the last heuristic round
 	double old_throughput = -1;		// Last statistics value used by the heuristic
 	double old_power = -1;			// Last statistics value used by the heuristic
 	double old_abort_rate = 0; 		// Last statistics value used by the heuristic
 	double old_energy_per_tx = 1;	// Last statistics value used by the heuristic
+
+	// Variables that define the currently best configuration
+	double best_throughput; 
+	int best_threads;
+	int best_pstate;
+
+	// Variables used to define the state of the search 
+	int new_pstate = 1;				// Used to check if just arrived to a new p_state in the heuristic search
+	int decreasing = 0;				// If 0 heuristic should remove threads until it reaches the limit  
+	int stopped_searching = 0;		// While 1 the algorithm searches for the best configuration, if 0 the algorithm moves to monitoring mode 
 
 #endif/* ! STM_HOPE */
 
@@ -118,7 +133,7 @@ global_t _tinystm =
 #ifdef STM_HOPE
 
 	// Used by the heuristic 
-	int set_p_state(int input_pstate){
+	int set_pstate(int input_pstate){
 		
 		char fname[64];
 		FILE* frequency_file;
@@ -192,7 +207,7 @@ global_t _tinystm =
 
 
 	  	// Setting processor to state P0
-	  	set_p_state(0);
+	  	set_pstate(max_pstate);
 
 		return 0;
 	}
@@ -367,22 +382,170 @@ global_t _tinystm =
 		return time;
 	}
 
+	// Function used to set the number of running threads. Based on active_threads and threads might wake up or pause some threads 
+	inline void set_threads(int to_threads){
+		if(active_threads != to_threads){
+			if(active_threads > to_threads){
+				for(int i = to_threads; i<active_threads; i++)
+					pause_thread(i);
+			}
+			else{
+				for(int i = active_threads; i<to_threads; i++)
+					wake_up_thread(i);
+			}
+		}
+	}
+
+	// Checks if the current config is better than the currently best config and if that's the case update it 
+	inline void update_best_config(double throughput){
+		
+		if(throughput > best_throughput){
+			best_throughput = throughput;
+			best_pstate = current_pstate;
+			best_threads = active_threads;
+		}
+	}
+
+	// Stop searching and set the best configuration 
+	inline void stop_searching(){
+
+		decreasing = 0;
+		new_pstate = 1;
+		stopped_searching = 1;
+
+		set_pstate(best_pstate);
+		set_threads(best_threads);
+
+		// DEBUG
+		printf("Stopped searching. Best configuration: %d threads at p-state %d\n", best_threads, best_pstate);
+	}
+
+	// Returns a configuration at the given pstate with power consumption less than the one of the current configuration 
+	// All the power related data is retrieved from the profiler_matrix and is only used as a starting point, as this values change based on the workload
+	// If no configuration at the given pstate uses less than the configuration power the algorithm returns the lowest consuming configuration 
+	// as long as it draws less than power_limit. If this configuration can't be found or the pstate is invalid the function returns -1 
+	int profiler_isoenergy(int from_threads, int pstate, int* threads){
+		
+		printf("Inside profiler_isoenergy\n");
+		if(pstate < 0 || pstate > max_pstate)
+			return -1;
+
+		printf("Inside profiler_isoenergy\n");
+
+
+		double old_power = power_profile[from_threads][current_pstate];
+
+		// There could be no number of threads > 0 such that the power consumption is less than old_power 
+		if(power_profile[1][pstate] > old_power){
+			if (power_profile[1][pstate] < power_limit){
+				*threads = 1;
+				return 0;
+			}
+			else return -1;
+		}
+
+		printf("Finding right value of threads for pstate %d\n", pstate);
+		int i = 1;
+		while( i<=total_threads && power_profile[i][pstate] < old_power)
+			i++;
+
+		*threads = --i;
+		return 0;
+	}  
+
 
 	// Takes decision on frequency and number of active threads based on statistics of current round 
 	void heuristic(double throughput, double  abort_rate, double power, double energy_per_tx){
 		
-		printf("Heuristic function called\n");
+		printf("\nHeuristic function called\n");
 
-		if(power > power_limit){
-			if(current_pstate != max_pstate)
-				set_p_state(current_pstate+1);			
+		if(!stopped_searching){
+			
+			if(new_pstate){
+				new_pstate = 0;
+				if(power > power_limit){	// Power is higher than limit
+					decreasing = 1;
+					if(active_threads > 1){
+						pause_thread(active_threads-1);
+					}
+					else 
+						stop_searching();
+				}else{	// Power lower than limit
+					decreasing = 0;
+					update_best_config(throughput);
+
+					if(active_threads < total_threads)
+						wake_up_thread(active_threads);
+					else{
+						int threads;
+						if(profiler_isoenergy(active_threads, current_pstate-1, &threads) != -1){
+							set_pstate(current_pstate-1);
+							set_threads(threads);
+							new_pstate = 1;
+						}
+						else stop_searching();
+					}
+				}
+			}
+			else{ // Not new_state, should check if decreasing or not
+				if(decreasing){
+					if(power < power_limit){
+						update_best_config(throughput);
+						decreasing = 0;
+						int threads;
+						if(profiler_isoenergy(active_threads, current_pstate-1, &threads) != -1){
+							set_pstate(current_pstate-1);
+							set_threads(threads);
+							new_pstate = 1;
+						}
+						else stop_searching();
+					}
+					else{
+						if(active_threads >1)
+							pause_thread(active_threads-1);
+						else stop_searching();
+					}
+				}
+				else{	// Increasing number of threads 
+					int improved = 0;
+					if(throughput > old_throughput && power < power_limit)
+						improved = 1;
+					if(improved){
+						update_best_config(throughput);
+						if(active_threads < total_threads){
+							wake_up_thread(active_threads);
+						}
+						else{
+							int threads;
+							if(profiler_isoenergy(active_threads, current_pstate-1, &threads) != -1){
+								set_pstate(current_pstate-1);
+								set_threads(threads);
+								new_pstate = 1;
+							}
+							else stop_searching();
+						}
+					}
+					else{ // not improved
+						int threads;
+							if(profiler_isoenergy(active_threads-1, current_pstate-1, &threads) != -1){
+								set_pstate(current_pstate-1);
+								set_threads(threads);
+								new_pstate = 1;
+							}
+							else stop_searching();
+					}
+
+				}	
+			}
+
+			//Update old global variables 
+			old_throughput = throughput;
+			old_abort_rate = abort_rate;
+			old_power = power;
+			old_energy_per_tx = energy_per_tx;
+
+			printf("Switched to: #threads %d - pstate %d\n", active_threads, current_pstate);
 		}
-
-		//Update old global variables 
-		old_throughput = throughput;
-		old_abort_rate = abort_rate;
-		old_power = power;
-		old_energy_per_tx = energy_per_tx;
 	}
 
 
