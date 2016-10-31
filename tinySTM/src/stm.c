@@ -254,7 +254,6 @@ global_t _tinystm =
 		}
 
 		running_array[thread_id] = 1;
-		printf("Waking up thread %d\n", thread_id);
 		pthread_kill(pthread_ids[thread_id], SIGUSR1);
 		active_threads++;
 		return 0;
@@ -268,7 +267,6 @@ global_t _tinystm =
 			return -1;
 		}
 
-		printf("Pausing thread %d\n", thread_id);
 		running_array[thread_id] = 0;
 		active_threads--;
 	}
@@ -384,13 +382,16 @@ global_t _tinystm =
 
 	// Function used to set the number of running threads. Based on active_threads and threads might wake up or pause some threads 
 	inline void set_threads(int to_threads){
-		if(active_threads != to_threads){
-			if(active_threads > to_threads){
-				for(int i = to_threads; i<active_threads; i++)
+
+		int starting_threads = active_threads;
+
+		if(starting_threads != to_threads){
+			if(starting_threads > to_threads){
+				for(int i = to_threads; i<starting_threads; i++)
 					pause_thread(i);
 			}
 			else{
-				for(int i = active_threads; i<to_threads; i++)
+				for(int i = starting_threads; i<to_threads; i++)
 					wake_up_thread(i);
 			}
 		}
@@ -426,12 +427,8 @@ global_t _tinystm =
 	// as long as it draws less than power_limit. If this configuration can't be found or the pstate is invalid the function returns -1 
 	int profiler_isoenergy(int from_threads, int pstate, int* threads){
 		
-		printf("Inside profiler_isoenergy\n");
 		if(pstate < 0 || pstate > max_pstate)
 			return -1;
-
-		printf("Inside profiler_isoenergy\n");
-
 
 		double old_power = power_profile[from_threads][current_pstate];
 
@@ -444,12 +441,12 @@ global_t _tinystm =
 			else return -1;
 		}
 
-		printf("Finding right value of threads for pstate %d\n", pstate);
 		int i = 1;
 		while( i<=total_threads && power_profile[i][pstate] < old_power)
 			i++;
 
 		*threads = --i;
+		printf("Isoenergy configuration: %d threads at %d pstate\n", *threads, pstate);
 		return 0;
 	}  
 
