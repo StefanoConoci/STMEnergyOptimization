@@ -42,6 +42,8 @@
 
 #ifdef STM_HOPE
 	#include <time.h>
+	//#include <numaif.h>
+	//#include <numa.h>
 #endif
 
 /* ################################################################### *
@@ -92,7 +94,8 @@ global_t _tinystm =
 	int current_pstate;				// Value of current pstate, index of pstate array which contains frequencies
 	int total_commits_round; 		// Number of total commits for each heuristics step 
 	stats_t** stats_array;			// Pointer to pointers of struct stats_s, one for each thread 	
-	volatile int stop_heuristic= 0;	// Variable set by thread 0 to 1 when finished 
+	volatile int stop_heuristic=0;	// Variable set by thread 0 to 1 when finished 
+	volatile int round_completed=0; // Defines if round completed and thread 0 should collect stats and call the heuristic function 
 	double** power_profile; 		// Power consumption matrix of the machine. Precomputed using profiler.c included in root folder.
 									// Rows are threads, columns are p-states. It has total_threads+1 rows as first row is filled with 0 for the profile with 0 threads 
 	
@@ -722,6 +725,16 @@ void stm_init(int threads) {
 	int starting_threads;
 
 	printf("TinySTM - STM_HOPE mode started\n");
+
+	/*
+	// Set mem_policy to numa node 0 
+	if(numa_available() < 0){
+		printf("System doesn't support NUMA API\n")
+	} else{
+		numa_set_preferred(0);
+		printf("Set node 0 as preferred numa node for memory allocation\n");
+	}*/
+
 	init_DVFS_management();
 	init_thread_management(threads);
 	load_profile_file();
