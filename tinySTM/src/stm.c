@@ -94,7 +94,6 @@ global_t _tinystm =
 	int current_pstate;				// Value of current pstate, index of pstate array which contains frequencies
 	int total_commits_round; 		// Number of total commits for each heuristics step 
 	stats_t** stats_array;			// Pointer to pointers of struct stats_s, one for each thread 	
-	volatile int stop_heuristic=0;	// Variable set by thread 0 to 1 when finished 
 	volatile int round_completed=0; // Defines if round completed and thread 0 should collect stats and call the heuristic function 
 	double** power_profile; 		// Power consumption matrix of the machine. Precomputed using profiler.c included in root folder.
 									// Rows are threads, columns are p-states. It has total_threads+1 rows as first row is filled with 0 for the profile with 0 threads 
@@ -870,7 +869,6 @@ stm_exit_thread(void)
 
   	// When thread 0 completes wake up all threads 
   	if(tx->thread_number == 0){
-  		stop_heuristic = 1;
   		for(int i=active_threads; i< total_threads; i++){
   			wake_up_thread(i);
   		}	
@@ -901,6 +899,47 @@ stm_start(stm_tx_attr_t attr)
 
   	// Retrive stats if collector 
   	if(tx->stats_ptr->collector == 1){
+
+  		// If thread 0 and round completed should collect stats and call heuristic
+  		if(tx->thread_number == 0 && round_completed){
+
+			// Compute aggregated statistics for the current round
+			
+			double throughput;		// Expressed as commit per second
+			double power;			// Expressed in Watt
+			double abort_rate;
+			double energy_per_tx;	// Expressed in micro Joule 
+
+
+			long energy_sum = 0;	// Expressed in micro Joule
+			long time_sum = 0;		// Expressed in nano seconds 
+			long aborts_sum = 0; 
+			long commits_sum = 0;
+
+			for(int i=0; i<active_threads; i++){
+				energy_sum += ((stats_array[i]->end_energy) - (stats_array[i]->start_energy));
+				time_sum += ((stats_array[i]->end_time) - (stats_array[i]->start_time));
+				aborts_sum += stats_array[i]->aborts;
+				commits_sum += stats_array[i]->commits;
+			}
+
+			throughput = (((double) commits_sum)*active_threads) / ( ((double) time_sum) / 1000000000 );
+			abort_rate = (((double) aborts_sum) / (aborts_sum+commits_sum))*100; 
+			power = ((double) energy_sum) / ( (double) time_sum / 1000 );
+			energy_per_tx = ((double) energy_sum) / (commits_sum*active_threads);
+			printf("Throughput: %f tx/sec - Abort rate: %f percent - Power: %f Watt - Energy per tx: %f micro Joule\n", 
+			    throughput, abort_rate, power, energy_per_tx);
+
+			heuristic(throughput, abort_rate, power, energy_per_tx);
+		
+			//Setup next round
+			int slice = total_commits_round/active_threads;
+			for(int i=0; i<active_threads; i++){
+				stats_array[i]->nb_tx = 0;
+				stats_array[i]->total_commits = slice; 
+			}
+			round_completed = 0;
+  		}
 
   		stats_t* stats = tx->stats_ptr;
   		
@@ -988,54 +1027,14 @@ stm_commit(void)
   			stats->end_time = get_time();
   			stats->collector = 0;
 
-  			if(!stop_heuristic){
-
-	  			// Call heuristic and start another stats round 
-	  			if(tx->thread_number == (active_threads-1)){
-
-	  				// Compute aggregated statistics for the current round
-	  				
-	  				double throughput;		// Expressed as commit per second
-	  				double power;			// Expressed in Watt
-	  				double abort_rate;
-	  				double energy_per_tx;	// Expressed in micro Joule 
-
-
-	  				long energy_sum = 0;	// Expressed in micro Joule
-	  				long time_sum = 0;		// Expressed in nano seconds 
-	  				long aborts_sum = 0; 
-	  				long commits_sum = 0;
-
-	  				for(int i=0; i<active_threads; i++){
-	  					energy_sum += ((stats_array[i]->end_energy) - (stats_array[i]->start_energy));
-	  					time_sum += ((stats_array[i]->end_time) - (stats_array[i]->start_time));
-	  					aborts_sum += stats_array[i]->aborts;
-	  					commits_sum += stats_array[i]->commits;
-	  				}
-
-	  				throughput = (((double) commits_sum)*active_threads) / ( ((double) time_sum) / 1000000000 );
-	  				abort_rate = (((double) aborts_sum) / (aborts_sum+commits_sum))*100; 
-	  				power = ((double) energy_sum) / ( (double) time_sum / 1000 );
-	  				energy_per_tx = ((double) energy_sum) / (commits_sum*active_threads);
-					printf("Throughput: %f tx/sec - Abort rate: %f percent - Power: %f Watt - Energy per tx: %f micro Joule\n", 
-						    throughput, abort_rate, power, energy_per_tx);
-
-	  				heuristic(throughput, abort_rate, power, energy_per_tx);
-	  			
-	  				//Setup next round
-	  				int slice = total_commits_round/active_threads;
-	  				for(int i=0; i<active_threads; i++){
-	  					stats_array[i]->nb_tx = 0;
-	  					stats_array[i]->total_commits = slice; 
-	  				}
-	  				stats_array[0]->collector = 1;
-	  			}
-	  			// Set next thread as collector
-	  			else{  				
-	  				int next = (tx->thread_number)+1;
-	  				stats_array[next]->collector = 1;
-	  			}
-	  		}
+  			if(tx->thread_number == (active_threads-1)){
+  				stats_array[0]->collector = 1;
+  				round_completed = 1;
+  			}
+  			else{  				
+  				int next = (tx->thread_number)+1;
+  				stats_array[next]->collector = 1;
+  			}
   		}
   	}
 
