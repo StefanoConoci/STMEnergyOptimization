@@ -93,6 +93,7 @@ global_t _tinystm =
 	int max_pstate;					// Maximum index of available pstate for the running machine 
 	int current_pstate;				// Value of current pstate, index of pstate array which contains frequencies
 	int total_commits_round; 		// Number of total commits for each heuristics step 
+	int starting_threads;			// Number of threads running at the start of the heuristic search. Defined in hope_config.txt
 	stats_t** stats_array;			// Pointer to pointers of struct stats_s, one for each thread 	
 	volatile int round_completed=0; // Defines if round completed and thread 0 should collect stats and call the heuristic function 
 	double** power_profile; 		// Power consumption matrix of the machine. Precomputed using profiler.c included in root folder.
@@ -105,7 +106,7 @@ global_t _tinystm =
 	double power_limit;				// Maximum power that should be used by the application expressed in Watt. Defined in hope_config.txt
 	double energy_per_tx_limit;		// Maximum energy per tx that should be drawn by the application expressed in micro Joule. Defined in hope_config.txt
 
-	// This variables are not volatile becouse I just to move the heuristic to be executed only by thread 0 
+	// This variables are not volatile because they are only used by thread 0 
 	
 	// Statistics of the last heuristic round
 	double old_throughput = -1;		// Last statistics value used by the heuristic
@@ -545,6 +546,17 @@ global_t _tinystm =
 
 			printf("Switched to: #threads %d - pstate %d\n", active_threads, current_pstate);
 		}
+		else{	//Check if workload changed and if it's the case restart the searching 
+			if( throughput > (best_throughput*1.1) || throughput < (best_throughput*0.9) || power > (power_limit *1.05) ){
+				stopped_searching = 0;
+				set_pstate(max_pstate);
+				set_threads(starting_threads);
+				best_throughput = 0;
+				best_threads = starting_threads;
+				best_pstate = max_pstate;
+				printf("Workload change detected. Restarting heuristic search\n");
+			}
+		}
 	}
 
 
@@ -721,8 +733,6 @@ signal_catcher(int sig)
 
 void stm_init(int threads) {
 	
-	int starting_threads;
-
 	printf("TinySTM - STM_HOPE mode started\n");
 
 	/*
