@@ -158,7 +158,7 @@ global_t _tinystm =
 		}
 		current_pstate = input_pstate;
 		
-		printf("Set processor to p-state %d (%d MHz)\n", input_pstate, frequency/100);
+		printf("Set processor to p-state %d (%d MHz)\n", input_pstate, frequency/1000);
 		return 0;
 	}
 
@@ -436,12 +436,19 @@ global_t _tinystm =
 		double old_power = power_profile[from_threads][current_pstate];
 
 		// There could be no number of threads > 0 such that the power consumption is less than old_power 
-		if(power_profile[1][pstate] > old_power){
+		
+		/*if(power_profile[1][pstate] > old_power){
 			if (power_profile[1][pstate] < power_limit){
 				*threads = 1;
 				return 0;
 			}
 			else return -1;
+		}*/
+
+		// If no configuration at requested pstate consumes less power than the last configuration return the configuration with 1 thread 
+		if(power_profile[1][pstate] > old_power){
+			*threads = 1;
+			return 0;
 		}
 
 		int i = 1;
@@ -510,6 +517,7 @@ global_t _tinystm =
 					int improved = 0;
 					if(throughput > old_throughput && power < power_limit)
 						improved = 1;
+
 					if(improved){
 						update_best_config(throughput);
 						if(active_threads < total_threads){
@@ -546,7 +554,7 @@ global_t _tinystm =
 
 			printf("Switched to: #threads %d - pstate %d\n", active_threads, current_pstate);
 		}
-		else{	//Check if workload changed and if it's the case restart the searching 
+		else{	//Check if workload changed and if that's the case restart the searching 
 			if( throughput > (best_throughput*1.1) || throughput < (best_throughput*0.9) || power > (power_limit *1.05) ){
 				stopped_searching = 0;
 				set_pstate(max_pstate);
