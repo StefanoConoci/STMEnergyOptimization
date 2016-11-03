@@ -42,8 +42,8 @@
 
 #ifdef STM_HOPE
 	#include <time.h>
-	//#include <numaif.h>
-	//#include <numa.h>
+	#include "stm_hope.h"
+	#include "heuristics.c"
 #endif
 
 /* ################################################################### *
@@ -79,54 +79,6 @@ global_t _tinystm =
     , .irrevocable = 0
 #endif /* IRREVOCABLE_ENABLED */
     };
-
-
-#ifdef STM_HOPE
-	
-	int* running_array;				// Array of integers that defines if a thread should be running
-	pthread_t* pthread_ids;			// Array of pthread id's to be used with signals
-	int total_threads;				// Total number of threads that could be used by the transcational operation 
-	volatile int active_threads;	// Number of currently active threads, reflects the number of 1's in running_array
-	int nb_cores; 					// Number of cores. Detected at startup and used to set DVFS parameters for all cores
-	int cache_line_size;			// Size in byte of the cache line. Detected at startup and used to alloc memory cache aligned 
-	int pstate[32];					// Array of p-states initialized at startup with available scaling frequencies 
-	int max_pstate;					// Maximum index of available pstate for the running machine 
-	int current_pstate;				// Value of current pstate, index of pstate array which contains frequencies
-	int total_commits_round; 		// Number of total commits for each heuristics step 
-	int starting_threads;			// Number of threads running at the start of the heuristic search. Defined in hope_config.txt
-	stats_t** stats_array;			// Pointer to pointers of struct stats_s, one for each thread 	
-	volatile int round_completed=0; // Defines if round completed and thread 0 should collect stats and call the heuristic function 
-	double** power_profile; 		// Power consumption matrix of the machine. Precomputed using profiler.c included in root folder.
-									// Rows are threads, columns are p-states. It has total_threads+1 rows as first row is filled with 0 for the profile with 0 threads 
-	
-	//////////////////////////////
-	// Heuristic variables
-	//////////////////////////////
-
-	double power_limit;				// Maximum power that should be used by the application expressed in Watt. Defined in hope_config.txt
-	double energy_per_tx_limit;		// Maximum energy per tx that should be drawn by the application expressed in micro Joule. Defined in hope_config.txt
-
-	// This variables are not volatile because they are only used by thread 0 
-	
-	// Statistics of the last heuristic round
-	double old_throughput = -1;		// Last statistics value used by the heuristic
-	double old_power = -1;			// Last statistics value used by the heuristic
-	double old_abort_rate = 0; 		// Last statistics value used by the heuristic
-	double old_energy_per_tx = 1;	// Last statistics value used by the heuristic
-
-	// Variables that define the currently best configuration
-	double best_throughput; 
-	int best_threads;
-	int best_pstate;
-
-	// Variables used to define the state of the search 
-	int new_pstate = 1;				// Used to check if just arrived to a new p_state in the heuristic search
-	int decreasing = 0;				// If 0 heuristic should remove threads until it reaches the limit  
-	int stopped_searching = 0;		// While 1 the algorithm searches for the best configuration, if 0 the algorithm moves to monitoring mode 
-
-#endif/* ! STM_HOPE */
-
-
 
 
 /* ################################################################### *
@@ -195,6 +147,7 @@ global_t _tinystm =
 		freq_available = malloc(sizeof(char)*256);
 		fgets(freq_available, 256, available_freq_file);
 		
+		pstate = malloc(sizeof(int)*32);
 		int i = 0; 
 		char * end;
 
@@ -461,111 +414,7 @@ global_t _tinystm =
 	}  
 
 
-	// Takes decision on frequency and number of active threads based on statistics of current round 
-	void heuristic(double throughput, double  abort_rate, double power, double energy_per_tx){
-		
-		printf("\nHeuristic function called\n");
-
-		if(!stopped_searching){
-			
-			if(new_pstate){
-				new_pstate = 0;
-				if(power > power_limit){	// Power is higher than limit
-					decreasing = 1;
-					if(active_threads > 1){
-						pause_thread(active_threads-1);
-					}
-					else 
-						stop_searching();
-				}else{	// Power lower than limit
-					decreasing = 0;
-					update_best_config(throughput);
-
-					if(active_threads < total_threads)
-						wake_up_thread(active_threads);
-					else{
-						int threads;
-						if(profiler_isoenergy(active_threads, current_pstate-1, &threads) != -1){
-							set_pstate(current_pstate-1);
-							set_threads(threads);
-							new_pstate = 1;
-						}
-						else stop_searching();
-					}
-				}
-			}
-			else{ // Not new_state, should check if decreasing or not
-				if(decreasing){
-					if(power < power_limit){
-						update_best_config(throughput);
-						decreasing = 0;
-						int threads;
-						if(profiler_isoenergy(active_threads, current_pstate-1, &threads) != -1){
-							set_pstate(current_pstate-1);
-							set_threads(threads);
-							new_pstate = 1;
-						}
-						else stop_searching();
-					}
-					else{
-						if(active_threads >1)
-							pause_thread(active_threads-1);
-						else stop_searching();
-					}
-				}
-				else{	// Increasing number of threads 
-					int improved = 0;
-					if(throughput > old_throughput && power < power_limit)
-						improved = 1;
-
-					if(improved){
-						update_best_config(throughput);
-						if(active_threads < total_threads){
-							wake_up_thread(active_threads);
-						}
-						else{
-							int threads;
-							if(profiler_isoenergy(active_threads, current_pstate-1, &threads) != -1){
-								set_pstate(current_pstate-1);
-								set_threads(threads);
-								new_pstate = 1;
-							}
-							else stop_searching();
-						}
-					}
-					else{ // not improved
-						int threads;
-							if(profiler_isoenergy(active_threads-1, current_pstate-1, &threads) != -1){
-								set_pstate(current_pstate-1);
-								set_threads(threads);
-								new_pstate = 1;
-							}
-							else stop_searching();
-					}
-
-				}	
-			}
-
-			//Update old global variables 
-			old_throughput = throughput;
-			old_abort_rate = abort_rate;
-			old_power = power;
-			old_energy_per_tx = energy_per_tx;
-
-			printf("Switched to: #threads %d - pstate %d\n", active_threads, current_pstate);
-		}
-		else{	//Check if workload changed and if that's the case restart the searching 
-			if( throughput > (best_throughput*1.1) || throughput < (best_throughput*0.9) || power > (power_limit *1.05) ){
-				stopped_searching = 0;
-				set_pstate(max_pstate);
-				set_threads(starting_threads);
-				best_throughput = 0;
-				best_threads = starting_threads;
-				best_pstate = max_pstate;
-				printf("Workload change detected. Restarting heuristic search\n");
-			}
-		}
-	}
+	
 
 
 
@@ -743,7 +592,7 @@ void stm_init(int threads) {
 	
 	printf("TinySTM - STM_HOPE mode started\n");
 
-	/*
+	/* This seems to be useless, its all already on node 0 expect stats arrays which should be local
 	// Set mem_policy to numa node 0 
 	if(numa_available() < 0){
 		printf("System doesn't support NUMA API\n")
@@ -763,8 +612,8 @@ void stm_init(int threads) {
 		printf("Error opening STM_HOPE configuration file.\n");
 		exit(1);
 	}
-	if (fscanf(config_file, "STARTING_THREADS=%d POWER_LIMIT=%lf COMMITS_ROUND = %d ENERGY_PER_TX_LIMIT = %lf", 
-			 &starting_threads, &power_limit, &total_commits_round, &energy_per_tx_limit)!=4) {
+	if (fscanf(config_file, "STARTING_THREADS=%d POWER_LIMIT=%lf COMMITS_ROUND = %d ENERGY_PER_TX_LIMIT = %lf HEURISTIC_MODE = %d", 
+			 &starting_threads, &power_limit, &total_commits_round, &energy_per_tx_limit, &heuristic_mode)!=5) {
 		printf("The number of input parameters of the STM_HOPE configuration file does not match the number of required parameters.\n");
 		exit(1);
 	}
@@ -992,9 +841,18 @@ _CALLCONV stm_tx_t *stm_pre_init_thread(int id){
 		pthread_ids[id] = pthread_self();
 		tx->stats_ptr = alloc_stats_buffer(id);
 
-		// Thread 0 sets itself as a collector 
-		if( id == 0)
+		// Thread 0 sets itself as a collector and inits global variables
+		if( id == 0){
 			tx->stats_ptr->collector = 1;
+			
+			round_completed=0;
+			old_throughput = -1;
+			old_power = -1;
+			old_energy_per_tx = -1;
+			new_pstate = 1;
+			decreasing = 0;
+			stopped_searching = 0;
+		}
 
 		return tx;
 	
