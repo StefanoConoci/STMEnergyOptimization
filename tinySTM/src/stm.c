@@ -353,71 +353,6 @@ global_t _tinystm =
 		}
 	}
 
-	// Checks if the current config is better than the currently best config and if that's the case update it 
-	inline void update_best_config(double throughput){
-		
-		if(throughput > best_throughput){
-			best_throughput = throughput;
-			best_pstate = current_pstate;
-			best_threads = active_threads;
-		}
-	}
-
-	// Stop searching and set the best configuration 
-	inline void stop_searching(){
-
-		decreasing = 0;
-		new_pstate = 1;
-		stopped_searching = 1;
-
-		set_pstate(best_pstate);
-		set_threads(best_threads);
-
-		// DEBUG
-		printf("Stopped searching. Best configuration: %d threads at p-state %d\n", best_threads, best_pstate);
-	}
-
-	// Returns a configuration at the given pstate with power consumption less than the one of the current configuration 
-	// All the power related data is retrieved from the profiler_matrix and is only used as a starting point, as this values change based on the workload
-	// If no configuration at the given pstate uses less than the configuration power the algorithm returns the lowest consuming configuration 
-	// as long as it draws less than power_limit. If this configuration can't be found or the pstate is invalid the function returns -1 
-	int profiler_isoenergy(int from_threads, int pstate, int* threads){
-		
-		if(pstate < 0 || pstate > max_pstate)
-			return -1;
-
-		double old_power = power_profile[from_threads][current_pstate];
-
-		// There could be no number of threads > 0 such that the power consumption is less than old_power 
-		
-		/*if(power_profile[1][pstate] > old_power){
-			if (power_profile[1][pstate] < power_limit){
-				*threads = 1;
-				return 0;
-			}
-			else return -1;
-		}*/
-
-		// If no configuration at requested pstate consumes less power than the last configuration return the configuration with 1 thread 
-		if(power_profile[1][pstate] > old_power){
-			*threads = 1;
-			return 0;
-		}
-
-		int i = 1;
-		while( i<=total_threads && power_profile[i][pstate] < old_power)
-			i++;
-
-		*threads = --i;
-		printf("Isoenergy configuration: %d threads at %d pstate\n", *threads, pstate);
-		return 0;
-	}  
-
-
-	
-
-
-
 #endif/* ! STM_HOPE */
 
 
@@ -618,6 +553,7 @@ void stm_init(int threads) {
 		exit(1);
 	}
 	fclose(config_file);
+	printf("Heuristic mode: %d\n", heuristic_mode);
 
 	if(starting_threads > total_threads){
 		printf("Starting threads set higher than total threads. Please modify this value in hope_config.txt\n");
@@ -849,6 +785,9 @@ _CALLCONV stm_tx_t *stm_pre_init_thread(int id){
 			old_throughput = -1;
 			old_power = -1;
 			old_energy_per_tx = -1;
+			level_best_throughput = -1; 
+			level_best_threads = 0;
+			level_starting_threads = starting_threads;
 			new_pstate = 1;
 			decreasing = 0;
 			stopped_searching = 0;

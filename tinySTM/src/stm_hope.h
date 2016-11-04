@@ -33,11 +33,16 @@ double best_throughput;
 int best_threads;
 int best_pstate;
 
+// Variables that define the current level best configuration. Used by HEURISTIC_MODE 0, 3 and 4
+double level_best_throughput; 
+int level_best_threads;
+int level_best_pstate;
+int level_starting_threads;
+
 // Variables used to define the state of the search 
 int new_pstate;					// Used to check if just arrived to a new p_state in the heuristic search
 int decreasing;					// If 0 heuristic should remove threads until it reaches the limit  
-int stopped_searching;			// While 1 the algorithm searches for the best configuration, if 0 the algorithm moves to monitoring mode 	
-
+int stopped_searching;			// While 1 the algorithm searches for the best configuration, if 0 the algorithm moves to monitoring mode 
 
 /////////////////////////////////////////////////////////////////
 //	Function declerations
