@@ -53,3 +53,7 @@ Threads: 14	Elapsed time: 0.043441	Commits: 156	Aborts: 37	Throughput: 3591.0728
 Threads: 15	Elapsed time: 0.050284	Commits: 158	Aborts: 35	Throughput: 3142.158270
 Threads: 16	Elapsed time: 0.043197	Commits: 160	Aborts: 43	Throughput: 3703.968076
 labyrinth
+labyrinth
+labyrinth
+labyrinth
+labyrinth

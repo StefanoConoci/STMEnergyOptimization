@@ -38,6 +38,7 @@ double level_best_throughput;
 int level_best_threads;
 int level_best_pstate;
 int level_starting_threads;
+int level_starting_energy_per_tx;
 
 // Variables used to define the state of the search 
 int new_pstate;					// Used to check if just arrived to a new p_state in the heuristic search
