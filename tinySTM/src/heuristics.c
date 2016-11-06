@@ -130,7 +130,7 @@ void heuristic_power(double throughput, double abort_rate, double power, double 
 					if( (active_threads-level_starting_threads)>1 || (level_starting_threads-1)<1  ){
 						new_pstate = 1;
 						compare_best_level_config();
-						if( current_pstate-1 < 0 )
+						if( current_pstate-1 < 0)
 							stop_searching();
 						else{
 							set_threads(level_best_threads);
@@ -155,6 +155,10 @@ void heuristic_power(double throughput, double abort_rate, double power, double 
 			}
 			// Decreasing number of threads
 			else{
+
+				if(power < power_limit)
+						update_level_best_config(throughput);
+
 				if(throughput < level_best_throughput|| active_threads == 1 ){
 					new_pstate = 1;
 					compare_best_level_config();
@@ -170,12 +174,8 @@ void heuristic_power(double throughput, double abort_rate, double power, double 
 						level_best_pstate = 0;
 					}
 				}
-				else{
-					if(power < power_limit){
-						update_level_best_config(throughput);
-					}
-					pause_thread(active_threads-1);
-				}
+				else pause_thread(active_threads-1);
+			
 			}
 		}
 
