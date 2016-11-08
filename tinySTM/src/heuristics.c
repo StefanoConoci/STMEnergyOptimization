@@ -587,6 +587,186 @@ void heuristic_energy_bidirectional(double throughput, double abort_rate, double
 }
 
 
+// HEURISTIC_MODE 4. This heuristics converges to the configuration with the highest throughput that consumes less than energy_per_tx on average for transaction
+// Hypothesis no local max on throughput. Increasing p-state the optimal configuration will move towards using less threads.
+// Given the optimal amount of threads t for a pstate p, if we consider a pstate<p the optimal amount of threads will be <=t   
+void heuristic_energy_unidirectional(double throughput, double abort_rate, double power, double energy_per_tx){
+
+	if(new_pstate){
+		new_pstate = 0;
+		level_starting_energy_per_tx = energy_per_tx;
+
+		if(energy_per_tx < energy_per_tx_limit)
+			update_level_best_config(throughput);			
+
+
+		if(current_pstate == max_pstate){	// Try to increase and then decrease	
+			if(active_threads < total_threads){
+				decreasing = 0;
+				wake_up_thread(active_threads);
+			}
+			else{
+				if(active_threads != 1 && (level_starting_threads-1) > 0) {
+					decreasing = 1;
+					pause_thread(active_threads-1);
+				}
+				else{
+					new_pstate = 1;
+					decreasing = 0;
+					compare_best_level_config();
+					if(current_pstate == 0 ){
+						stop_searching();
+					}
+					else{
+						if(level_best_threads != 0)
+							level_starting_threads = level_best_threads;
+						level_best_threads = 0;
+						level_best_throughput = 0;
+						level_best_pstate = 0;
+						set_threads(level_starting_threads);
+						set_pstate(current_pstate-1);
+					}
+				}
+			}
+		}else{	// With pstate > max_pstate only decrease the number of threads
+			if(active_threads != 1 && (level_starting_threads-1) > 0) {
+					decreasing = 1;
+					pause_thread(active_threads-1);
+				}
+				else{
+					new_pstate = 1;
+					decreasing = 0;
+					compare_best_level_config();
+					if(current_pstate == 0 ){
+						stop_searching();
+					}
+					else{
+						if(level_best_threads != 0)
+							level_starting_threads = level_best_threads;
+						level_best_threads = 0;
+						level_best_throughput = 0;
+						level_best_pstate = 0;
+						set_threads(level_starting_threads);
+						set_pstate(current_pstate-1);
+					}
+				}
+		}
+		
+	}
+	else{
+		if(!decreasing){	// Increasing
+			if(energy_per_tx < energy_per_tx_limit){
+				update_level_best_config(throughput);
+				if(active_threads == total_threads || old_throughput > throughput){ // Switch to decreasing if possible or move to next p-state
+					if(active_threads != 1 && (level_starting_threads-1) > 0) {
+						decreasing = 1;
+						pause_thread(active_threads-1);
+					}
+					else{
+						new_pstate = 1;
+						decreasing = 0;
+						compare_best_level_config();
+						if(current_pstate == 0 ){
+							stop_searching();
+						}
+						else{
+							if(level_best_threads != 0)
+								level_starting_threads = level_best_threads;
+							level_best_threads = 0;
+							level_best_throughput = 0;
+							level_best_pstate = 0;
+							set_threads(level_starting_threads);
+							set_pstate(current_pstate-1);
+						}
+					}
+				}
+				else wake_up_thread(active_threads);
+			}
+			else{	// Energy higher than limit 
+				if(energy_per_tx > old_energy_per_tx || active_threads == total_threads){	// Switch to decreasing if possible or move to next p-state
+					if(active_threads != 1 && (level_starting_threads-1) > 0) {
+						decreasing = 1;
+						pause_thread(active_threads-1);
+					}
+					else{
+						new_pstate = 1;
+						decreasing = 0;
+						compare_best_level_config();
+						if(current_pstate == 0 ){
+							stop_searching();
+						}
+						else{
+							if(level_best_threads != 0)
+								level_starting_threads = level_best_threads;
+							level_best_threads = 0;
+							level_best_throughput = 0;
+							level_best_pstate = 0;
+							set_threads(level_starting_threads);
+							set_pstate(current_pstate-1);
+						}
+					}
+				}
+				else wake_up_thread(active_threads);
+			}
+		}
+		else{	// Decreasing
+			if(energy_per_tx < energy_per_tx_limit){
+				update_level_best_config(throughput);
+				if(active_threads == 1 || level_best_throughput > throughput){
+					new_pstate = 1;
+					decreasing = 0;
+					compare_best_level_config();
+					if(current_pstate == 0){
+						stop_searching();
+					}	
+					else{
+						if(level_best_threads != 0)
+							level_starting_threads = level_best_threads;
+						level_best_threads = 0;
+						level_best_throughput = 0;
+						level_best_pstate = 0;
+						set_threads(level_starting_threads);
+						set_pstate(current_pstate-1);
+					}
+				}
+				else pause_thread(active_threads-1);
+			}
+			else{	// Energy higher than limit 
+				if(active_threads == (level_starting_threads-1))	// In the first decreasing step last energy is related to the increasing phase
+					old_energy_per_tx = level_starting_energy_per_tx;
+				if(energy_per_tx > old_energy_per_tx || active_threads == 1){
+					new_pstate = 1;
+					decreasing = 0;
+					compare_best_level_config();
+					if(current_pstate == 0){
+						stop_searching();
+					}	
+					else{
+						if(level_best_threads != 0)
+							level_starting_threads = level_best_threads;
+						level_best_threads = 0;
+						level_best_throughput = 0;
+						level_best_pstate = 0;
+						set_threads(level_starting_threads);
+						set_pstate(current_pstate-1);
+					}
+				}
+				else pause_thread(active_threads-1);
+			}
+		}
+	}
+
+	//Update old global variables 
+	old_throughput = throughput;
+	old_abort_rate = abort_rate;
+	old_power = power;
+	old_energy_per_tx = energy_per_tx;
+
+	printf("Switched to: #threads %d - pstate %d\n", active_threads, current_pstate);
+
+}
+
+
 // Used for testing all possible configurations pstate/threads
 void explore_all_configurations(double throughput, double  abort_rate, double power, double energy_per_tx){
 
@@ -628,7 +808,7 @@ void explore_all_configurations(double throughput, double  abort_rate, double po
 					heuristic_energy_bidirectional(throughput, abort_rate, power, energy_per_tx);
 					break;
 				case 4:
-					printf("Heuristic mode 4  - energy_per_tx limit unidirectional\n");
+					heuristic_energy_unidirectional(throughput, abort_rate, power, energy_per_tx);
 					break;	
 				case 5:
 					explore_all_configurations(throughput, abort_rate, power, energy_per_tx);
