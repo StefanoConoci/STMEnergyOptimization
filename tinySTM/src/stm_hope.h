@@ -21,6 +21,7 @@ double** power_profile; 		// Power consumption matrix of the machine. Precompute
 double power_limit;				// Maximum power that should be used by the application expressed in Watt. Defined in hope_config.txt
 double energy_per_tx_limit;		// Maximum energy per tx that should be drawn by the application expressed in micro Joule. Defined in hope_config.txt 
 int heuristic_mode;				// Used to switch between different heuristics mode. Can be set from 0 to 4. 
+double jump_percentage;			// Used by heuristic mode 2. It defines how near pwer_limit we expect the optimal configuration to be
 
 // Statistics of the last heuristic round
 double old_throughput;		

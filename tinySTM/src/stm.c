@@ -547,8 +547,8 @@ void stm_init(int threads) {
 		printf("Error opening STM_HOPE configuration file.\n");
 		exit(1);
 	}
-	if (fscanf(config_file, "STARTING_THREADS=%d POWER_LIMIT=%lf COMMITS_ROUND = %d ENERGY_PER_TX_LIMIT = %lf HEURISTIC_MODE = %d", 
-			 &starting_threads, &power_limit, &total_commits_round, &energy_per_tx_limit, &heuristic_mode)!=5) {
+	if (fscanf(config_file, "STARTING_THREADS=%d POWER_LIMIT=%lf COMMITS_ROUND = %d ENERGY_PER_TX_LIMIT = %lf HEURISTIC_MODE = %d JUMP_PERCENTAGE = %lf", 
+			 &starting_threads, &power_limit, &total_commits_round, &energy_per_tx_limit, &heuristic_mode, &jump_percentage)!=6) {
 		printf("The number of input parameters of the STM_HOPE configuration file does not match the number of required parameters.\n");
 		exit(1);
 	}
