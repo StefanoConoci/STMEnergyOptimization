@@ -75,7 +75,7 @@
 #ifndef _STM_H_
 # define _STM_H_
 
-#define STM_HOPE
+//#define STM_HOPE
 
 #ifdef STM_HOPE
   
