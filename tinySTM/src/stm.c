@@ -173,6 +173,10 @@ global_t _tinystm =
 
 	// Executed inside stm_init
 	void init_thread_management(int threads){
+
+		char* filename;
+		FILE* numafile;
+		int package_last_core;
 		
 		// Init total threads and active threads
 		total_threads = threads;
@@ -190,6 +194,18 @@ global_t _tinystm =
 
 		//Registering SIGUSR1 handler
 		signal(SIGUSR1, sig_func);
+
+		//init number of packages
+		filename = malloc(sizeof(char)*64); 
+		sprintf(filename,"/sys/devices/system/cpu/cpu%d/topology/physical_package_id", nb_cores-1);
+		numafile = fopen(filename,"r");
+		if (numafile == NULL){
+			printf("Cannot read number of packages\n");
+			exit(1);
+		} 
+		fscanf(numafile ,"%d", &package_last_core);
+		nb_packages = package_last_core+1;
+		printf("Number of packages detected: %d\n", nb_packages);
 	}
 
 

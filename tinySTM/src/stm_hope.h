@@ -8,6 +8,7 @@ pthread_t* pthread_ids;			// Array of pthread id's to be used with signals
 int total_threads;				// Total number of threads that could be used by the transcational operation 
 volatile int active_threads;	// Number of currently active threads, reflects the number of 1's in running_array
 int nb_cores; 					// Number of cores. Detected at startup and used to set DVFS parameters for all cores
+int nb_packages;				// Number of system package. Necessary to monitor energy consumption of all packages in th system
 int cache_line_size;			// Size in byte of the cache line. Detected at startup and used to alloc memory cache aligned 
 int* pstate;					// Array of p-states initialized at startup with available scaling frequencies 
 int max_pstate;					// Maximum index of available pstate for the running machine 
