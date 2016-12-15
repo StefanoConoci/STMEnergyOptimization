@@ -309,10 +309,13 @@ global_t _tinystm =
 		long power;
 
 		// Package 0 power consumtion
-		//FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj", "r");
+		FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj", "r");
 		
 		// Package 0 cores power consumption
-		FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:0/energy_uj", "r");	
+		//FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:0/energy_uj", "r");	
+
+		// DRAM module, considered inside the package
+		//FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:1/energy_uj", "r");	
 
 		if(power_file == NULL){
 			printf("Error opening power file\n");		
