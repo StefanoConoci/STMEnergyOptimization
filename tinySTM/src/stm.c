@@ -90,6 +90,7 @@ global_t _tinystm =
 	// Used by the heuristic 
 	int set_pstate(int input_pstate){
 		
+		int i;
 		char fname[64];
 		FILE* frequency_file;
 
@@ -97,7 +98,7 @@ global_t _tinystm =
 			return -1;
 		int frequency = pstate[input_pstate];
 
-		for(int i=0; i<nb_cores;i++){
+		for(i=0; i<nb_cores;i++){
 			sprintf(fname, "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_setspeed", i);
 			frequency_file = fopen(fname,"w+");
 			if(frequency_file == NULL){
@@ -119,13 +120,12 @@ global_t _tinystm =
 		
 		char fname[64];
 		char* freq_available;
-		char* token;
 		int frequency;
 		FILE* governor_file;
 
 		//Set governor to userspace
 		nb_cores = sysconf(_SC_NPROCESSORS_ONLN);
-		for(int i=0; i<nb_cores;i++){
+		for(i=0; i<nb_cores;i++){
 			sprintf(fname, "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_governor", i);
 			governor_file = fopen(fname,"w+");
 			if(governor_file == NULL){
@@ -148,7 +148,7 @@ global_t _tinystm =
 		fgets(freq_available, 256, available_freq_file);
 		
 		pstate = malloc(sizeof(int)*32);
-		int i = 0; 
+		i = 0; 
 		char * end;
 
 		for (frequency = strtol(freq_available, &end, 10); freq_available != end; frequency = strtol(freq_available, &end, 10)){
@@ -177,7 +177,8 @@ global_t _tinystm =
 		char* filename;
 		FILE* numafile;
 		int package_last_core;
-		
+		int i;
+
 		// Init total threads and active threads
 		total_threads = threads;
 		printf("Set total_threads to %d\n", threads);
@@ -185,7 +186,7 @@ global_t _tinystm =
 
 		// Init running array with all threads running 	
 		running_array = malloc(sizeof(int)*total_threads);
-		for(int i=0; i<total_threads; i++)
+		for(i=0; i<total_threads; i++)
 			running_array[i] = 1;	
 		
 
@@ -241,6 +242,7 @@ global_t _tinystm =
 
 		running_array[thread_id] = 0;
 		active_threads--;
+		return active_threads;
 	}
 
 	// Executed inside stm_init
@@ -283,14 +285,15 @@ global_t _tinystm =
 	void load_profile_file(){
 
 		double power;
+		int i;
 
 		// Allocate the matrix 
 		power_profile = (double**) malloc(sizeof(double*) * (total_threads+1)); 
-		for (int i = 0; i < (total_threads+1); i++)
+		for (i = 0; i < (total_threads+1); i++)
   	   		power_profile[i] = (double *) malloc(sizeof(double) * (max_pstate+1));
 
   	   	// Init first row with all zeros 
-  	   	for(int i =0; i<=max_pstate; i++){
+  	   	for(i =0; i<=max_pstate; i++){
   	   		power_profile[0][i] = 0;
   	   	}
 
@@ -304,7 +307,7 @@ global_t _tinystm =
 		fgets(profile_string, 8192, profile_file);
   	   	
   	   	char * end;
-  	   	int i=1;
+  	   	i=1;
   	   	int j=0; 
 		for (power = strtod(profile_string, &end); profile_string != end; power = strtod(profile_string, &end)){
 			power_profile[i][j] = power;
@@ -358,15 +361,16 @@ global_t _tinystm =
 	// Function used to set the number of running threads. Based on active_threads and threads might wake up or pause some threads 
 	inline void set_threads(int to_threads){
 
+		int i;
 		int starting_threads = active_threads;
 
 		if(starting_threads != to_threads){
 			if(starting_threads > to_threads){
-				for(int i = to_threads; i<starting_threads; i++)
+				for(i = to_threads; i<starting_threads; i++)
 					pause_thread(i);
 			}
 			else{
-				for(int i = starting_threads; i<to_threads; i++)
+				for(i = starting_threads; i<to_threads; i++)
 					wake_up_thread(i);
 			}
 		}
@@ -544,6 +548,8 @@ signal_catcher(int sig)
 
 void stm_init(int threads) {
 	
+	int i;
+
 	printf("TinySTM - STM_HOPE mode started\n");
 
 	/* This seems to be useless, its all already on node 0 expect stats arrays which should be local
@@ -580,7 +586,7 @@ void stm_init(int threads) {
 	}
 	
 	// Set active_threads to starting_threads
-	for(int i = starting_threads; i<total_threads;i++){
+	for(i = starting_threads; i<total_threads;i++){
 		pause_thread(i);
 	}
 	
@@ -688,10 +694,11 @@ stm_exit_thread(void)
   
   TX_GET;
   #ifdef STM_HOPE
+  	int i;
 
   	// When thread 0 completes wake up all threads 
   	if(tx->thread_number == 0){
-  		for(int i=active_threads; i< total_threads; i++){
+  		for(i=active_threads; i< total_threads; i++){
   			wake_up_thread(i);
   		}	
   	}
@@ -717,6 +724,7 @@ stm_start(stm_tx_attr_t attr)
   TX_GET;
   sigjmp_buf * ret;
   #ifdef STM_HOPE
+  	int i;
   	stm_wait(tx->thread_number);
 
   	// Retrive stats if collector 
@@ -738,7 +746,7 @@ stm_start(stm_tx_attr_t attr)
 			long aborts_sum = 0; 
 			long commits_sum = 0;
 
-			for(int i=0; i<active_threads; i++){
+			for(i=0; i<active_threads; i++){
 				energy_sum += ((stats_array[i]->end_energy) - (stats_array[i]->start_energy));
 				time_sum += ((stats_array[i]->end_time) - (stats_array[i]->start_time));
 				aborts_sum += stats_array[i]->aborts;
@@ -756,7 +764,7 @@ stm_start(stm_tx_attr_t attr)
 		
 			//Setup next round
 			int slice = total_commits_round/active_threads;
-			for(int i=0; i<active_threads; i++){
+			for(i=0; i<active_threads; i++){
 				stats_array[i]->nb_tx = 0;
 				stats_array[i]->total_commits = slice; 
 			}
