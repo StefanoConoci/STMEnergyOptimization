@@ -120,7 +120,7 @@ global_t _tinystm =
 		
 		char fname[64];
 		char* freq_available;
-		int frequency;
+		int frequency, i;
 		FILE* governor_file;
 
 		//Set governor to userspace
