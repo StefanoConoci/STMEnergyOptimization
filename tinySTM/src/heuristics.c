@@ -770,7 +770,7 @@ void heuristic_energy_unidirectional(double throughput, double abort_rate, doubl
 // Used for testing all possible configurations pstate/threads
 void explore_all_configurations(double throughput, double  abort_rate, double power, double energy_per_tx){
 
-	if(active_threads == total_threads){
+	if(active_threads == total_threads || abort_rate>0.9){
 		if( current_pstate > 0 ){
 			set_pstate(current_pstate-1);
 			set_threads(1);
