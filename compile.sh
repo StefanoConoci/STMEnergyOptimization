@@ -1,6 +1,7 @@
 #!/bin/bash
 rm profiler
 gcc profiler.c -o profiler -lpthread
+gcc energy_monitor.c -o energy_monitor
 cd rapl-power
 make clean
 make

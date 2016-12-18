@@ -10,11 +10,15 @@
 // Returns energy consumption of package 0 cores in micro Joule
 long get_energy(){
     
-    long power;
+    long power, power1;
 
     // Package 0 power consumtion
     FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj", "r");
+
+    // Package 0 power consumtion
+    FILE* power_file1 = fopen("/sys/class/powercap/intel-rapl/intel-rapl:1/energy_uj", "r");
     
+
     // Package 0 cores power consumption
     //FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:0/energy_uj", "r");    
 
@@ -26,7 +30,14 @@ long get_energy(){
     }
     fscanf(power_file,"%ld",&power);
     fclose(power_file);
-    return power;
+    
+    if(power_file1 == NULL){
+        printf("Error opening power file\n");
+    }
+    fscanf(power_file1,"%ld",&power1);
+    fclose(power_file1);
+
+    return (power+power1);
 }
 
 

@@ -29,6 +29,7 @@ make -f Makefile.stm clean
 cd ..
 cd yada
 make -f Makefile.stm clean
-
+cd ../..
+rm energy_monitor
 
 
