@@ -46,6 +46,10 @@
 	#include "heuristics.c"
 #endif
 
+#ifdef ENERGY_DESKTOP
+	#include <time.h>
+#endif
+
 /* ################################################################### *
  * DEFINES
  * ################################################################### */
@@ -380,6 +384,123 @@ global_t _tinystm =
 
 
 /* ################################################################### *
+ * ENERGY_DESKTOP
+ * ################################################################### */
+
+#ifdef ENERGY_DESKTOP
+
+	long start_package_energy, end_package_energy;
+	long start_core_energy, end_core_energy;
+	long start_dram_energy, end_dram_energy; 
+
+	long start_time, end_time;
+
+	// Return time as a monotomically increasing long expressed as nanoseconds 
+	long read_time_energy(){
+
+		long time =0;
+		struct timespec ts;
+
+		clock_gettime(CLOCK_MONOTONIC, &ts);
+		time += (ts.tv_sec*1000000000);
+		time += ts.tv_nsec;
+
+		return time;
+	}
+
+
+	// Overhead around 0.13 ms 
+	void set_start_energy_counters(){
+		long power;
+
+		// Package 0 power consumtion
+		FILE* package_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj", "r");
+		if(package_file == NULL){
+			printf("Error opening package power file\n");		
+		}
+		fscanf(package_file,"%ld",&power);
+		fclose(package_file);
+		start_package_energy = power;
+		
+		// Package 0 cores power consumption
+		FILE* core_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:0/energy_uj", "r");	
+		if(core_file == NULL){
+			printf("Error opening core power file\n");		
+		}
+		fscanf(core_file,"%ld",&power);
+		fclose(core_file);
+		start_core_energy = power;
+
+		// Package 0 DRAM module, considered as a child of the package
+		FILE* dram_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:1/energy_uj", "r");	
+		if(dram_file == NULL){
+			printf("Error opening core power file\n");		
+		}
+		fscanf(dram_file,"%ld",&power);
+		fclose(dram_file);
+		start_dram_energy = power;
+
+		start_time = read_time_energy();
+	}
+
+	// Energy consumed is expressed in Joule, power expressed in Watt. 
+	void print_energy_counters(){
+		
+		double runtime; 
+		double package_energy_consumed, core_energy_consumed, dram_energy_consumed;
+		double package_power, core_power, dram_power;
+
+		long power; 
+
+		end_time = read_time_energy();
+
+		// Package 0 power consumtion
+		FILE* package_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj", "r");
+		if(package_file == NULL){
+			printf("Error opening package power file\n");		
+		}
+		fscanf(package_file,"%ld",&power);
+		fclose(package_file);
+		end_package_energy = power;
+		
+		// Package 0 cores power consumption
+		FILE* core_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:0/energy_uj", "r");	
+		if(core_file == NULL){
+			printf("Error opening core power file\n");		
+		}
+		fscanf(core_file,"%ld",&power);
+		fclose(core_file);
+		end_core_energy = power;
+
+		// Package 0 DRAM module, considered as a child of the package
+		FILE* dram_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:1/energy_uj", "r");	
+		if(dram_file == NULL){
+			printf("Error opening core power file\n");		
+		}
+		fscanf(dram_file,"%ld",&power);
+		fclose(dram_file);
+		end_dram_energy = power;
+
+		// Computing aggregated results 
+		runtime = ( (double) end_time - start_time)/1000000000;
+    	
+    	package_energy_consumed = ( (double) end_package_energy - start_package_energy)/1000000;
+    	core_energy_consumed = ( (double) end_core_energy - start_core_energy)/1000000;
+    	dram_energy_consumed = ( (double) end_dram_energy - start_dram_energy)/1000000;
+
+   		package_power = (package_energy_consumed)/runtime;
+   		core_power = (core_energy_consumed)/runtime;
+   		dram_power = (dram_energy_consumed)/runtime;
+
+   		// Printing results
+
+   		printf("\tPkg_energy: %lf\tCore_energy: %lf\tDram_energy: %lf\tPkg_power: %lf\tCore_power: %lf\tDram_power: %lf",
+   				   package_energy_consumed, core_energy_consumed, dram_energy_consumed, package_power, core_power, dram_power);
+	}
+
+#endif /* ! ENERGY_DESKTOP */
+
+/* ################################################################### *
  * TYPES
  * ################################################################### */
 
@@ -651,6 +772,11 @@ void stm_init(){
     }
   }
 #endif /* SIGNAL_HANDLER */
+
+#ifdef ENERGY_DESKTOP
+  set_start_energy_counters();
+#endif ENERGY_DESKTOP
+
   _tinystm.initialized = 1;
 }
 
@@ -668,6 +794,10 @@ stm_exit(void)
   stm_quiesce_exit();
 
   terminate_rapl();
+
+  #ifdef ENERGY_DESKTOP
+  	print_energy_counters();
+  #endif
 
 #ifdef EPOCH_GC
   gc_exit();
