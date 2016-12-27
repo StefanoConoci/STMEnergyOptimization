@@ -923,6 +923,11 @@ void stm_init(){
   set_start_energy_counters();
 #endif ENERGY_DESKTOP
 
+
+#ifdef ENERGY_SERVER
+  set_start_energy_counters();
+#endif ENERGY_SERVER
+
   _tinystm.initialized = 1;
 }
 
@@ -944,6 +949,11 @@ stm_exit(void)
   #ifdef ENERGY_DESKTOP
   	print_energy_counters();
   #endif
+
+  #ifdef ENERGY_SERVER
+  	print_energy_counters();
+  #endif
+
 
 #ifdef EPOCH_GC
   gc_exit();
