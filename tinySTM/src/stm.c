@@ -500,6 +500,152 @@ global_t _tinystm =
 
 #endif /* ! ENERGY_DESKTOP */
 
+
+/* ################################################################### *
+ * ENERGY_SERVER
+ * ################################################################### */
+
+#ifdef ENERGY_SERVER
+
+	long start_package0_energy, end_package0_energy;
+	long start_package1_energy, end_package1_energy;
+
+	long start_dram0_energy, end_dram0_energy;
+	long start_dram1_energy, end_dram1_energy; 
+
+	long start_time, end_time;
+
+	// Return time as a monotomically increasing long expressed as nanoseconds 
+	long read_time_energy(){
+
+		long time =0;
+		struct timespec ts;
+
+		clock_gettime(CLOCK_MONOTONIC, &ts);
+		time += (ts.tv_sec*1000000000);
+		time += ts.tv_nsec;
+
+		return time;
+	}
+
+
+	// Overhead not yet computed for server 
+	void set_start_energy_counters(){
+		long power;
+
+		// Package 0 power consumption
+		FILE* package_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:1/energy_uj", "r");
+		if(package_file == NULL){
+			printf("Error opening package power file\n");		
+		}
+		fscanf(package_file,"%ld",&power);
+		fclose(package_file);
+		start_package0_energy = power;
+
+		// Package 1 power consumption
+		package_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj", "r");
+		if(package_file == NULL){
+			printf("Error opening package power file\n");		
+		}
+		fscanf(package_file,"%ld",&power);
+		fclose(package_file);
+		start_package1_energy = power;
+
+		//Package 0 DRAM module, considered as a child of the package
+		FILE* dram_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:1/intel-rapl:1:0/energy_uj", "r");	
+		if(dram_file == NULL){
+			printf("Error opening core power file\n");		
+		}
+		fscanf(dram_file,"%ld",&power);
+		fclose(dram_file);
+		start_dram0_energy = power;
+
+		// Package 1 DRAM module, considered as a child of the package
+		dram_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:0/energy_uj", "r");	
+		if(dram_file == NULL){
+			printf("Error opening core power file\n");		
+		}
+		fscanf(dram_file,"%ld",&power);
+		fclose(dram_file);
+		start_dram1_energy = power;
+
+		start_time = read_time_energy();
+	}
+
+	// Energy consumed is expressed in Joule, power expressed in Watt. 
+	void print_energy_counters(){
+		
+		double runtime; 
+		double package0_energy_consumed, package1_energy_consumed, dram0_energy_consumed, dram1_energy_consumed;
+		double package0_power, package1_power, dram0_power, dram1_power;
+
+		long power; 
+
+		end_time = read_time_energy();
+
+		// Package 0 power consumption
+		FILE* package_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:1/energy_uj", "r");
+		if(package_file == NULL){
+			printf("Error opening package power file\n");		
+		}
+		fscanf(package_file,"%ld",&power);
+		fclose(package_file);
+		end_package0_energy = power;
+
+		// Package 1 power consumption
+		package_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj", "r");
+		if(package_file == NULL){
+			printf("Error opening package power file\n");		
+		}
+		fscanf(package_file,"%ld",&power);
+		fclose(package_file);
+		end_package1_energy = power;
+
+		//Package 0 DRAM module, considered as a child of the package
+		FILE* dram_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:1/intel-rapl:1:0/energy_uj", "r");	
+		if(dram_file == NULL){
+			printf("Error opening core power file\n");		
+		}
+		fscanf(dram_file,"%ld",&power);
+		fclose(dram_file);
+		end_dram0_energy = power;
+
+		// Package 1 DRAM module, considered as a child of the package
+		dram_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:0/energy_uj", "r");	
+		if(dram_file == NULL){
+			printf("Error opening core power file\n");		
+		}
+		fscanf(dram_file,"%ld",&power);
+		fclose(dram_file);
+		end_dram1_energy = power;
+
+		// Computing aggregated results 
+		runtime = ( (double) end_time - start_time)/1000000000;
+    	
+    	package0_energy_consumed = ( (double) end_package0_energy - start_package0_energy)/1000000;
+    	package1_energy_consumed = ( (double) end_package1_energy - start_package1_energy)/1000000;
+
+    	dram0_energy_consumed = ( (double) end_dram0_energy - start_dram0_energy)/1000000;
+    	dram1_energy_consumed = ( (double) end_dram1_energy - start_dram1_energy)/1000000;
+
+
+   		package0_power = (package0_energy_consumed)/runtime;
+   		package1_power = (package1_energy_consumed)/runtime;
+   		dram0_power = (dram0_energy_consumed)/runtime;
+   		dram1_power = (dram1_energy_consumed)/runtime;
+
+   		// Printing results
+
+   		printf("\tPkg0_energy: %lf\tDram0_energy: %lf\tPkg1_energy: %lf\tDram1_energy: %lf\tPkg0_power: %lf\tDram0_power: %lf\tPkg1_power: %lf\tDram1_power: %lf",
+   				   package0_energy_consumed, dram0_energy_consumed, package1_energy_consumed, dram1_energy_consumed, package0_power, dram0_power, package1_power, dram1_power);
+	}
+
+
+
+
+#endif /* ! ENERGY_SERVER */
+
+
 /* ################################################################### *
  * TYPES
  * ################################################################### */

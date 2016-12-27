@@ -76,6 +76,7 @@
 # define _STM_H_
 //#define STM_HOPE
 //#define ENERGY_DESKTOP
+#define ENERGY_SERVER
 
 #ifdef STM_HOPE
   
