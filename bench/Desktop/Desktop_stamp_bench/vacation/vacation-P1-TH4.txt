@@ -1,0 +1,5 @@
+Threads: 4	Elapsed time: 6.869761	Commits: 4194304	Aborts: 6756	Pkg_energy: 199.770241	Core_energy: 169.286981	Dram_energy: 19.502696	Pkg_power: 25.300125	Core_power: 21.439538	Dram_power: 2.469941	Throughput: 610545.840826
+Threads: 4	Elapsed time: 6.900111	Commits: 4194304	Aborts: 6669	Pkg_energy: 200.611608	Core_energy: 170.044792	Dram_energy: 19.509472	Pkg_power: 25.313622	Core_power: 21.456633	Dram_power: 2.461749	Throughput: 607860.369827
+Threads: 4	Elapsed time: 6.889991	Commits: 4194304	Aborts: 6791	Pkg_energy: 199.984229	Core_energy: 169.495904	Dram_energy: 19.478893	Pkg_power: 25.303522	Core_power: 21.445908	Dram_power: 2.464617	Throughput: 608753.185978
+Threads: 4	Elapsed time: 6.975664	Commits: 4194304	Aborts: 6660	Pkg_energy: 201.856295	Core_energy: 171.057424	Dram_energy: 19.593944	Pkg_power: 25.244630	Core_power: 21.392849	Dram_power: 2.450465	Throughput: 601276.675583
+Threads: 4	Elapsed time: 6.932238	Commits: 4194304	Aborts: 6809	Pkg_energy: 201.532504	Core_energy: 170.864675	Dram_energy: 19.605907	Pkg_power: 25.349405	Core_power: 21.491907	Dram_power: 2.466094	Throughput: 605043.289420
