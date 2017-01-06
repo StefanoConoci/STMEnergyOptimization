@@ -1058,6 +1058,11 @@ stm_start(stm_tx_attr_t attr)
 			power = ((double) energy_sum) / ( (double) time_sum / 1000 );
 			energy_per_tx = ((double) energy_sum) / (commits_sum*active_threads);
 
+			#ifdef DEBUG_HEURISTICS 
+				printf("Throughput: %f tx/sec - Abort rate: %f percent - Power: %f Watt - Energy per tx: %f micro Joule\n", 
+-			         throughput, abort_rate, power, energy_per_tx);
+			#endif
+
 			// We don't call the heuristic if the energy results are out or range due to an overflow 
 			if(power > 0 && energy_per_tx > 0)
 				heuristic(throughput, abort_rate, power, energy_per_tx);

@@ -77,6 +77,8 @@
 #define STM_HOPE
 //#define ENERGY_DESKTOP
 #define ENERGY_SERVER
+#define DEBUG_HEURISTICS
+
 
 #ifdef STM_HOPE
   
