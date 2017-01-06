@@ -330,22 +330,29 @@ global_t _tinystm =
 	long get_energy(){
 		
 		long power;
+		int i;
+		FILE* power_file;
+		long total_power = 0;
 
-		// Package 0 power consumtion
-		FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj", "r");
-		
-		// Package 0 cores power consumption
-		//FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:0/energy_uj", "r");	
+		for(i = 0; i<nb_packages; i++){
 
-		// DRAM module, considered inside the package
-		//FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:1/energy_uj", "r");	
+			// Package 0 power consumtion
+			FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj", "r");
+			
+			// Package 0 cores power consumption
+			//FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:0/energy_uj", "r");	
 
-		if(power_file == NULL){
-			printf("Error opening power file\n");		
+			// DRAM module, considered inside the package
+			//FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:1/energy_uj", "r");	
+
+			if(power_file == NULL){
+				printf("Error opening power file\n");		
+			}
+			fscanf(power_file,"%ld",&power);
+			fclose(power_file);
+			total_power+=power;
 		}
-		fscanf(power_file,"%ld",&power);
-		fclose(power_file);
-		return power;
+		return total_power;
 	}
 
 
@@ -954,10 +961,14 @@ stm_exit(void)
   	print_energy_counters();
   #endif
 
+  #ifdef STM_HOPE
+  	printf("\tSteps: %d", steps);
+  #endif
 
-#ifdef EPOCH_GC
-  gc_exit();
-#endif /* EPOCH_GC */
+
+	#ifdef EPOCH_GC
+  	gc_exit();
+	#endif /* EPOCH_GC */
   _tinystm.initialized = 0;
 }
 
@@ -1046,7 +1057,9 @@ stm_start(stm_tx_attr_t attr)
 			printf("Throughput: %f tx/sec - Abort rate: %f percent - Power: %f Watt - Energy per tx: %f micro Joule\n", 
 			    throughput, abort_rate, power, energy_per_tx);
 
-			heuristic(throughput, abort_rate, power, energy_per_tx);
+			// We don't call the heuristic if the energy results are out or range due to an overflow 
+			if(power > 0 && energy_per_tx > 0)
+				heuristic(throughput, abort_rate, power, energy_per_tx);
 		
 			//Setup next round
 			int slice = total_commits_round/active_threads;
@@ -1104,6 +1117,7 @@ _CALLCONV stm_tx_t *stm_pre_init_thread(int id){
 			new_pstate = 1;
 			decreasing = 0;
 			stopped_searching = 0;
+			steps=0;
 		}
 
 		return tx;

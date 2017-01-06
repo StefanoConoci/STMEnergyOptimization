@@ -15,6 +15,7 @@ int max_pstate;					// Maximum index of available pstate for the running machine
 int current_pstate;				// Value of current pstate, index of pstate array which contains frequencies
 int total_commits_round; 		// Number of total commits for each heuristics step 
 int starting_threads;			// Number of threads running at the start of the heuristic search. Defined in hope_config.txt
+int steps;						// Number of steps required for the heuristic to converge 
 stats_t** stats_array;			// Pointer to pointers of struct stats_s, one for each thread 	
 volatile int round_completed;   // Defines if round completed and thread 0 should collect stats and call the heuristic function 
 double** power_profile; 		// Power consumption matrix of the machine. Precomputed using profiler.c included in root folder.

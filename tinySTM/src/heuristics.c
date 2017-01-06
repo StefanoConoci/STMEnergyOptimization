@@ -794,6 +794,7 @@ void explore_all_configurations(double throughput, double  abort_rate, double po
 		printf("\nHeuristic function called\n");
 
 		if(!stopped_searching){
+			steps++;
 			switch(heuristic_mode){
 				case 0:
 					heuristic_power(throughput, abort_rate, power, energy_per_tx);
