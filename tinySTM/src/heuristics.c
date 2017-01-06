@@ -1,4 +1,4 @@
-#define DEBUG_HEURISTICS
+//#define DEBUG_HEURISTICS
 
 ///////////////////////////////////////////////////////////////
 // Utility functions
@@ -786,8 +786,6 @@ void explore_all_configurations(double throughput, double  abort_rate, double po
 // Takes decision on frequency and number of active threads based on statistics of current round 
 	void heuristic(double throughput, double  abort_rate, double power, double energy_per_tx){
 		
-		printf("\nHeuristic function called\n");
-
 		if(!stopped_searching){
 			steps++;
 			switch(heuristic_mode){
