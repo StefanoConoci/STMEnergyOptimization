@@ -10,31 +10,44 @@
 #define ITERATIONS 100000
 #define STARTING_VALUE 546723060
 
-int threads;
 int pstate[32];					// Array of p-states initialized at startup with available scaling frequencies 
 int max_pstate;					// Maximum index of available pstate for the running machine 
 int current_pstate;				// Value of current pstate, index of pstate array which contains frequencies
 int nb_cores; 					// Number of cores. Detected at startup and used to set DVFS parameters for all cores
+int nb_packages;				// Number of packages in the system
 
 
 
 // Returns energy consumption of package 0 cores in micro Joule
 long get_energy(){
 	
-	long power;
+	long energy;
+	int i;
+	FILE* energy_file;
+	long total_energy = 0;
+	char fname[64];
 
-	// Package 0 power consumtion
-	//FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj", "r");
-	
-	// Package 0 cores power consumption
-	FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:0/energy_uj", "r");	
+	for(i = 0; i<nb_packages; i++){
 
-	if(power_file == NULL){
-		printf("Error opening power file\n");		
+		// Package energy consumtion
+		sprintf(fname, "/sys/class/powercap/intel-rapl/intel-rapl:%d/energy_uj", i);
+		energy_file = fopen(fname, "r");
+		
+		// Cores energy consumption
+		//FILE* energy_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:0/energy_uj", "r");	
+
+		// DRAM module, considered inside the package
+		//FILE* energy_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:1/energy_uj", "r");	
+
+		if(energy_file == NULL){
+			printf("Error opening energy file\n");		
+		}
+		fscanf(energy_file,"%ld",&energy);
+		fclose(energy_file);
+		total_energy+=energy;
 	}
-	fscanf(power_file,"%ld",&power);
-	fclose(power_file);
-	return power;
+
+	return total_energy;
 }
 
 // Return time as a monotomically increasing long expressed as nanoseconds 
@@ -83,6 +96,9 @@ int init_DVFS_management(){
 	char* token;
 	int frequency;
 	FILE* governor_file;
+	char* filename;
+	int package_last_core;
+	FILE* numafile;
 
 	//Set governor to userspace
 	nb_cores = sysconf(_SC_NPROCESSORS_ONLN);
@@ -121,9 +137,18 @@ int init_DVFS_management(){
   	printf("Found %d p-states in the range from %d MHz to %d MHz\n", max_pstate, pstate[max_pstate]/1000, pstate[0]/1000);
   	fclose(available_freq_file);
 
-
-  	// Setting processor to state P0
-  	set_p_state(1);
+  	//init number of packages
+	filename = malloc(sizeof(char)*64); 
+	sprintf(filename,"/sys/devices/system/cpu/cpu%d/topology/physical_package_id", nb_cores-1);
+	numafile = fopen(filename,"r");
+	if (numafile == NULL){
+		printf("Cannot read number of packages\n");
+		exit(1);
+	} 
+	fscanf(numafile ,"%d", &package_last_core);
+	nb_packages = package_last_core+1;
+	printf("Number of packages detected: %d\n", nb_packages);
+	free(filename);
 
 	return 0;
 }
@@ -158,29 +183,39 @@ int main(int argc, char *argv[]){
 	long start_time, end_time, start_energy, end_energy;
 	long time_interval;
 	long energy_interval;
+	int total_threads;
+	int threads;
+	int i;
+	int p;
 
-	profile_file = fopen("profile_file.txt","w");
+	if(argc < 2){
+		printf("Please define the number of maximum threads\n");
+		exit(1);
+	}
+
+	total_threads = atoi(argv[1]);
+
+	profile_file = fopen("profile_file.txt","w+");
 	
-	int total_threads = sysconf(_SC_NPROCESSORS_ONLN);
 	printf("Power consumption profiler started\nProfiling on %d cores\n", total_threads);	
 	init_DVFS_management();
 	pthread_array = malloc(sizeof(pthread_t)*total_threads);	
-	for(int threads = 1; threads <= total_threads; threads++){
-		for( int p = 0; p<=max_pstate; p++){
+	for( threads = 1; threads <= total_threads; threads++){
+		for( p = 0; p<=max_pstate; p++){
 			
 			printf("Profiling with %d threads at frequency %d\n", threads, pstate[p]);
 			set_p_state(p);
 			start_time = get_time();
 			start_energy = get_energy();
 
-			for(int i=0; i<threads; i++){
+			for(i=0; i<threads; i++){
 				if(pthread_create(&pthread_array[i], NULL, loop_function, NULL)){
 					printf("Error creating threads\n");	
 					return 0;					
 				}
 			}
 
-			for(int i=0; i<threads; i++)
+			for(i=0; i<threads; i++)
 				pthread_join(pthread_array[i], NULL);		
 
 			end_time = get_time();
@@ -194,11 +229,6 @@ int main(int argc, char *argv[]){
 		}
 	}
 
-	
-
-	for(int i=0; i<threads; i++)
-		pthread_join(pthread_array[i], NULL);
-	
 	printf("Profiling completed\n");	
 	
 	return 0;
