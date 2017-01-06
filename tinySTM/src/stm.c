@@ -329,30 +329,33 @@ global_t _tinystm =
 	// Returns energy consumption of package 0 cores in micro Joule
 	long get_energy(){
 		
-		long power;
+		long energy;
 		int i;
-		FILE* power_file;
-		long total_power = 0;
+		FILE* energy_file;
+		long total_energy = 0;
+		char fname[64];
 
 		for(i = 0; i<nb_packages; i++){
 
-			// Package 0 power consumtion
-			FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj", "r");
+			// Package energy consumtion
+			sprintf(fname, "/sys/class/powercap/intel-rapl/intel-rapl:%d/energy_uj", i);
+			energy_file = fopen(fname, "r");
 			
-			// Package 0 cores power consumption
-			//FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:0/energy_uj", "r");	
+			// Cores energy consumption
+			//FILE* energy_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:0/energy_uj", "r");	
 
 			// DRAM module, considered inside the package
-			//FILE* power_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:1/energy_uj", "r");	
+			//FILE* energy_file = fopen("/sys/class/powercap/intel-rapl/intel-rapl:0/intel-rapl:0:1/energy_uj", "r");	
 
-			if(power_file == NULL){
-				printf("Error opening power file\n");		
+			if(energy_file == NULL){
+				printf("Error opening energy file\n");		
 			}
-			fscanf(power_file,"%ld",&power);
-			fclose(power_file);
-			total_power+=power;
+			fscanf(energy_file,"%ld",&energy);
+			fclose(energy_file);
+			total_energy+=energy;
 		}
-		return total_power;
+
+		return total_energy;
 	}
 
 
