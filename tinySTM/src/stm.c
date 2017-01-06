@@ -115,7 +115,6 @@ global_t _tinystm =
 		}
 		current_pstate = input_pstate;
 		
-		printf("Set processor to p-state %d (%d MHz)\n", input_pstate, frequency/1000);
 		return 0;
 	}
 
