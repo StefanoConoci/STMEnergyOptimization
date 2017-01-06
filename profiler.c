@@ -65,6 +65,8 @@ long get_time(){
 
 int set_p_state(int input_pstate){
 	
+	int i;
+
 	char fname[64];
 	FILE* frequency_file;
 
@@ -72,7 +74,7 @@ int set_p_state(int input_pstate){
 		return -1;
 	int frequency = pstate[input_pstate];
 
-	for(int i=0; i<nb_cores;i++){
+	for(i=0; i<nb_cores;i++){
 		sprintf(fname, "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_setspeed", i);
 		frequency_file = fopen(fname,"w+");
 		if(frequency_file == NULL){
@@ -99,10 +101,11 @@ int init_DVFS_management(){
 	char* filename;
 	int package_last_core;
 	FILE* numafile;
+	int i;
 
 	//Set governor to userspace
 	nb_cores = sysconf(_SC_NPROCESSORS_ONLN);
-	for(int i=0; i<nb_cores;i++){
+	for(i=0; i<nb_cores;i++){
 		sprintf(fname, "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_governor", i);
 		governor_file = fopen(fname,"w+");
 		if(governor_file == NULL){
@@ -124,7 +127,7 @@ int init_DVFS_management(){
 	freq_available = malloc(sizeof(char)*256);
 	fgets(freq_available, 256, available_freq_file);
 	
-	int i = 0; 
+	i = 0; 
 	char * end;
 
 	for (frequency = strtol(freq_available, &end, 10); freq_available != end; frequency = strtol(freq_available, &end, 10)){
@@ -163,13 +166,14 @@ int isPrime(int number) {
 
 
 void* loop_function(void* params){
-	
+	long i;
+
 	long start_value = STARTING_VALUE;
 	long end_value = STARTING_VALUE+ITERATIONS;
 
 	int cont;
 
-	for(long i=start_value; i<end_value; i++){
+	for(i=start_value; i<end_value; i++){
 		if(isPrime(i))
 			cont++;
 	}	
