@@ -1,5 +1,3 @@
-//#define DEBUG_HEURISTICS
-
 ///////////////////////////////////////////////////////////////
 // Utility functions
 ///////////////////////////////////////////////////////////////
@@ -786,6 +784,11 @@ void explore_all_configurations(double throughput, double  abort_rate, double po
 // Takes decision on frequency and number of active threads based on statistics of current round 
 	void heuristic(double throughput, double  abort_rate, double power, double energy_per_tx){
 		
+		#ifdef DEBUG_HEURISTICS 
+			printf("Throughput: %f tx/sec - Abort rate: %f percent - Power: %f Watt - Energy per tx: %f micro Joule\n", 
+-			         throughput, abort_rate, power, energy_per_tx);
+		#endif
+
 		if(!stopped_searching){
 			steps++;
 			switch(heuristic_mode){
