@@ -1,3 +1,4 @@
+#define DEBUG_HEURISTICS
 
 ///////////////////////////////////////////////////////////////
 // Utility functions
@@ -41,7 +42,6 @@ inline void stop_searching(){
 	set_pstate(best_pstate);
 	set_threads(best_threads);
 
-	// DEBUG
 	printf("Stopped searching. Best configuration: %d threads at p-state %d\n", best_threads, best_pstate);
 }
 
@@ -77,7 +77,11 @@ int profiler_isoenergy(int from_threads, int pstate, int* threads){
 		i++;
 
 	*threads = --i;
-	printf("Isoenergy configuration: %d threads at %d pstate\n", *threads, pstate);
+
+	#ifdef DEBUG_HEURISTICS
+		printf("Isoenergy configuration: %d threads at %d pstate\n", *threads, pstate);
+	#endif 
+
 	return 0;
 }  
 
@@ -110,7 +114,10 @@ int profiler_isoenergy_fast(int from_threads, int power, int* to_threads, int* t
 			pstate = 0;
 		*to_threads = from_threads;
 		*to_pstate = pstate;
-		printf("Isoenergy configuration fast - Jumping to: %d threads at %d pstate\n", *to_threads, *to_pstate);
+		#ifdef DEBUG_HEURISTICS
+			printf("Isoenergy configuration fast - Jumping to: %d threads at %d pstate\n", *to_threads, *to_pstate);
+		#endif 
+
 		return 0;
 	}
 	else{	//Should find isoenergy configuration
@@ -128,7 +135,10 @@ int profiler_isoenergy_fast(int from_threads, int power, int* to_threads, int* t
 			i++;
 
 		*to_threads = --i;
-		printf("Isoenergy configuration fast - Moving to: %d threads at %d pstate\n", *to_threads, pstate);
+		#ifdef DEBUG_HEURISTICS
+			printf("Isoenergy configuration fast - Moving to: %d threads at %d pstate\n", *to_threads, pstate);
+		#endif 
+
 		return 0;
 	}
 
@@ -236,9 +246,6 @@ void heuristic_power(double throughput, double abort_rate, double power, double 
 	old_abort_rate = abort_rate;
 	old_power = power;
 	old_energy_per_tx = energy_per_tx;
-
-	printf("Switched to: #threads %d - pstate %d\n", active_threads, current_pstate);
-
 }
 
 
@@ -333,8 +340,6 @@ void heuristic_power_profiler(double throughput, double abort_rate, double power
 	old_abort_rate = abort_rate;
 	old_power = power;
 	old_energy_per_tx = energy_per_tx;
-
-	printf("Switched to: #threads %d - pstate %d\n", active_threads, current_pstate);
 }
 
 // HEURISTIC_MODE 2
@@ -430,8 +435,6 @@ void heuristic_power_profiler_fast(double throughput, double abort_rate, double 
 	old_abort_rate = abort_rate;
 	old_power = power;
 	old_energy_per_tx = energy_per_tx;
-
-	printf("Switched to: #threads %d - pstate %d\n", active_threads, current_pstate);
 }
 
 // HEURISTIC_MODE 3. This heuristics converges to the configuration with the highest throughput that consumes less than energy_per_tx on average for transaction
@@ -581,9 +584,6 @@ void heuristic_energy_bidirectional(double throughput, double abort_rate, double
 	old_abort_rate = abort_rate;
 	old_power = power;
 	old_energy_per_tx = energy_per_tx;
-
-	printf("Switched to: #threads %d - pstate %d\n", active_threads, current_pstate);
-
 }
 
 
@@ -761,9 +761,6 @@ void heuristic_energy_unidirectional(double throughput, double abort_rate, doubl
 	old_abort_rate = abort_rate;
 	old_power = power;
 	old_energy_per_tx = energy_per_tx;
-
-	printf("Switched to: #threads %d - pstate %d\n", active_threads, current_pstate);
-
 }
 
 
@@ -778,8 +775,6 @@ void explore_all_configurations(double throughput, double  abort_rate, double po
 		}
 	}
 	else set_threads(active_threads+1);
-
-	printf("Switched to: #threads %d - pstate %d\n", active_threads, current_pstate);
 }
 
 
@@ -815,6 +810,10 @@ void explore_all_configurations(double throughput, double  abort_rate, double po
 					explore_all_configurations(throughput, abort_rate, power, energy_per_tx);
 					break;
 			}
+
+			#ifdef DEBUG_HEURISTICS
+				printf("Switched to: #threads %d - pstate %d\n", active_threads, current_pstate);
+			#endif 
 		}
 		else{	// Workload change monitoring
 			
