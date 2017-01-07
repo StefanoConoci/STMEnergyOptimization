@@ -312,7 +312,7 @@ global_t _tinystm =
   	   	char * end;
   	   	i=1;
   	   	int j=0; 
-		for (power = strtod(profile_string, &end); profile_string != end; power = strtod(profile_string, &end)){
+		for (power = strtod(profile_string, &end); profile_string != end && i <= total_threads; power = strtod(profile_string, &end)){
 			power_profile[i][j] = power;
 			profile_string = end;
 	  		if( j == max_pstate){

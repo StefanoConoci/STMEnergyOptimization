@@ -1,77 +1,3 @@
-/*
- * File:
- *   stm.h
- * Author(s):
- *   Pascal Felber <pascal.felber@unine.ch>
- *   Patrick Marlier <patrick.marlier@unine.ch>
- * Description:
- *   STM functions.
- *
- * Copyright (c) 2007-2012.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation, version 2
- * of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * This program has a dual license and can also be distributed
- * under the terms of the MIT license.
- */
-
-/**
- * @file
- *   STM functions.  This library contains the core functions for
- *   programming with STM.
- * @author
- *   Pascal Felber <pascal.felber@unine.ch>
- *   Patrick Marlier <patrick.marlier@unine.ch>
- * @date
- *   2007-2012
- */
-
-/**
- * @mainpage TinySTM
- *
- * @section overview_sec Overview
- *
- *   TinySTM is a lightweight but efficient word-based STM
- *   implementation.  This distribution includes three versions of
- *   TinySTM: write-back (updates are buffered until commit time),
- *   write-through (updates are directly written to memory), and
- *   commit-time locking (locks are only acquired upon commit).  The
- *   version can be selected by editing the makefile, which documents
- *   all the different compilation options.
- *
- *   TinySTM compiles and runs on 32 or 64-bit architectures.  It was
- *   tested on various flavors of Unix, on Mac OS X, and on Windows
- *   using cygwin.  It comes with a few test applications, notably a
- *   linked list, a skip list, and a red-black tree.
- *
- * @section install_sec Installation
- *
- *   TinySTM requires the atomic_ops library, freely available from
- *   http://www.hpl.hp.com/research/linux/atomic_ops/.  A stripped-down
- *   version of the library is included in the TinySTM distribution.  If you
- *   wish to use another version, you must set the environment variable
- *   <c>LIBAO_HOME</c> to the installation directory of atomic_ops.
- *
- *   If your system does not support GCC thread-local storage, set the
- *   variable <c>TLS</c> to TLS_POSIX value into the Makefile.common.
- *
- *   To compile TinySTM libraries, execute <c>make</c> in the main
- *   directory.  To compile test applications, execute <c>make test</c>.
- *
- * @section contact_sec Contact
- *
- *   - E-mail : tinystm@tinystm.org
- *   - Web    : http://tinystm.org
- */
-
 #ifndef _STM_H_
 # define _STM_H_
 #define STM_HOPE
@@ -80,16 +6,14 @@
 #define DEBUG_HEURISTICS
 
 
-#ifdef STM_HOPE
   
-  #define STM_TIMER_READ() ({ \
-    unsigned int lo; \
-    unsigned int hi; \
-    __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi)); \
-    ((stm_time_t)hi) << 32 | lo; \
-  })
+#define STM_TIMER_READ() ({ \
+  unsigned int lo; \
+  unsigned int hi; \
+  __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi)); \
+  ((stm_time_t)hi) << 32 | lo; \
+})
   
-#endif
 
 
 

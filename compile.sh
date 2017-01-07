@@ -2,6 +2,7 @@
 rm profiler
 gcc profiler.c -o profiler -lpthread
 gcc energy_monitor.c -o energy_monitor
+gcc set_profile.c -o set_profile
 gcc utils/stamp_parser_energy_desktop.c -o utils/parser_desktop
 cd rapl-power
 make clean
