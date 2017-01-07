@@ -161,7 +161,9 @@ global_t _tinystm =
 		}
 	  	max_pstate = --i;
 
-	  	printf("Found %d p-states in the range from %d MHz to %d MHz\n", max_pstate, pstate[max_pstate]/1000, pstate[0]/1000);
+			#ifdef DEBUG_HEURISTICS
+	  		printf("Found %d p-states in the range from %d MHz to %d MHz\n", max_pstate, pstate[max_pstate]/1000, pstate[0]/1000);
+	  	#endif
 	  	fclose(available_freq_file);
 
 
@@ -184,7 +186,11 @@ global_t _tinystm =
 
 		// Init total threads and active threads
 		total_threads = threads;
-		printf("Set total_threads to %d\n", threads);
+
+		#ifdef DEBUG_HEURISTICS
+			printf("Set total_threads to %d\n", threads);
+		#endif
+
 		active_threads = total_threads;
 
 		// Init running array with all threads running 	
@@ -209,7 +215,10 @@ global_t _tinystm =
 		} 
 		fscanf(numafile ,"%d", &package_last_core);
 		nb_packages = package_last_core+1;
-		printf("Number of packages detected: %d\n", nb_packages);
+
+		#ifdef DEBUG_HEURISTICS
+			printf("Number of packages detected: %d\n", nb_packages);
+		#endif
 	}
 
 
@@ -255,7 +264,10 @@ global_t _tinystm =
 		stats_array = malloc(sizeof(stats_t*)*threads); 
 
 		cache_line_size = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
-		printf("D1 cache line size: %d bytes\n", cache_line_size);
+
+		#ifdef DEBUG_HEURISTICS
+			printf("D1 cache line size: %d bytes\n", cache_line_size);
+		#endif
 	}
 
 	// Executed by each thread inside stm_pre_init_thread
@@ -322,7 +334,9 @@ global_t _tinystm =
 	  		else j++;
 		}
 
-		printf("Power consumption profile loaded\n");
+		#ifdef DEBUG_HEURISTICS
+			printf("Power consumption profile loaded\n");
+		#endif
 	}
 
 	// Returns energy consumption of package 0 cores in micro Joule
@@ -826,7 +840,9 @@ void stm_init(int threads) {
 	
 	int i;
 
-	printf("TinySTM - STM_HOPE mode started\n");
+	#endif
+		printf("TinySTM - STM_HOPE mode started\n");
+	#ifdef DEBUG_HEURISTICS
 
 	/* This seems to be useless, its all already on node 0 expect stats arrays which should be local
 	// Set mem_policy to numa node 0 
@@ -854,7 +870,10 @@ void stm_init(int threads) {
 		exit(1);
 	}
 	fclose(config_file);
-	printf("Heuristic mode: %d\n", heuristic_mode);
+
+	#ifdef DEBUG_HEURISTICS
+		printf("Heuristic mode: %d\n", heuristic_mode);
+	#endif
 
 	if(starting_threads > total_threads){
 		printf("Starting threads set higher than total threads. Please modify this value in hope_config.txt\n");
