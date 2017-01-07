@@ -840,9 +840,9 @@ void stm_init(int threads) {
 	
 	int i;
 
-	#endif
-		printf("TinySTM - STM_HOPE mode started\n");
 	#ifdef DEBUG_HEURISTICS
+		printf("TinySTM - STM_HOPE mode started\n");
+	#endif
 
 	/* This seems to be useless, its all already on node 0 expect stats arrays which should be local
 	// Set mem_policy to numa node 0 
