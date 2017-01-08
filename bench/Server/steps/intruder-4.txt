@@ -1,0 +1,20 @@
+Stopped searching. Best configuration: 6 threads at p-state 0
+Threads: 20	Elapsed time: 7.973190	Commits: 23428145	Aborts: 9019151	Pkg0_energy: 339.442429	Dram0_energy: 97.144336	Pkg1_energy: 339.224779	Dram1_energy: 79.398754	Pkg0_power: 27.922719	Dram0_power: 7.991146	Pkg1_power: 27.904815	Dram1_power: 6.531385	Steps: 30	Throughput: 2938365.384147
+Stopped searching. Best configuration: 6 threads at p-state 0
+Threads: 20	Elapsed time: 7.801397	Commits: 23428145	Aborts: 8231126	Pkg0_energy: 334.807126	Dram0_energy: 95.079295	Pkg1_energy: 335.692378	Dram1_energy: 78.550475	Pkg0_power: 27.932762	Dram0_power: 7.932410	Pkg1_power: 28.006618	Dram1_power: 6.553420	Steps: 31	Throughput: 3003070.442918
+Stopped searching. Best configuration: 6 threads at p-state 0
+Threads: 20	Elapsed time: 7.683357	Commits: 23428145	Aborts: 7748322	Pkg0_energy: 335.461849	Dram0_energy: 95.714903	Pkg1_energy: 329.306591	Dram1_energy: 78.001741	Pkg0_power: 28.184109	Dram0_power: 8.041568	Pkg1_power: 27.666970	Dram1_power: 6.553382	Steps: 30	Throughput: 3049206.876490
+Stopped searching. Best configuration: 6 threads at p-state 0
+Threads: 20	Elapsed time: 7.900856	Commits: 23428145	Aborts: 8373287	Pkg0_energy: 335.873103	Dram0_energy: 96.284170	Pkg1_energy: 341.396587	Dram1_energy: 78.829899	Pkg0_power: 27.803160	Dram0_power: 7.970285	Pkg1_power: 28.260387	Dram1_power: 6.525442	Steps: 31	Throughput: 2965266.668122
+Stopped searching. Best configuration: 6 threads at p-state 0
+Threads: 20	Elapsed time: 7.589640	Commits: 23428145	Aborts: 7750345	Pkg0_energy: 338.578967	Dram0_energy: 94.593796	Pkg1_energy: 320.794467	Dram1_energy: 75.833624	Pkg0_power: 28.702367	Dram0_power: 8.019003	Pkg1_power: 27.194721	Dram1_power: 6.428647	Steps: 29	Throughput: 3086858.573286
+Stopped searching. Best configuration: 6 threads at p-state 1
+Threads: 20	Elapsed time: 8.369799	Commits: 23428145	Aborts: 9287770	Pkg0_energy: 324.953025	Dram0_energy: 101.105873	Pkg1_energy: 325.368674	Dram1_energy: 83.725976	Pkg0_power: 25.752147	Dram0_power: 8.012522	Pkg1_power: 25.785086	Dram1_power: 6.635186	Steps: 33	Throughput: 2799128.782371
+Stopped searching. Best configuration: 4 threads at p-state 1
+Threads: 20	Elapsed time: 10.363555	Commits: 23428145	Aborts: 3021490	Pkg0_energy: 372.433495	Dram0_energy: 118.249585	Pkg1_energy: 365.353618	Dram1_energy: 98.220232	Pkg0_power: 25.176507	Dram0_power: 7.993673	Pkg1_power: 24.697908	Dram1_power: 6.639688	Steps: 28	Throughput: 2260628.240290
+Stopped searching. Best configuration: 6 threads at p-state 0
+Threads: 20	Elapsed time: 7.775353	Commits: 23428145	Aborts: 8218782	Pkg0_energy: 342.399270	Dram0_energy: 96.712371	Pkg1_energy: 332.355594	Dram1_energy: 77.852642	Pkg0_power: 28.574476	Dram0_power: 8.071002	Pkg1_power: 27.736294	Dram1_power: 6.497089	Steps: 29	Throughput: 3013129.361151
+Stopped searching. Best configuration: 6 threads at p-state 0
+Threads: 20	Elapsed time: 7.905629	Commits: 23428145	Aborts: 8819069	Pkg0_energy: 345.879424	Dram0_energy: 109.118269	Pkg1_energy: 338.637927	Dram1_energy: 79.545573	Pkg0_power: 28.696718	Dram0_power: 9.053260	Pkg1_power: 28.095910	Dram1_power: 6.599690	Steps: 30	Throughput: 2963476.434103
+Stopped searching. Best configuration: 3 threads at p-state 0
+Threads: 20	Elapsed time: 10.930356	Commits: 23428145	Aborts: 1388070	Pkg0_energy: 366.209817	Dram0_energy: 111.522480	Pkg1_energy: 419.075710	Dram1_energy: 105.541266	Pkg0_power: 24.190436	Dram0_power: 7.366753	Pkg1_power: 27.682557	Dram1_power: 6.971657	Steps: 30	Throughput: 2143401.820117
