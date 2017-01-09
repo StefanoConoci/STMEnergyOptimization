@@ -1014,8 +1014,10 @@ stm_exit_thread(void)
   #ifdef STM_HOPE
   	int i;
 
+  	printf("Exiting thread %d\n", tx->thread_number);
+
   	// When thread 0 completes wake up all threads 
-  	if(tx->thread_number == 0){
+  	if(tx->thread_number == 0){	
   		printf("Starting waking up threads\n");
   		for(i=active_threads; i< total_threads; i++){
   			wake_up_thread(i);
