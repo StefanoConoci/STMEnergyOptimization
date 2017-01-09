@@ -813,10 +813,16 @@ void explore_all_configurations(double throughput, double  abort_rate, double po
 				case 5:
 					explore_all_configurations(throughput, abort_rate, power, energy_per_tx);
 					break;
-				case 6:
+				case 6:	// Static max frequency, number of threads defined by file 
+					set_pstate(0);
 					best_pstate = current_pstate;
 					best_threads = active_threads;
 					stop_searching();
+					break;
+				case 7: // Only thread scheduling at P-state 0
+					set_pstate(0);
+					heuristic_mode = 0;
+					heuristic_power(throughput, abort_rate, power, energy_per_tx);
 					break;
 			}
 
