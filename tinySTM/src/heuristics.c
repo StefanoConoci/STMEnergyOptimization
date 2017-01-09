@@ -813,6 +813,11 @@ void explore_all_configurations(double throughput, double  abort_rate, double po
 				case 5:
 					explore_all_configurations(throughput, abort_rate, power, energy_per_tx);
 					break;
+				case 6:
+					best_pstate = current_pstate;
+					best_threads = active_threads;
+					stop_searching();
+					break;
 			}
 
 			#ifdef DEBUG_HEURISTICS
