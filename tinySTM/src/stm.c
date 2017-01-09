@@ -983,7 +983,7 @@ stm_exit(void)
   #endif
 
   #ifdef STM_HOPE
-  	printf("\tP-state: %d\tThreads: %d\tSteps: %d", best_pstate, best_threads, steps);
+  	printf("\tP-state: %d\tBest-threads: %d\tSteps: %d", best_pstate, best_threads, steps);
   #endif
 
 
