@@ -1019,6 +1019,7 @@ stm_exit_thread(void)
   	// When thread 0 completes wake up all threads 
   	if(tx->thread_number == 0){	
   		printf("Starting waking up threads\n");
+  		shutdown = 1;
   		for(i=active_threads; i< total_threads; i++){
   			wake_up_thread(i);
   		}	
@@ -1106,12 +1107,19 @@ stm_start(stm_tx_attr_t attr)
   		}
 
   		stats->nb_tx++;
+
+  		if(shutdown == 1){
+  			int_stm_exit_thread(tx);
+  			ret = 0;
+  		}
+  		else 
+  			ret=int_stm_start(tx, attr);
   	}
 
   #else
   	stm_wait(attr.id);
+  	ret=int_stm_start(tx, attr);
   #endif
-  ret=int_stm_start(tx, attr);
 
   return ret;
 }
@@ -1141,6 +1149,7 @@ _CALLCONV stm_tx_t *stm_pre_init_thread(int id){
 			decreasing = 0;
 			stopped_searching = 0;
 			steps=0;
+			shutdown = 0;
 		}
 
 		return tx;
