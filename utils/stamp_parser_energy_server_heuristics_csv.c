@@ -23,7 +23,7 @@ int main(int argc, char *argv[]){
         long total_aborts=0;
         double total_throughput=0;
 
-		//Package 0
+        //Package 0
         double package0_energy;
         double dram0_energy;
 
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
         double total_package0_power=0;
         double total_dram0_power=0;
 
-       	//Package 1
+        //Package 1
         double package1_energy;
         double dram1_energy;
 
@@ -65,9 +65,9 @@ int main(int argc, char *argv[]){
         int best_threads;
         int steps;
 
-        int total_pstate;
-        int total_best_threads;
-        int total_steps;
+        int total_pstate=0;
+        int total_best_threads=0;
+        int total_steps=0;
 
         double avg_pstate;
         double avg_best_threads;
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]){
                 exit(EXIT_FAILURE);
 
         while ((read = getline(&line, &len, fp)) != -1) {
-                sscanf(line, "Threads: %d Elapsed time: %lf Commits: %ld Aborts: %ld Pkg0_energy: %lf Dram0_energy: %lf Pkg1_energy: %lf Dram1_energy: %lf Pkg0_power: %lf Dram0_power: %lf Pkg1_power: %lf Dram1_power: %lf P-state: %d Best-threads %d Steps: %d Throughput: %lf ", 
+                sscanf(line, "Threads: %d Elapsed time: %lf Commits: %ld Aborts: %ld Pkg0_energy: %lf Dram0_energy: %lf Pkg1_energy: %lf Dram1_energy: %lf Pkg0_power: %lf Dram0_power: %lf Pkg1_power: %lf Dram1_power: %lf P_state: %d Best_threads: %d Steps: %d Throughput: %lf ", 
                               &threads, &time, &commits, &aborts, 
                               &package0_energy, &dram0_energy, &package1_energy, &dram1_energy,
                               &package0_power, &dram0_power, &package1_power, &dram1_power, 
@@ -124,9 +124,9 @@ int main(int argc, char *argv[]){
 
         avg_package0_energy = total_package0_energy / entries;
         avg_dram0_energy = total_dram0_energy / entries;
-		avg_package1_energy = total_package1_energy / entries;
+        avg_package1_energy = total_package1_energy / entries;
         avg_dram1_energy = total_dram1_energy / entries;
-		        
+                
         avg_package0_power = total_package0_power / entries;
         avg_dram0_power = total_dram0_power / entries;
         avg_package1_power = total_package1_power / entries;

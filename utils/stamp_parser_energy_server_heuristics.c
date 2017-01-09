@@ -65,9 +65,9 @@ int main(int argc, char *argv[]){
         int best_threads;
         int steps;
 
-        int total_pstate;
-        int total_best_threads;
-        int total_steps;
+        int total_pstate=0;
+        int total_best_threads=0;
+        int total_steps=0;
 
         double avg_pstate;
         double avg_best_threads;
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]){
                 exit(EXIT_FAILURE);
 
         while ((read = getline(&line, &len, fp)) != -1) {
-                sscanf(line, "Threads: %d Elapsed time: %lf Commits: %ld Aborts: %ld Pkg0_energy: %lf Dram0_energy: %lf Pkg1_energy: %lf Dram1_energy: %lf Pkg0_power: %lf Dram0_power: %lf Pkg1_power: %lf Dram1_power: %lf P-state: %d Best-threads %d Steps: %d Throughput: %lf ", 
+                sscanf(line, "Threads: %d Elapsed time: %lf Commits: %ld Aborts: %ld Pkg0_energy: %lf Dram0_energy: %lf Pkg1_energy: %lf Dram1_energy: %lf Pkg0_power: %lf Dram0_power: %lf Pkg1_power: %lf Dram1_power: %lf P_state: %d Best_threads: %d Steps: %d Throughput: %lf ", 
                               &threads, &time, &commits, &aborts, 
                               &package0_energy, &dram0_energy, &package1_energy, &dram1_energy,
                               &package0_power, &dram0_power, &package1_power, &dram1_power, 
@@ -139,7 +139,7 @@ int main(int argc, char *argv[]){
         avg_throughput = total_throughput/ entries;
 
 
-        printf("Entries: %d - Threads: %d - Runtime: %lf - Pstate: %lf - Best_threads: %lf - Steps: %lf - Commits: %lf - Aborts: %lf - Throughput: %lf - Package0_energy: %lf - Dram0_energy: %lf - Package1_energy: %lf - Dram1_energy: %lf - Package0_power: %lf - Dram0_power %lf - Package1_power: %lf - Dram1_power %lf\n",
+        printf("Entries: %d - Threads: %d - Runtime: %lf - P_state: %lf - Best_threads: %lf - Steps: %lf - Commits: %lf - Aborts: %lf - Throughput: %lf - Package0_energy: %lf - Dram0_energy: %lf - Package1_energy: %lf - Dram1_energy: %lf - Package0_power: %lf - Dram0_power %lf - Package1_power: %lf - Dram1_power %lf\n",
                 entries, threads, avg_time, avg_pstate, avg_best_threads, avg_steps, avg_commits, avg_aborts, avg_throughput, avg_package0_energy, avg_dram0_energy, avg_package1_energy, avg_dram1_energy, avg_package0_power, avg_dram0_power, avg_package1_power, avg_dram1_power);
 
         exit(EXIT_SUCCESS);
