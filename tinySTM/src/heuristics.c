@@ -40,8 +40,11 @@ inline void stop_searching(){
 	set_pstate(best_pstate);
 	set_threads(best_threads);
 
-	printf("Stopped searching. Best configuration: %d threads at p-state %d\n", best_threads, best_pstate);
+	#ifdef DEBUG_HEURISTICS
+		printf("Stopped searching. Best configuration: %d threads at p-state %d\n", best_threads, best_pstate);
+	#endif
 }
+
 
 // Returns a configuration at the given pstate with power consumption less than the one of the current configuration 
 // All the power related data is retrieved from the profiler_matrix and is only used as a starting point, as this values change based on the workload
