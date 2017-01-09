@@ -333,6 +333,7 @@
 
 #  endif /* !OTM */
 
+#define STM_STATS
 
 /* =============================================================================
  * STM - Software Transactional Memory
