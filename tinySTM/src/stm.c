@@ -973,15 +973,6 @@ void stm_init(){
   }
 #endif /* SIGNAL_HANDLER */
 
-#ifdef ENERGY_DESKTOP
-  set_start_energy_counters();
-#endif ENERGY_DESKTOP
-
-
-#ifdef ENERGY_SERVER
-  set_start_energy_counters();
-#endif ENERGY_SERVER
-
   _tinystm.initialized = 1;
 }
 
@@ -1169,6 +1160,17 @@ _CALLCONV stm_tx_t *stm_pre_init_thread(int id){
 			steps=0;
 			shutdown = 0;
 			effective_commits = 0;
+
+
+			#ifdef ENERGY_DESKTOP
+  			set_start_energy_counters();
+			#endif ENERGY_DESKTOP
+
+
+			#ifdef ENERGY_SERVER
+  			set_start_energy_counters();
+			#endif ENERGY_SERVER
+
 		}
 
 		return tx;
