@@ -1107,20 +1107,13 @@ stm_start(stm_tx_attr_t attr)
   		}
 
   		stats->nb_tx++;
-
-  		if(shutdown == 1){
-  			int_stm_exit_thread(tx);
-  			ret = 0;
-  		}
-  		else 
-  			ret=int_stm_start(tx, attr);
   	}
-
+	
   #else
   	stm_wait(attr.id);
-  	ret=int_stm_start(tx, attr);
   #endif
 
+  ret=int_stm_start(tx, attr);
   return ret;
 }
 
@@ -1162,7 +1155,7 @@ _CALLCONV stm_tx_t *stm_pre_init_thread(int id){
 void stm_wait(int id) {
 	#ifdef STM_HOPE
   		check_running_array(id);
-  	#endif
+  #endif
 }
 
 
