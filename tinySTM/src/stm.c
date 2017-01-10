@@ -521,10 +521,10 @@ global_t _tinystm =
    		effective_energy_per_tx = (package_energy_consumed/effective_commits)*1000000; //Expressed in microJoule
    		
    		#ifdef REDUCED_VERBOSITY
-   			printf("\tEffective_runtime %lf\tEffective_commits: %ld\tEffective_throughput: %lf\tEffective_energy_per_tx: %lf\tPkg_power: %lf\t",
+   			printf("Effective_runtime: %lf\tEffective_commits: %ld\tEffective_throughput: %lf\tEffective_energy_per_tx: %lf\tPkg_power: %lf\t",
    				   runtime, effective_commits, effective_throughput, effective_energy_per_tx, package_power);
    		#else
-   			printf("\tEffective_runtime %lf\tEffective_commits: %ld\tEffective_throughput: %lf\tEffective_energy_per_tx: %lf\tPkg_energy: %lf\tCore_energy: %lf\tDram_energy: %lf\tPkg_power: %lf\tCore_power: %lf\tDram_power: %lf\t",
+   			printf("Effective_runtime: %lf\tEffective_commits: %ld\tEffective_throughput: %lf\tEffective_energy_per_tx: %lf\tPkg_energy: %lf\tCore_energy: %lf\tDram_energy: %lf\tPkg_power: %lf\tCore_power: %lf\tDram_power: %lf\t",
    				   runtime, effective_commits, effective_throughput, effective_energy_per_tx, package_energy_consumed, core_energy_consumed, dram_energy_consumed, package_power, core_power, dram_power);
    		#endif   		
 	
@@ -678,10 +678,10 @@ global_t _tinystm =
    		effective_energy_per_tx = (summed_energy/effective_commits)*1000000; //Expressed in microJoule
    		
    		#ifdef REDUCED_VERBOSITY
-   			printf("\tEffective_runtime %lf\tEffective_commits: %ld\tEffective_throughput: %lf\tEffective_energy_per_tx: %lf\tPkg_power: %lf\t",
+   			printf("Effective_runtime: %lf\tEffective_commits: %ld\tEffective_throughput: %lf\tEffective_energy_per_tx: %lf\tPkg_power: %lf\t",
    				   runtime, effective_commits, effective_throughput, effective_energy_per_tx, summed_power);
    		#else
-   				printf("\tEffective_runtime %lf\tPkg0_energy: %lf\tDram0_energy: %lf\tPkg1_energy: %lf\tDram1_energy: %lf\tPkg0_power: %lf\tDram0_power: %lf\tPkg1_power: %lf\tDram1_power: %lf",
+   				printf("Effective_runtime: %lf\tPkg0_energy: %lf\tDram0_energy: %lf\tPkg1_energy: %lf\tDram1_energy: %lf\tPkg0_power: %lf\tDram0_power: %lf\tPkg1_power: %lf\tDram1_power: %lf",
    				   runtime,package0_energy_consumed, dram0_energy_consumed, package1_energy_consumed, dram1_energy_consumed, package0_power, dram0_power, package1_power, dram1_power);
 	
    		#endif   		
