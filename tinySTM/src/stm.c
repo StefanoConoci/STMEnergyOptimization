@@ -613,11 +613,10 @@ global_t _tinystm =
 
 		long power; 
 
-		long effective_commits;
 		double effective_throughput;
 		double effective_energy_per_tx;
-		double summed_power;
-		double summed_energy;
+		double summed_power=0;
+		double summed_energy=0;
 
 		end_time = read_time_energy();
 
