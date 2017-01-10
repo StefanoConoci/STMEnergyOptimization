@@ -788,8 +788,8 @@ void explore_all_configurations(double throughput, double  abort_rate, double po
 	void heuristic(double throughput, double  abort_rate, double power, double energy_per_tx){
 		
 		#ifdef DEBUG_HEURISTICS 
-			printf("Throughput: %lf tx/sec - Abort rate: %lf percent - Power: %lf Watt - Energy per tx: %lf micro Joule\n", 
--			         throughput, abort_rate, power, energy_per_tx);
+			printf("Throughput: %lf - Abort rate: %lf percent - Power: %lf Watt - Energy per tx: %lf micro Joule\n",
+			         throughput, abort_rate, power, energy_per_tx);
 		#endif
 
 		if(!stopped_searching){

@@ -25,6 +25,7 @@ double energy_per_tx_limit;		// Maximum energy per tx that should be drawn by th
 int heuristic_mode;				// Used to switch between different heuristics mode. Can be set from 0 to 4. 
 double jump_percentage;			// Used by heuristic mode 2. It defines how near power_limit we expect the optimal configuration to be
 volatile int shutdown;			// Used to check if should shutdown
+long effective_commits; 		// Number of commits during the phase managed by the heuristics. Necessary due to the delay at the end of execution with less than max threads
 
 // Statistics of the last heuristic round
 double old_throughput;		

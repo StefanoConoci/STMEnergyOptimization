@@ -472,6 +472,8 @@ global_t _tinystm =
 		double runtime; 
 		double package_energy_consumed, core_energy_consumed, dram_energy_consumed;
 		double package_power, core_power, dram_power;
+		double effective_throughput;
+		double effective_energy_per_tx;
 
 		long power; 
 
@@ -515,10 +517,17 @@ global_t _tinystm =
    		core_power = (core_energy_consumed)/runtime;
    		dram_power = (dram_energy_consumed)/runtime;
 
-   		// Printing results
-
-   		printf("\tPkg_energy: %lf\tCore_energy: %lf\tDram_energy: %lf\tPkg_power: %lf\tCore_power: %lf\tDram_power: %lf",
-   				   package_energy_consumed, core_energy_consumed, dram_energy_consumed, package_power, core_power, dram_power);
+   		effective_throughput = effective_commits/runtime;
+   		effective_energy_per_tx = (package_energy_consumed/effective_commits)*1000000; //Expressed in microJoule
+   		
+   		#ifdef REDUCED_VERBOSITY
+   			printf("\tEffective_runtime %lf\tEffective_commits: %ld\tEffective_throughput: %lf\tEffective_energy_per_tx: %lf\tPkg_power: %lf\t",
+   				   runtime, effective_commits, effective_throughput, effective_energy_per_tx, package_power);
+   		#else
+   			printf("\tEffective_runtime %lf\tEffective_commits: %ld\tEffective_throughput: %lf\tEffective_energy_per_tx: %lf\tPkg_energy: %lf\tCore_energy: %lf\tDram_energy: %lf\tPkg_power: %lf\tCore_power: %lf\tDram_power: %lf\t",
+   				   runtime, effective_commits, effective_throughput, effective_energy_per_tx, package_energy_consumed, core_energy_consumed, dram_energy_consumed, package_power, core_power, dram_power);
+   		#endif   		
+	
 	}
 
 #endif /* ! ENERGY_DESKTOP */
@@ -604,6 +613,12 @@ global_t _tinystm =
 
 		long power; 
 
+		long effective_commits;
+		double effective_throughput;
+		double effective_energy_per_tx;
+		double summed_power;
+		double summed_energy;
+
 		end_time = read_time_energy();
 
 		// Package 0 power consumption
@@ -657,10 +672,22 @@ global_t _tinystm =
    		dram0_power = (dram0_energy_consumed)/runtime;
    		dram1_power = (dram1_energy_consumed)/runtime;
 
-   		// Printing results
+   		summed_energy = package0_energy_consumed+package1_energy_consumed;
+   		summed_power = package0_power+package1_power;
 
-   		printf("\tPkg0_energy: %lf\tDram0_energy: %lf\tPkg1_energy: %lf\tDram1_energy: %lf\tPkg0_power: %lf\tDram0_power: %lf\tPkg1_power: %lf\tDram1_power: %lf",
-   				   package0_energy_consumed, dram0_energy_consumed, package1_energy_consumed, dram1_energy_consumed, package0_power, dram0_power, package1_power, dram1_power);
+   		effective_throughput = effective_commits/runtime;
+   		effective_energy_per_tx = (summed_energy/effective_commits)*1000000; //Expressed in microJoule
+   		
+   		#ifdef REDUCED_VERBOSITY
+   			printf("\tEffective_runtime %lf\tEffective_commits: %ld\tEffective_throughput: %lf\tEffective_energy_per_tx: %lf\tPkg_power: %lf\t",
+   				   runtime, effective_commits, effective_throughput, effective_energy_per_tx, summed_power);
+   		#else
+   				printf("\tEffective_runtime %lf\tPkg0_energy: %lf\tDram0_energy: %lf\tPkg1_energy: %lf\tDram1_energy: %lf\tPkg0_power: %lf\tDram0_power: %lf\tPkg1_power: %lf\tDram1_power: %lf",
+   				   runtime,package0_energy_consumed, dram0_energy_consumed, package1_energy_consumed, dram1_energy_consumed, package0_power, dram0_power, package1_power, dram1_power);
+	
+   		#endif   		
+
+
 	}
 
 
@@ -974,14 +1001,6 @@ stm_exit(void)
 
   terminate_rapl();
 
-  #ifdef ENERGY_DESKTOP
-  	print_energy_counters();
-  #endif
-
-  #ifdef ENERGY_SERVER
-  	print_energy_counters();
-  #endif
-
   #ifdef STM_HOPE
   	printf("\tP-state: %d\tBest-threads: %d\tSteps: %d", best_pstate, best_threads, steps);
   #endif
@@ -1014,16 +1033,21 @@ stm_exit_thread(void)
   #ifdef STM_HOPE
   	int i;
 
-  	printf("Exiting thread %d\n", tx->thread_number);
-
   	// When thread 0 completes wake up all threads 
-  	if(tx->thread_number == 0){	
-  		printf("Starting waking up threads\n");
+  	if(tx->thread_number == 0){
   		shutdown = 1;
+
+  		#ifdef ENERGY_DESKTOP
+  			print_energy_counters();
+  		#endif
+
+  		#ifdef ENERGY_SERVER
+  			print_energy_counters();
+  		#endif
+
   		for(i=active_threads; i< total_threads; i++){
   			wake_up_thread(i);
   		}	
-  		printf("Completed waking up threads\n");
   	}
   #endif
 
@@ -1080,6 +1104,8 @@ stm_start(stm_tx_attr_t attr)
 			abort_rate = (((double) aborts_sum) / (aborts_sum+commits_sum))*100; 
 			power = ((double) energy_sum) / ( (double) time_sum / 1000 );
 			energy_per_tx = ((double) energy_sum) / (commits_sum*active_threads);
+
+			effective_commits+= (commits_sum*active_threads);
 
 			// We don't call the heuristic if the energy results are out or range due to an overflow 
 			if(power > 0 && energy_per_tx > 0)
@@ -1143,6 +1169,7 @@ _CALLCONV stm_tx_t *stm_pre_init_thread(int id){
 			stopped_searching = 0;
 			steps=0;
 			shutdown = 0;
+			effective_commits = 0;
 		}
 
 		return tx;
