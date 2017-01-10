@@ -1,4 +1,4 @@
-ITERATIONS=20
+ITERATIONS=10
 export STM_STATS=1
 
 for i in $(seq 1 $ITERATIONS)
