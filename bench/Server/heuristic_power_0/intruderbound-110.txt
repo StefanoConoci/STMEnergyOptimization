@@ -1,0 +1,40 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Effective_runtime: 5.169403	Effective_commits: 18284007	Effective_throughput: 3536967.048555	Effective_energy_per_tx: 17.691921	Pkg_power: 62.575743	Threads: 20	Elapsed time: 5.230661	Commits: 23428145	Aborts: 7406903	P-state: 1	Best-threads: 7	Steps: 40	Throughput: 4479002.617673
+Effective_runtime: 5.448727	Effective_commits: 18798450	Effective_throughput: 3450062.764119	Effective_energy_per_tx: 18.761053	Pkg_power: 64.726812	Threads: 20	Elapsed time: 5.506122	Commits: 23428145	Aborts: 5196658	P-state: 0	Best-threads: 6	Steps: 40	Throughput: 4254926.520386
+Effective_runtime: 5.002239	Effective_commits: 18487653	Effective_throughput: 3695875.923825	Effective_energy_per_tx: 17.960701	Pkg_power: 66.380523	Threads: 20	Elapsed time: 5.005501	Commits: 23428145	Aborts: 7578033	P-state: 0	Best-threads: 7	Steps: 41	Throughput: 4680479.506608
+Effective_runtime: 5.617870	Effective_commits: 18392607	Effective_throughput: 3273946.693605	Effective_energy_per_tx: 19.627112	Pkg_power: 64.258120	Threads: 20	Elapsed time: 5.687505	Commits: 23428145	Aborts: 5131683	P-state: 0	Best-threads: 6	Steps: 41	Throughput: 4119230.659495
+Effective_runtime: 5.353991	Effective_commits: 18964377	Effective_throughput: 3542101.269438	Effective_energy_per_tx: 18.287353	Pkg_power: 64.775656	Threads: 20	Elapsed time: 5.438562	Commits: 23428145	Aborts: 5053102	P-state: 0	Best-threads: 6	Steps: 41	Throughput: 4307783.079487
+Effective_runtime: 5.343756	Effective_commits: 18944373	Effective_throughput: 3545141.945554	Effective_energy_per_tx: 18.313967	Pkg_power: 64.925612	Threads: 20	Elapsed time: 5.410195	Commits: 23428145	Aborts: 5192435	P-state: 0	Best-threads: 6	Steps: 41	Throughput: 4330369.702757
+Effective_runtime: 5.750889	Effective_commits: 19000371	Effective_throughput: 3303901.500874	Effective_energy_per_tx: 18.183908	Pkg_power: 60.077842	Threads: 20	Elapsed time: 5.755657	Commits: 23428145	Aborts: 5582731	P-state: 1	Best-threads: 6	Steps: 43	Throughput: 4070455.409779
+Effective_runtime: 5.149667	Effective_commits: 17769131	Effective_throughput: 3450539.845776	Effective_energy_per_tx: 19.574147	Pkg_power: 67.541373	Threads: 20	Elapsed time: 5.207960	Commits: 23428145	Aborts: 7217395	P-state: 0	Best-threads: 7	Steps: 43	Throughput: 4498526.183124
+Effective_runtime: 4.910391	Effective_commits: 18463669	Effective_throughput: 3760122.257631	Effective_energy_per_tx: 17.980624	Pkg_power: 67.609344	Threads: 20	Elapsed time: 4.944522	Commits: 23428145	Aborts: 7179069	P-state: 0	Best-threads: 7	Steps: 40	Throughput: 4738202.059821
+Effective_runtime: 5.621684	Effective_commits: 18432633	Effective_throughput: 3278845.324342	Effective_energy_per_tx: 19.882432	Pkg_power: 65.191419	Threads: 20	Elapsed time: 5.710268	Commits: 23428145	Aborts: 5134200	P-state: 0	Best-threads: 6	Steps: 43	Throughput: 4102810.045931
+Effective_runtime: 5.403149	Effective_commits: 18798468	Effective_throughput: 3479169.174741	Effective_energy_per_tx: 18.845345	Pkg_power: 65.566144	Threads: 20	Elapsed time: 5.441173	Commits: 23428145	Aborts: 5187268	P-state: 0	Best-threads: 6	Steps: 41	Throughput: 4305715.820845
+Effective_runtime: 5.610291	Effective_commits: 18324693	Effective_throughput: 3266264.347715	Effective_energy_per_tx: 20.056733	Pkg_power: 65.510593	Threads: 20	Elapsed time: 5.701658	Commits: 23428145	Aborts: 5071497	P-state: 0	Best-threads: 6	Steps: 42	Throughput: 4109005.653606
+Effective_runtime: 5.413569	Effective_commits: 19032297	Effective_throughput: 3515665.504776	Effective_energy_per_tx: 18.710761	Pkg_power: 65.780779	Threads: 20	Elapsed time: 5.500608	Commits: 23428145	Aborts: 5302027	P-state: 0	Best-threads: 6	Steps: 40	Throughput: 4259191.918230
+Effective_runtime: 4.929136	Effective_commits: 18322003	Effective_throughput: 3717081.943743	Effective_energy_per_tx: 18.212279	Pkg_power: 67.696532	Threads: 20	Elapsed time: 4.989112	Commits: 23428145	Aborts: 7038312	P-state: 0	Best-threads: 7	Steps: 43	Throughput: 4695854.562587
+Effective_runtime: 5.680771	Effective_commits: 18270696	Effective_throughput: 3216235.448989	Effective_energy_per_tx: 19.130243	Pkg_power: 61.527365	Threads: 20	Elapsed time: 5.758502	Commits: 23428145	Aborts: 5331250	P-state: 1	Best-threads: 6	Steps: 42	Throughput: 4068444.358173
+Effective_runtime: 5.341042	Effective_commits: 18948355	Effective_throughput: 3547688.727448	Effective_energy_per_tx: 18.486842	Pkg_power: 65.585561	Threads: 20	Elapsed time: 5.421964	Commits: 23428145	Aborts: 5074925	P-state: 0	Best-threads: 6	Steps: 40	Throughput: 4320970.279756
+Effective_runtime: 5.302129	Effective_commits: 18890394	Effective_throughput: 3562794.356577	Effective_energy_per_tx: 18.453236	Pkg_power: 65.745083	Threads: 20	Elapsed time: 5.366976	Commits: 23428145	Aborts: 4991152	P-state: 0	Best-threads: 6	Steps: 39	Throughput: 4365241.227242
+Effective_runtime: 5.663921	Effective_commits: 18732495	Effective_throughput: 3307337.020049	Effective_energy_per_tx: 18.513210	Pkg_power: 61.229424	Threads: 20	Elapsed time: 5.759056	Commits: 23428145	Aborts: 5314022	P-state: 1	Best-threads: 6	Steps: 42	Throughput: 4068053.097322
+Effective_runtime: 5.379486	Effective_commits: 19072240	Effective_throughput: 3545364.987534	Effective_energy_per_tx: 18.554263	Pkg_power: 65.781633	Threads: 20	Elapsed time: 5.446084	Commits: 23428145	Aborts: 5210096	P-state: 0	Best-threads: 6	Steps: 40	Throughput: 4301833.189336
+Effective_runtime: 5.326802	Effective_commits: 18956379	Effective_throughput: 3558679.017043	Effective_energy_per_tx: 18.450387	Pkg_power: 65.659004	Threads: 20	Elapsed time: 5.415676	Commits: 23428145	Aborts: 5198104	P-state: 0	Best-threads: 6	Steps: 41	Throughput: 4325987.286813
