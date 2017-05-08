@@ -348,6 +348,10 @@ global_t _tinystm =
 		long total_energy = 0;
 		char fname[64];
 
+		#ifdef NO_POWERCAP
+			return 1000000l;
+		#endif
+
 		for(i = 0; i<nb_packages; i++){
 
 			// Package energy consumtion
@@ -1098,8 +1102,14 @@ stm_start(stm_tx_attr_t attr)
 			effective_commits+= (commits_sum*active_threads);
 
 			// We don't call the heuristic if the energy results are out or range due to an overflow 
-			if(power > 0 && energy_per_tx > 0)
+			#ifdef NO_POWERCAP
 				heuristic(throughput, abort_rate, power, energy_per_tx);
+			#else
+				if(power > 0 && energy_per_tx > 0)
+					heuristic(throughput, abort_rate, power, energy_per_tx);
+			#endif
+
+			
 		
 			//Setup next round
 			int slice = total_commits_round/active_threads;
