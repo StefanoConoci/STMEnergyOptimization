@@ -1,10 +1,10 @@
 #ifndef _STM_H_
 # define _STM_H_
 #define STM_HOPE
-//#define ENERGY_DESKTOP
-#define ENERGY_SERVER
-//#define DEBUG_HEURISTICS
-#define REDUCED_VERBOSITY
+#define ENERGY_DESKTOP
+//#define ENERGY_SERVER
+#define DEBUG_HEURISTICS
+//#define REDUCED_VERBOSITY
 
 
   
