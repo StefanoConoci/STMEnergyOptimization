@@ -830,18 +830,17 @@ void explore_all_configurations(double throughput, double  abort_rate, double po
 				printf("Switched to: #threads %d - pstate %d\n", active_threads, current_pstate);
 			#endif 
 		}
-		else{	// Workload change monitoring
-			
-			/*
-			if( throughput > (best_throughput*1.1) || throughput < (best_throughput*0.9) || power > (power_limit *1.05) ){
-				stopped_searching = 0;
-				set_pstate(max_pstate);
-				set_threads(starting_threads);
-				best_throughput = 0;
-				best_threads = starting_threads;
-				best_pstate = max_pstate;
-				printf("Workload change detected. Restarting heuristic search\n");
+		else{	// Workload change detection
+			if(detection_mode == 1 ){
+				if( throughput > (best_throughput*(1+(detection_tp_threshold/100))) || throughput < (best_throughput*(1-(detection_tp_threshold/100))) || power > (power_limit*(1+(detection_pwr_threshold/100))) || power < (power_limit*(1-(detection_pwr_threshold/100))) ){
+					stopped_searching = 0;
+					set_pstate(max_pstate);
+					set_threads(starting_threads);
+					best_throughput = 0;
+					best_threads = starting_threads;
+					best_pstate = max_pstate;
+					printf("Workload change detected. Restarting heuristic search\n");
+				}		
 			}
-			*/
 		}
 	}

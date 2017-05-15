@@ -339,6 +339,27 @@ global_t _tinystm =
 		#endif
 	}
 
+	void load_config_file(){
+		
+		// Load config file 
+		FILE* config_file;
+		if ((config_file = fopen("hope_config.txt", "r")) == NULL) {
+			printf("Error opening STM_HOPE configuration file.\n");
+			exit(1);
+		}
+		if (fscanf(config_file, "STARTING_THREADS=%d POWER_LIMIT=%lf COMMITS_ROUND = %d ENERGY_PER_TX_LIMIT = %lf HEURISTIC_MODE = %d JUMP_PERCENTAGE = %lf DETECTION_MODE = %d DETECTION_TP_THRESHOLD = %lf DETECTION_PWR_THRESHOLD = %lf", 
+				 &starting_threads, &power_limit, &total_commits_round, &energy_per_tx_limit, &heuristic_mode, &jump_percentage, &detection_mode, &detection_tp_threshold ,&detection_pwr_threshold)!=9) {
+			printf("The number of input parameters of the STM_HOPE configuration file does not match the number of required parameters.\n");
+			exit(1);
+		}
+		if(detection_tp_threshold < 0.0 || detection_tp_threshold > 100.0 || detection_pwr_threshold < 0.0 || detection_pwr_threshold >100.0){
+			printf("The detection percentage thresholds are set to values outside their valid range.\n");
+			exit(1);
+		}
+		fclose(config_file);
+	}
+
+
 	// Returns energy consumption of package 0 cores in micro Joule
 	long get_energy(){
 		
@@ -883,19 +904,7 @@ void stm_init(int threads) {
 	init_thread_management(threads);
 	load_profile_file();
 	init_stats_array_pointer(threads);
-
-	// Load config file 
-	FILE* config_file;
-	if ((config_file = fopen("hope_config.txt", "r")) == NULL) {
-		printf("Error opening STM_HOPE configuration file.\n");
-		exit(1);
-	}
-	if (fscanf(config_file, "STARTING_THREADS=%d POWER_LIMIT=%lf COMMITS_ROUND = %d ENERGY_PER_TX_LIMIT = %lf HEURISTIC_MODE = %d JUMP_PERCENTAGE = %lf", 
-			 &starting_threads, &power_limit, &total_commits_round, &energy_per_tx_limit, &heuristic_mode, &jump_percentage)!=6) {
-		printf("The number of input parameters of the STM_HOPE configuration file does not match the number of required parameters.\n");
-		exit(1);
-	}
-	fclose(config_file);
+	load_config_file();
 
 	#ifdef DEBUG_HEURISTICS
 		printf("Heuristic mode: %d\n", heuristic_mode);

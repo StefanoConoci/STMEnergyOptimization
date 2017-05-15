@@ -26,6 +26,9 @@ int heuristic_mode;				// Used to switch between different heuristics mode. Can 
 double jump_percentage;			// Used by heuristic mode 2. It defines how near power_limit we expect the optimal configuration to be
 volatile int shutdown;			// Used to check if should shutdown
 long effective_commits; 		// Number of commits during the phase managed by the heuristics. Necessary due to the delay at the end of execution with less than max threads
+int detection_mode; 			// Defines the detection mode. Value 0 means detection is disabled. 1 restarts the exploration from the start. Defined in hope_config.txt and loaded at startup 
+double detection_tp_threshold;	// Defines the percentage of throughput variation of the current optimal configuration compared to the results at the moment of convergece that should trigger a new exploration. Defined in hope_config.txt 
+double detection_pwr_threshold; // Defines the percentage of power consumption variation of the current optimal configuration compared to the results at the moment of convergece that should trigger a new exploration. Defined in hope_config.txt 
 
 // Statistics of the last heuristic round
 double old_throughput;		
