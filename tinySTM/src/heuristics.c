@@ -761,11 +761,11 @@ void heuristic_energy_unidirectional(double throughput, double abort_rate, doubl
 	old_throughput = throughput;
 	old_abort_rate = abort_rate;
 	old_power = power;
+	// Used for testing all possible configurations pstate/threads
 	old_energy_per_tx = energy_per_tx;
 }
 
 
-// Used for testing all possible configurations pstate/threads
 void explore_all_configurations(double throughput, double  abort_rate, double power, double energy_per_tx){
 
 	if(active_threads == total_threads || abort_rate>90.0){
@@ -778,6 +778,85 @@ void explore_all_configurations(double throughput, double  abort_rate, double po
 	else set_threads(active_threads+1);
 }
 
+// Baseline dynamic exploration. In phase 0 the explorations looks for the number of threads that provides the best performance. 
+// In phase 1 the algorithm iteratively decreases the p-state and seeks for the first config within the powercap at each frequency/voltage.
+// The exploration at the next p_state always starts from the number of threads found optimal from the previous performance state and only decreases it if needed 
+void heuristic_power_dynamic_baseline(double throughput, double  abort_rate, double power, double energy_per_tx){
+	
+	if(phase == 0){	// Thread scheduling at lowest frequency
+		
+		if(steps == 0){ // First exploration step
+			if(active_threads != total_threads && power < power_limit){
+				update_best_config(throughput);
+				set_thread(active_threads+1);
+			}
+			else{
+				decreasing = 1;
+				set_threads(active_threads-1);
+			}
+		}
+		else if(steps == 1 && !decreasing){ //Second exploration step, define if should set decreasing 
+			if(throughput > best_throughput){
+				if(power > power_limit){ //In step 1 the power could be already outside the limit while it was within the limit for step 0 
+					phase = 1; 
+					set_thread(best_threads);
+					set_pstate(current_pstate-1);
+				}else{ // TP increase and within the power limit
+					update_best_config(throughput);
+					if(active_threads == total_threads){
+						phase = 1;
+						set_thread(best_threads);
+						set_pstate(current_pstate-1);
+					}else set_thread(active_threads+1);
+				}
+			} else{ // Decrease in throughput compared to step 0. Should set decreasing to 0 
+				if(starting_threads > 1){
+					decreasing = 1; 
+					set_thread(starting_threads-1);	
+				}
+				else{ // Cannot reduce number of thread more as starting_thread is already set to 1 
+					phase = 1; 
+					set_thread(best_threads);
+					set_pstate(current_pstate-1);
+				}
+			}
+		} 
+		else if(decreasing){ // Decreasing threads  
+			if(throughput < best_throughput || active_threads == 1){
+				phase = 1; 	
+				set_thread(best_threads);
+				set_pstate(current_pstate-1);
+			}else{
+				if(power < power_limit)
+					update_best_config(throughput);
+				set_thread(active_threads-1);
+			}
+		} else{ // Increasing threads
+			if( power > power_limit || active_threads = total_threads){
+				phase = 1; 	
+				set_thread(best_threads);
+				set_pstate(current_pstate-1);
+			}
+			else set_thread(active_threads+1);
+		}
+	}
+	else{ // Phase == 1. Increase in performance states while being within the power cap
+		if( (power < power_limit && current_pstate == 0) || (power > power_limit && active_threads == 1) ){
+			update_best_config(throughput);
+			stop_searching();
+		}
+		else{ // Not yet completed to explore
+			if(power < power_limit){ //Should decrease number of active threads
+				update_best_config(throughput);
+				set_pstate(current_pstate-1);
+			}
+			else{ // Power beyond power limit
+				set_threads(active_threads-1);
+			}
+
+		}	
+	}
+}
 
 ///////////////////////////////////////////////////////////////
 // Main heuristic function
@@ -793,7 +872,6 @@ void explore_all_configurations(double throughput, double  abort_rate, double po
 		#endif
 
 		if(!stopped_searching){
-			steps++;
 			switch(heuristic_mode){
 				case 0:
 					heuristic_power(throughput, abort_rate, power, energy_per_tx);
@@ -825,6 +903,8 @@ void explore_all_configurations(double throughput, double  abort_rate, double po
 					heuristic_power(throughput, abort_rate, power, energy_per_tx);
 					break;
 			}
+			steps++;
+
 
 			#ifdef DEBUG_HEURISTICS
 				printf("Switched to: #threads %d - pstate %d\n", active_threads, current_pstate);

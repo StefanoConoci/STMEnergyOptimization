@@ -52,6 +52,7 @@ int level_starting_energy_per_tx;
 int new_pstate;					// Used to check if just arrived to a new p_state in the heuristic search
 int decreasing;					// If 0 heuristic should remove threads until it reaches the limit  
 int stopped_searching;			// While 1 the algorithm searches for the best configuration, if 0 the algorithm moves to monitoring mode 
+int phase;						// The value of phase has different semantics based on the running heuristic mode
 
 /////////////////////////////////////////////////////////////////
 //	Function declerations

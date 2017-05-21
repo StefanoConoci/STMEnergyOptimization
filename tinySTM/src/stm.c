@@ -1163,13 +1163,14 @@ _CALLCONV stm_tx_t *stm_pre_init_thread(int id){
 			level_best_throughput = -1; 
 			level_best_threads = 0;
 			level_starting_threads = starting_threads;
+			best_throughput = -1;
 			new_pstate = 1;
 			decreasing = 0;
 			stopped_searching = 0;
 			steps=0;
 			shutdown = 0;
 			effective_commits = 0;
-
+			phase = 0; 
 
 			#ifdef ENERGY_DESKTOP
   			set_start_energy_counters();
