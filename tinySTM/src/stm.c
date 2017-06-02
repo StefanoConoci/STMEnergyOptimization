@@ -275,7 +275,7 @@ global_t _tinystm =
 		
 		stats_t* stats_ptr = stats_array[thread_number];
 
-		int ret = posix_memalign(&stats_ptr, cache_line_size, sizeof(stats_t));
+		int ret = posix_memalign(&stats_ptr, (void**) cache_line_size, sizeof(stats_t));
 		if ( ret != 0 ){
 			printf("Error allocating stats_t for thread %d\n", thread_number);
 			exit(0);
@@ -636,8 +636,8 @@ global_t _tinystm =
 
 		double effective_throughput;
 		double effective_energy_per_tx;
-		double summed_power=0;
-		double summed_energy=0;
+		double summed_power;
+		double summed_energy;
 
 		end_time = read_time_energy();
 
@@ -1174,12 +1174,12 @@ _CALLCONV stm_tx_t *stm_pre_init_thread(int id){
 
 			#ifdef ENERGY_DESKTOP
   			set_start_energy_counters();
-			#endif ENERGY_DESKTOP
+			#endif 
 
 
 			#ifdef ENERGY_SERVER
   			set_start_energy_counters();
-			#endif ENERGY_SERVER
+			#endif 
 
 		}
 

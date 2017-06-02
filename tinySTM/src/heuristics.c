@@ -788,7 +788,7 @@ void heuristic_power_dynamic_baseline(double throughput, double  abort_rate, dou
 		if(steps == 0){ // First exploration step
 			if(active_threads != total_threads && power < power_limit){
 				update_best_config(throughput);
-				set_thread(active_threads+1);
+				set_threads(active_threads+1);
 			}
 			else{
 				decreasing = 1;
@@ -799,24 +799,24 @@ void heuristic_power_dynamic_baseline(double throughput, double  abort_rate, dou
 			if(throughput > best_throughput){
 				if(power > power_limit){ //In step 1 the power could be already outside the limit while it was within the limit for step 0 
 					phase = 1; 
-					set_thread(best_threads);
+					set_threads(best_threads);
 					set_pstate(current_pstate-1);
 				}else{ // TP increase and within the power limit
 					update_best_config(throughput);
 					if(active_threads == total_threads){
 						phase = 1;
-						set_thread(best_threads);
+						set_threads(best_threads);
 						set_pstate(current_pstate-1);
-					}else set_thread(active_threads+1);
+					}else set_threads(active_threads+1);
 				}
 			} else{ // Decrease in throughput compared to step 0. Should set decreasing to 0 
 				if(starting_threads > 1){
 					decreasing = 1; 
-					set_thread(starting_threads-1);	
+					set_threads(starting_threads-1);	
 				}
 				else{ // Cannot reduce number of thread more as starting_thread is already set to 1 
 					phase = 1; 
-					set_thread(best_threads);
+					set_threads(best_threads);
 					set_pstate(current_pstate-1);
 				}
 			}
@@ -824,20 +824,20 @@ void heuristic_power_dynamic_baseline(double throughput, double  abort_rate, dou
 		else if(decreasing){ // Decreasing threads  
 			if(throughput < best_throughput || active_threads == 1){
 				phase = 1; 	
-				set_thread(best_threads);
+				set_threads(best_threads);
 				set_pstate(current_pstate-1);
 			}else{
 				if(power < power_limit)
 					update_best_config(throughput);
-				set_thread(active_threads-1);
+				set_threads(active_threads-1);
 			}
 		} else{ // Increasing threads
-			if( power > power_limit || active_threads = total_threads){
+			if( power > power_limit || active_threads == total_threads){
 				phase = 1; 	
-				set_thread(best_threads);
+				set_threads(best_threads);
 				set_pstate(current_pstate-1);
 			}
-			else set_thread(active_threads+1);
+			else set_threads(active_threads+1);
 		}
 	}
 	else{ // Phase == 1. Increase in performance states while being within the power cap
