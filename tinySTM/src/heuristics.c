@@ -902,6 +902,11 @@ void heuristic_power_dynamic_baseline(double throughput, double  abort_rate, dou
 					heuristic_mode = 0;
 					heuristic_power(throughput, abort_rate, power, energy_per_tx);
 					break;
+				case 8: // Fixed number of threads at p_state static_pstate set in hope_config.txt
+					best_pstate = current_pstate;
+					best_threads = active_threads;
+					stop_searching();
+					break;					
 			}
 			steps++;
 

@@ -166,7 +166,6 @@ if(input_pstate > max_pstate)
 	  	fclose(available_freq_file);
 
 
-	  	// Setting processor to state P0
 	  	set_pstate(max_pstate);
 
 		return 0;
@@ -345,8 +344,8 @@ if(input_pstate > max_pstate)
 			printf("Error opening STM_HOPE configuration file.\n");
 			exit(1);
 		}
-		if (fscanf(config_file, "STARTING_THREADS=%d POWER_LIMIT=%lf COMMITS_ROUND = %d ENERGY_PER_TX_LIMIT = %lf HEURISTIC_MODE = %d JUMP_PERCENTAGE = %lf DETECTION_MODE = %d DETECTION_TP_THRESHOLD = %lf DETECTION_PWR_THRESHOLD = %lf", 
-				 &starting_threads, &power_limit, &total_commits_round, &energy_per_tx_limit, &heuristic_mode, &jump_percentage, &detection_mode, &detection_tp_threshold ,&detection_pwr_threshold)!=9) {
+		if (fscanf(config_file, "STARTING_THREADS=%d STATIC_PSTATE=%d POWER_LIMIT=%lf COMMITS_ROUND = %d ENERGY_PER_TX_LIMIT = %lf HEURISTIC_MODE = %d JUMP_PERCENTAGE = %lf DETECTION_MODE = %d DETECTION_TP_THRESHOLD = %lf DETECTION_PWR_THRESHOLD = %lf", 
+				 &starting_threads, &static_pstate  &power_limit, &total_commits_round, &energy_per_tx_limit, &heuristic_mode, &jump_percentage, &detection_mode, &detection_tp_threshold ,&detection_pwr_threshold)!=10) {
 			printf("The number of input parameters of the STM_HOPE configuration file does not match the number of required parameters.\n");
 			exit(1);
 		}
@@ -354,6 +353,15 @@ if(input_pstate > max_pstate)
 			printf("The detection percentage thresholds are set to values outside their valid range.\n");
 			exit(1);
 		}
+
+	  	if(Heuristic_mode == 8){
+	  		if(static_pstate >= 0 && static_pstate <= max_pstate)
+	  			set_pstate(static_pstate);
+	  		else 
+	  			printf("The parameter manual_pstate is set outside of the valid range for this CPU. Setting the CPU to the slowest frequency/voltage\n");
+	  	}
+
+
 		fclose(config_file);
 	}
 
@@ -632,8 +640,8 @@ if(input_pstate > max_pstate)
 
 		long power; 
 
-		double effective_throughput;
-		double effective_energy_per_tx;
+		//double effective_throughput;
+		//double effective_energy_per_tx;
 		double summed_power;
 		double summed_energy;
 
@@ -693,6 +701,7 @@ if(input_pstate > max_pstate)
    		summed_energy = package0_energy_consumed+package1_energy_consumed;
    		summed_power = package0_power+package1_power;
 
+   		/*
    		effective_throughput = effective_commits/runtime;
    		effective_energy_per_tx = (summed_energy/effective_commits)*1000000; //Expressed in microJoule
    		
@@ -705,6 +714,10 @@ if(input_pstate > max_pstate)
 	
    		#endif   		
 
+   		*/
+
+   		printf("Effective_runtime: %lf\tPkg_power: %lf\tEnergy_total: %lf\t",
+   			   	runtime, summed_power, (package0_energy_consumed+package1_energy_consumed));
 
 	}
 
