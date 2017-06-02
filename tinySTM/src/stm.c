@@ -345,7 +345,7 @@ if(input_pstate > max_pstate)
 			exit(1);
 		}
 		if (fscanf(config_file, "STARTING_THREADS=%d STATIC_PSTATE=%d POWER_LIMIT=%lf COMMITS_ROUND = %d ENERGY_PER_TX_LIMIT = %lf HEURISTIC_MODE = %d JUMP_PERCENTAGE = %lf DETECTION_MODE = %d DETECTION_TP_THRESHOLD = %lf DETECTION_PWR_THRESHOLD = %lf", 
-				 &starting_threads, &static_pstate  &power_limit, &total_commits_round, &energy_per_tx_limit, &heuristic_mode, &jump_percentage, &detection_mode, &detection_tp_threshold ,&detection_pwr_threshold)!=10) {
+				 &starting_threads, &static_pstate, &power_limit, &total_commits_round, &energy_per_tx_limit, &heuristic_mode, &jump_percentage, &detection_mode, &detection_tp_threshold, &detection_pwr_threshold)!=10) {
 			printf("The number of input parameters of the STM_HOPE configuration file does not match the number of required parameters.\n");
 			exit(1);
 		}
@@ -354,7 +354,7 @@ if(input_pstate > max_pstate)
 			exit(1);
 		}
 
-	  	if(Heuristic_mode == 8){
+	  	if(heuristic_mode == 8){
 	  		if(static_pstate >= 0 && static_pstate <= max_pstate)
 	  			set_pstate(static_pstate);
 	  		else 
