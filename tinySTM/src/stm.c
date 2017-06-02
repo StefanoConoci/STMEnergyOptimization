@@ -97,8 +97,7 @@ global_t _tinystm =
 		int i;
 		char fname[64];
 		FILE* frequency_file;
-
-		if(input_pstate > max_pstate)
+if(input_pstate > max_pstate)
 			return -1;
 		int frequency = pstate[input_pstate];
 
@@ -275,9 +274,8 @@ global_t _tinystm =
 		
 		stats_t* stats_ptr = stats_array[thread_number];
 
-		int ret = posix_memalign(&stats_ptr, (void**) cache_line_size, sizeof(stats_t));
-		if ( ret != 0 ){
-			printf("Error allocating stats_t for thread %d\n", thread_number);
+		int ret = posix_memalign(((void**) &stats_ptr), cache_line_size, sizeof(stats_t));
+		if ( ret != 0 ){ printf("Error allocating stats_t for thread %d\n", thread_number);
 			exit(0);
 		}
 
