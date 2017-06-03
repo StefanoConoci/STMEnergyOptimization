@@ -37,12 +37,23 @@ inline void stop_searching(){
 	new_pstate = 1;
 	stopped_searching = 1;
 
+	level_best_throughput = 0;
+	level_best_threads = 0;
+	level_best_pstate = 0;
+
+	phase0_threads = -1;
+	phase0_pstate = -1;
+
+	current_exploit_steps = 0;
+
 	set_pstate(best_pstate);
 	set_threads(best_threads);
 
 	#ifdef DEBUG_HEURISTICS
-		printf("Stopped searching. Best configuration: %d threads at p-state %d\n", best_threads, best_pstate);
+		printf("Stopped searching after %d steps. Best configuration: %d threads at p-state %d\n", steps, best_threads, best_pstate);
 	#endif
+
+	steps = 0; 
 }
 
 
@@ -778,10 +789,59 @@ void explore_all_configurations(double throughput, double  abort_rate, double po
 	else set_threads(active_threads+1);
 }
 
+
+// Helper function for dynamic heuristic0, called in phase 0
+inline void from_phase0_to_next(){
+	phase0_threads = best_threads;
+	phase0_pstate = current_pstate;
+
+	if(current_pstate == 0){
+		if(best_threads == total_threads)
+			stop_searching();
+		else{
+			phase = 2; 
+			set_threads(best_threads);
+			set_pstate(current_pstate+1);
+			level_best_throughput = 0;
+			level_best_threads = 0;
+			level_best_pstate = 0;
+			#ifdef DEBUG_HEURISTICS
+				printf("PHASE 0 -> PHASE 2\n");
+			#endif
+		}
+	}else{
+		phase = 1;
+		set_threads(best_threads);
+		set_pstate(current_pstate-1);
+		#ifdef DEBUG_HEURISTICS
+				printf("PHASE 0 -> PHASE 1\n");
+		#endif
+	}
+}
+
+// Helper function for dynamic heuristic0, called in phase 1
+inline void from_phase1_to_next(){
+	// Check if should move to phase 0 or should stop searching 
+	if(phase0_pstate == max_pstate || best_threads == total_threads || phase0_threads == total_threads)
+		stop_searching();
+	else{
+		phase = 2;
+		set_threads(phase0_threads);
+		set_pstate(phase0_pstate+1);
+		level_best_threads = 0;
+		level_best_throughput = 0;
+		level_best_pstate = 0;
+		#ifdef DEBUG_HEURISTICS
+				printf("PHASE 1 -> PHASE 2\n");
+		#endif
+	}
+}
+
+
 // Baseline dynamic exploration. In phase 0 the explorations looks for the number of threads that provides the best performance. 
 // In phase 1 the algorithm iteratively decreases the p-state and seeks for the first config within the powercap at each frequency/voltage.
 // The exploration at the next p_state always starts from the number of threads found optimal from the previous performance state and only decreases it if needed 
-void heuristic_power_dynamic_baseline(double throughput, double  abort_rate, double power, double energy_per_tx){
+void dynamic_heuristic0(double throughput, double  abort_rate, double power, double energy_per_tx){
 	
 	if(phase == 0){	// Thread scheduling at lowest frequency
 		
@@ -798,15 +858,11 @@ void heuristic_power_dynamic_baseline(double throughput, double  abort_rate, dou
 		else if(steps == 1 && !decreasing){ //Second exploration step, define if should set decreasing 
 			if(throughput > best_throughput){
 				if(power > power_limit){ //In step 1 the power could be already outside the limit while it was within the limit for step 0 
-					phase = 1; 
-					set_threads(best_threads);
-					set_pstate(current_pstate-1);
+					from_phase0_to_next();
 				}else{ // TP increase and within the power limit
 					update_best_config(throughput);
 					if(active_threads == total_threads){
-						phase = 1;
-						set_threads(best_threads);
-						set_pstate(current_pstate-1);
+						from_phase0_to_next();
 					}else set_threads(active_threads+1);
 				}
 			} else{ // Decrease in throughput compared to step 0. Should set decreasing to 0 
@@ -815,17 +871,13 @@ void heuristic_power_dynamic_baseline(double throughput, double  abort_rate, dou
 					set_threads(starting_threads-1);	
 				}
 				else{ // Cannot reduce number of thread more as starting_thread is already set to 1 
-					phase = 1; 
-					set_threads(best_threads);
-					set_pstate(current_pstate-1);
+					from_phase0_to_next();
 				}
 			}
 		} 
 		else if(decreasing){ // Decreasing threads  
 			if(throughput < best_throughput || active_threads == 1){
-				phase = 1; 	
-				set_threads(best_threads);
-				set_pstate(current_pstate-1);
+				from_phase0_to_next();
 			}else{
 				if(power < power_limit)
 					update_best_config(throughput);
@@ -833,19 +885,18 @@ void heuristic_power_dynamic_baseline(double throughput, double  abort_rate, dou
 			}
 		} else{ // Increasing threads
 			if( power > power_limit || active_threads == total_threads){
-				phase = 1; 	
-				set_threads(best_threads);
-				set_pstate(current_pstate-1);
+				from_phase0_to_next();
 			}
 			else set_threads(active_threads+1);
 		}
 	}
-	else{ // Phase == 1. Increase in performance states while being within the power cap
+	else if(phase == 1){ //Increase in performance states while being within the power cap
 		if( (power < power_limit && current_pstate == 0) || (power > power_limit && active_threads == 1) ){
-			update_best_config(throughput);
-			stop_searching();
+			if( power< power_limit)
+				update_best_config(throughput);
+			from_phase1_to_next();
 		}
-		else{ // Not yet completed to explore
+		else{ // Not yet completed to explore in phase 1 
 			if(power < power_limit){ //Should decrease number of active threads
 				update_best_config(throughput);
 				set_pstate(current_pstate-1);
@@ -853,10 +904,31 @@ void heuristic_power_dynamic_baseline(double throughput, double  abort_rate, dou
 			else{ // Power beyond power limit
 				set_threads(active_threads-1);
 			}
-
 		}	
 	}
+	else{ // Phase == 2. Decreasing the CPU frequency and increasing the number of threads. Not called in the first exploration phase 
+		if( (current_pstate == max_pstate && power>power_limit) || (current_pstate == max_pstate && active_threads = total_threads) || throughput << level_best_throughput || (active_threads == total_threads && power<power_limit )){
+			if(power < power_limit){
+				update_best_config(throughput);
+			}
+			stop_searching();
+		}else{ // Should still explore in phase 2 
+			if(power < power_limit){
+				update_best_config(throughput);
+				update_level_best_config(throughput);
+				set_threads(active_threads+1);
+			}
+			else{ // Outside power_limit, should decrease P-state and reset level related data
+				set_pstate(current_pstate+1);
+				level_best_threads = 0;
+				level_best_throughput = 0;
+				level_best_pstate = 0;
+			}
+		}
+	}
 }
+
+	
 
 ///////////////////////////////////////////////////////////////
 // Main heuristic function
@@ -906,10 +978,12 @@ void heuristic_power_dynamic_baseline(double throughput, double  abort_rate, dou
 					best_pstate = current_pstate;
 					best_threads = active_threads;
 					stop_searching();
-					break;					
+					break;
+				case 9:	// Dynamic heuristic0
+					dynamic_heuristic0(throughput, abort_rate, power, energy_per_tx);
+					break;
 			}
 			steps++;
-
 
 			#ifdef DEBUG_HEURISTICS
 				printf("Switched to: #threads %d - pstate %d\n", active_threads, current_pstate);
@@ -921,11 +995,21 @@ void heuristic_power_dynamic_baseline(double throughput, double  abort_rate, dou
 					stopped_searching = 0;
 					set_pstate(max_pstate);
 					set_threads(starting_threads);
-					best_throughput = 0;
+					best_throughput = -1;
 					best_threads = starting_threads;
 					best_pstate = max_pstate;
 					printf("Workload change detected. Restarting heuristic search\n");
 				}		
+			}
+			else if(detection_mode == 2){
+				if(current_exploit_steps++ == exploit_steps){
+					set_pstate(best_pstate);
+					set_threads(best_threads);
+					best_throughput = -1;
+					best_pstate = -1; 
+					best_threads = -1;
+					stopped_searching = 0;
+				}
 			}
 		}
 	}
