@@ -6,30 +6,44 @@
 int main(int argc, char *argv[]){
 
 	int starting_threads;
+	int static_pstate;
 	double power_limit;
 	int total_commits_round;
 	double energy_per_tx_limit;
 	int heuristic_mode;
 	double jump_percentage;
+	int detection_mode;
+	double detection_tp_threshold;
+	double detection_pwr_threshold; 
 
 	int output_starting_threads;
+	int output_static_pstate;
 	double output_power_limit;
 	int output_total_commits_round;
 	double output_energy_per_tx_limit;
 	int output_heuristic_mode;
 	double output_jump_percentage;
+	int output_detection_mode;
+	double output_detection_tp_threshold;
+	double output_detection_pwr_threshold; 
 
-	if(argc < 7){
+	if(argc < 10){
 		printf("Not enough parameters passed in input\n");
 		exit(1);
 	}
 
 	output_starting_threads = atoi(argv[1]);
-	output_power_limit = atof(argv[2]);
-	output_total_commits_round = atoi(argv[3]);
-	output_energy_per_tx_limit = atof(argv[4]);
-	output_heuristic_mode = atoi(argv[5]);
-	output_jump_percentage = atof(argv[6]);
+	output_static_pstate = atoi(argv[2]);
+	output_power_limit = atof(argv[3]);
+	output_total_commits_round = atoi(argv[4]);
+	output_energy_per_tx_limit = atof(argv[5]);
+	output_heuristic_mode = atoi(argv[6]);
+	output_jump_percentage = atof(argv[7]);
+	output_detection_mode = atoi(argv[8]);
+	output_detection_tp_threshold = atof(argv[9]);
+	output_detection_pwr_threshold = atof(argv[10]);
+
+
 
 	// Load config file 
 	FILE* config_file;
@@ -37,8 +51,8 @@ int main(int argc, char *argv[]){
 		printf("Error opening STM_HOPE configuration file.\n");
 		exit(1);
 	}
-	if (fscanf(config_file, "STARTING_THREADS=%d POWER_LIMIT=%lf COMMITS_ROUND = %d ENERGY_PER_TX_LIMIT = %lf HEURISTIC_MODE = %d JUMP_PERCENTAGE = %lf", 
-			 &starting_threads, &power_limit, &total_commits_round, &energy_per_tx_limit, &heuristic_mode, &jump_percentage)!=6) {
+	if (fscanf(config_file, "STARTING_THREADS=%d STATIC_PSTATE=%d POWER_LIMIT=%lf COMMITS_ROUND = %d ENERGY_PER_TX_LIMIT = %lf HEURISTIC_MODE = %d JUMP_PERCENTAGE = %lf DETECTION_MODE = %d DETECTION_TP_THRESHOLD = %lf DETECTION_PWR_THRESHOLD = %lf", 
+				 &starting_threads, &static_pstate, &power_limit, &total_commits_round, &energy_per_tx_limit, &heuristic_mode, &jump_percentage, &detection_mode, &detection_tp_threshold, &detection_pwr_threshold)!=10) {
 		printf("The number of input parameters of the STM_HOPE configuration file does not match the number of required parameters.\n");
 		exit(1);
 	}
@@ -48,8 +62,8 @@ int main(int argc, char *argv[]){
 		printf("Error opening STM_HOPE configuration file.\n");
 		exit(1);
 	}
-	fprintf(config_file, "STARTING_THREADS=%d\nPOWER_LIMIT=%lf\nCOMMITS_ROUND=%d\nENERGY_PER_TX_LIMIT=%lf\nHEURISTIC_MODE=%d\nJUMP_PERCENTAGE=%lf",
-			output_starting_threads, output_power_limit, output_total_commits_round, output_energy_per_tx_limit, output_heuristic_mode, output_jump_percentage);
+	fprintf(config_file, "STARTING_THREADS=%d\nSTATIC_PSTATE=%d\nPOWER_LIMIT=%lf\nCOMMITS_ROUND=%d\nENERGY_PER_TX_LIMIT=%lf\nHEURISTIC_MODE=%d\nJUMP_PERCENTAGE=%lf\nDETECTION_MODE=%d\nDETECTION_TP_THRESHOLD=%lf\nDETECTION_PWR_THRESHOLD=%lf",
+			output_starting_threads, output_static_pstate, output_power_limit, output_total_commits_round, output_energy_per_tx_limit, output_heuristic_mode, output_jump_percentage, output_detection_mode, output_detection_tp_threshold, output_detection_pwr_threshold);
 	fflush(config_file);
 	printf("File hope_config.txt modified\n");
 	
