@@ -1,0 +1,5 @@
+Effective_runtime: 11.900837	Pkg_power: 63.032195	Energy_total: 750.135897	Threads: 13	Elapsed time: 11.950312	Commits: 23428138	Aborts: 51987038	P-state: 3	Best-threads: 13	Steps: 1	Throughput: 1960462.471410
+Effective_runtime: 11.892889	Pkg_power: 63.267965	Energy_total: 752.438870	Threads: 13	Elapsed time: 11.916358	Commits: 23428138	Aborts: 52266815	P-state: 3	Best-threads: 13	Steps: 1	Throughput: 1966048.520164
+Effective_runtime: 12.073885	Pkg_power: 63.141889	Energy_total: 762.367922	Threads: 13	Elapsed time: 12.122088	Commits: 23428138	Aborts: 52867028	P-state: 3	Best-threads: 13	Steps: 1	Throughput: 1932681.736517
+Effective_runtime: 12.227207	Pkg_power: 63.458448	Energy_total: 775.919583	Threads: 13	Elapsed time: 12.296510	Commits: 23428138	Aborts: 52245963	P-state: 3	Best-threads: 13	Steps: 1	Throughput: 1905267.269811
+Effective_runtime: 11.833275	Pkg_power: 62.982154	Energy_total: 745.285142	Threads: 13	Elapsed time: 11.843046	Commits: 23428138	Aborts: 52199191	P-state: 3	Best-threads: 13	Steps: 1	Throughput: 1978218.956427
