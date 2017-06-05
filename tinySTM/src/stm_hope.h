@@ -17,6 +17,8 @@ int total_commits_round; 		// Number of total commits for each heuristics step
 int starting_threads;			// Number of threads running at the start of the heuristic search. Defined in hope_config.txt
 int static_pstate;				// Static -state used for the execution with heuristic 8. Defined in hope_config.txt
 int steps;						// Number of steps required for the heuristic to converge 
+int exploit_steps;				// Number of steps that should be waited until the next exploration is started. Defined in hope_config.txt
+int current_exploit_steps;		// Current number of steps since the last completed exploration
 stats_t** stats_array;			// Pointer to pointers of struct stats_s, one for each thread 	
 volatile int round_completed;   // Defines if round completed and thread 0 should collect stats and call the heuristic function 
 double** power_profile; 		// Power consumption matrix of the machine. Precomputed using profiler.c included in root folder.
@@ -42,12 +44,16 @@ double best_throughput;
 int best_threads;
 int best_pstate;
 
-// Variables that define the current level best configuration. Used by HEURISTIC_MODE 0, 3 and 4
+// Variables that define the current level best configuration. Used by HEURISTIC_MODE 0, 3, 4
 double level_best_throughput; 
 int level_best_threads;
 int level_best_pstate;
 int level_starting_threads;
 int level_starting_energy_per_tx;
+
+// Variable to keep track of the starting configuration for phase 1 and 2 of dynamic heuristic 0 and 1 (9 and 10)
+int phase0_pstate;
+int phase0_threads;
 
 // Variables used to define the state of the search 
 int new_pstate;					// Used to check if just arrived to a new p_state in the heuristic search

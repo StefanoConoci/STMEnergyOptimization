@@ -344,8 +344,8 @@ if(input_pstate > max_pstate)
 			printf("Error opening STM_HOPE configuration file.\n");
 			exit(1);
 		}
-		if (fscanf(config_file, "STARTING_THREADS=%d STATIC_PSTATE=%d POWER_LIMIT=%lf COMMITS_ROUND = %d ENERGY_PER_TX_LIMIT = %lf HEURISTIC_MODE = %d JUMP_PERCENTAGE = %lf DETECTION_MODE = %d DETECTION_TP_THRESHOLD = %lf DETECTION_PWR_THRESHOLD = %lf", 
-				 &starting_threads, &static_pstate, &power_limit, &total_commits_round, &energy_per_tx_limit, &heuristic_mode, &jump_percentage, &detection_mode, &detection_tp_threshold, &detection_pwr_threshold)!=10) {
+		if (fscanf(config_file, "STARTING_THREADS=%d STATIC_PSTATE=%d POWER_LIMIT=%lf COMMITS_ROUND=%d ENERGY_PER_TX_LIMIT=%lf HEURISTIC_MODE=%d JUMP_PERCENTAGE=%lf DETECTION_MODE=%d DETECTION_TP_THRESHOLD=%lf DETECTION_PWR_THRESHOLD=%lf EXPLOIT_STEPS=%d", 
+				 &starting_threads, &static_pstate, &power_limit, &total_commits_round, &energy_per_tx_limit, &heuristic_mode, &jump_percentage, &detection_mode, &detection_tp_threshold, &detection_pwr_threshold, &exploit_steps)!=11) {
 			printf("The number of input parameters of the STM_HOPE configuration file does not match the number of required parameters.\n");
 			exit(1);
 		}
@@ -428,6 +428,27 @@ if(input_pstate > max_pstate)
 					wake_up_thread(i);
 			}
 		}
+	}
+
+	// Initialization of global variables 
+	inline void init_global_variables(){
+
+		round_completed=0;
+		old_throughput = -1;
+		old_power = -1;
+		old_energy_per_tx = -1;
+		level_best_throughput = -1; 
+		level_best_threads = 0;
+		level_starting_threads = starting_threads;
+		best_throughput = -1;
+		new_pstate = 1;
+		decreasing = 0;
+		stopped_searching = 0;
+		steps=0;
+		shutdown = 0;
+		effective_commits = 0;
+		phase = 0; 
+		current_exploit_steps = 0;
 	}
 
 #endif/* ! STM_HOPE */
@@ -1166,32 +1187,15 @@ _CALLCONV stm_tx_t *stm_pre_init_thread(int id){
 		// Thread 0 sets itself as a collector and inits global variables
 		if( id == 0){
 			tx->stats_ptr->collector = 1;
-			
-			round_completed=0;
-			old_throughput = -1;
-			old_power = -1;
-			old_energy_per_tx = -1;
-			level_best_throughput = -1; 
-			level_best_threads = 0;
-			level_starting_threads = starting_threads;
-			best_throughput = -1;
-			new_pstate = 1;
-			decreasing = 0;
-			stopped_searching = 0;
-			steps=0;
-			shutdown = 0;
-			effective_commits = 0;
-			phase = 0; 
+			init_global_variables();
 
 			#ifdef ENERGY_DESKTOP
   			set_start_energy_counters();
 			#endif 
 
-
 			#ifdef ENERGY_SERVER
   			set_start_energy_counters();
 			#endif 
-
 		}
 
 		return tx;
@@ -1201,7 +1205,7 @@ _CALLCONV stm_tx_t *stm_pre_init_thread(int id){
 	#endif
 }
 
-void stm_wait(int id) {
+inline void stm_wait(int id) {
 	#ifdef STM_HOPE
   		check_running_array(id);
   #endif
