@@ -866,9 +866,10 @@ void dynamic_heuristic0(double throughput, double  abort_rate, double power, dou
 			else{
 				decreasing = 1;
 				set_threads(active_threads-1);
-				//DEBUG
-				printf("PHASE 0 - DECREASING");
-				//END_DEBUG
+				
+				#ifdef DEBUG_HEURISTICS
+					printf("PHASE 0 - DECREASING");
+				#endif
 			}
 		}
 		else if(steps == 1 && !decreasing){ //Second exploration step, define if should set decreasing 
@@ -884,6 +885,10 @@ void dynamic_heuristic0(double throughput, double  abort_rate, double power, dou
 				if(starting_threads > 1){
 					decreasing = 1; 
 					set_threads(starting_threads-1);	
+
+					#ifdef DEBUG_HEURISTICS
+						printf("PHASE 0 - DECREASING");
+					#endif
 				}
 				else{ // Cannot reduce number of thread more as starting_thread is already set to 1 
 					from_phase0_to_next();
