@@ -887,7 +887,7 @@ void dynamic_heuristic0(double throughput, double  abort_rate, double power, dou
 					set_threads(starting_threads-1);	
 
 					#ifdef DEBUG_HEURISTICS
-						printf("PHASE 0 - DECREASING");
+						printf("PHASE 0 - DECREASING\n");
 					#endif
 				}
 				else{ // Cannot reduce number of thread more as starting_thread is already set to 1 
@@ -1031,6 +1031,7 @@ void dynamic_heuristic0(double throughput, double  abort_rate, double power, dou
 					
 					set_pstate(best_pstate);
 					set_threads(best_threads);
+					starting_threads = best_threads;
 					best_throughput = -1;
 					best_pstate = -1; 
 					best_threads = -1;
