@@ -5,7 +5,7 @@
 // Checks if the current config is better than the currently best config and if that's the case update it 
 inline void update_best_config(double throughput){
 	
-	if(throughput > best_throughput){
+	if(throughput > best_throughput || (best_threads == active_threads && current_pstate <= best_pstate)){
 		best_throughput = throughput;
 		best_pstate = current_pstate;
 		best_threads = active_threads;
