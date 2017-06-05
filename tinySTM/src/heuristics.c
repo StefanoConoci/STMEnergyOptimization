@@ -868,7 +868,7 @@ void dynamic_heuristic0(double throughput, double  abort_rate, double power, dou
 				set_threads(active_threads-1);
 				
 				#ifdef DEBUG_HEURISTICS
-					printf("PHASE 0 - DECREASING");
+					printf("PHASE 0 - DECREASING\n");
 				#endif
 			}
 		}
