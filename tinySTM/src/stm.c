@@ -690,8 +690,8 @@ global_t _tinystm =
 
 		long power; 
 
-		//double effective_throughput;
-		//double effective_energy_per_tx;
+		double effective_throughput;
+		double effective_energy_per_tx;
 		double summed_power;
 		double summed_energy;
 
