@@ -422,7 +422,7 @@ global_t _tinystm =
 		#ifdef DEBUG_OVERHEAD
 			time_heuristic_end = get_time();
 			time_heuristic_microseconds = (((double) time_heuristic_end) - ((double) time_heuristic_start))/1000;
-			printf("DEBUG OVERHEAD -  Inside set_threads(): %lf microseconds\n", time_heuristic_microseconds);
+			printf("DEBUG OVERHEAD -  Inside get_energy(): %lf microseconds\n", time_heuristic_microseconds);
 		#endif 
 
 		return total_energy;
