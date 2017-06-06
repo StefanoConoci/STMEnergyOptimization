@@ -962,6 +962,14 @@ void dynamic_heuristic0(double throughput, double  abort_rate, double power, dou
 			         throughput, abort_rate, power, energy_per_tx);
 		#endif
 
+		#ifdef DEBUG_OVERHEAD
+			long time_heuristic_start;
+			long time_heuristic_end;
+			double time_heuristic_microseconds;
+
+			time_heuristic_start = get_time();
+		#endif 
+
 		if(!stopped_searching){
 			switch(heuristic_mode){
 				case 0:
@@ -1039,4 +1047,10 @@ void dynamic_heuristic0(double throughput, double  abort_rate, double power, dou
 				}
 			}
 		}
+
+		#ifdef DEBUG_OVERHEAD
+			time_heuristic_end = get_time();
+			time_heuristic_microseconds = (((double) time_heuristic_end) - ((double) time_heuristic_start))/1000;
+			printf("DEBUG OVERHEAD - time spent in heuristic function: %lf microseconds\n", time_heuristic_microseconds);
+		#endif 
 	}

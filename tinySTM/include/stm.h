@@ -4,6 +4,7 @@
 //#define ENERGY_DESKTOP
 #define ENERGY_SERVER
 #define DEBUG_HEURISTICS
+#define DEBUG_OVERHEAD
 //#define REDUCED_VERBOSITY
 
 
