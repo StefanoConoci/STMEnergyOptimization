@@ -5,7 +5,7 @@
 #define ENERGY_SERVER
 #define DEBUG_HEURISTICS
 #define DEBUG_OVERHEAD
-//#define REDUCED_VERBOSITY
+#define REDUCED_VERBOSITY
 
 
   
