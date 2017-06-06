@@ -762,10 +762,6 @@ global_t _tinystm =
    				   runtime,package0_energy_consumed, dram0_energy_consumed, package1_energy_consumed, dram1_energy_consumed, package0_power, dram0_power, package1_power, dram1_power);
 	
    		#endif   		
-
-   		printf("Effective_runtime: %lf\tPkg_power: %lf\tEnergy_total: %lf\t",
-   			   	runtime, summed_power, (package0_energy_consumed+package1_energy_consumed));
-
 	}
 
 
