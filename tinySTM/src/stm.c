@@ -97,7 +97,16 @@ global_t _tinystm =
 		int i;
 		char fname[64];
 		FILE* frequency_file;
-if(input_pstate > max_pstate)
+
+		#ifdef DEBUG_OVERHEAD
+			long time_heuristic_start;
+			long time_heuristic_end;
+			double time_heuristic_microseconds;
+
+			time_heuristic_start = get_time();
+		#endif 
+		
+		if(input_pstate > max_pstate)
 			return -1;
 		int frequency = pstate[input_pstate];
 
@@ -113,6 +122,12 @@ if(input_pstate > max_pstate)
 			fclose(frequency_file);
 		}
 		current_pstate = input_pstate;
+
+		#ifdef DEBUG_OVERHEAD
+			time_heuristic_end = get_time();
+			time_heuristic_microseconds = (((double) time_heuristic_end) - ((double) time_heuristic_start))/1000;
+			printf("DEBUG OVERHEAD - inside set_pstate() %lf microseconds\n", time_heuristic_microseconds);
+		#endif 
 		
 		return 0;
 	}
@@ -160,7 +175,7 @@ if(input_pstate > max_pstate)
 		}
 	  	max_pstate = --i;
 
-			#ifdef DEBUG_HEURISTICS
+		#ifdef DEBUG_HEURISTICS
 	  		printf("Found %d p-states in the range from %d MHz to %d MHz\n", max_pstate, pstate[max_pstate]/1000, pstate[0]/1000);
 	  	#endif
 	  	fclose(available_freq_file);
@@ -415,6 +430,14 @@ if(input_pstate > max_pstate)
 	// Function used to set the number of running threads. Based on active_threads and threads might wake up or pause some threads 
 	inline void set_threads(int to_threads){
 
+		#ifdef DEBUG_OVERHEAD
+			long time_heuristic_start;
+			long time_heuristic_end;
+			double time_heuristic_microseconds;
+
+			time_heuristic_start = get_time();
+		#endif 
+
 		int i;
 		int starting_threads = active_threads;
 
@@ -428,6 +451,12 @@ if(input_pstate > max_pstate)
 					wake_up_thread(i);
 			}
 		}
+
+		#ifdef DEBUG_OVERHEAD
+			time_heuristic_end = get_time();
+			time_heuristic_microseconds = (((double) time_heuristic_end) - ((double) time_heuristic_start))/1000;
+			printf("DEBUG OVERHEAD -  Inside set_threads(): %lf microseconds\n", time_heuristic_microseconds);
+		#endif 
 	}
 
 	// Initialization of global variables 

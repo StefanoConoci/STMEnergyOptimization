@@ -1051,6 +1051,6 @@ void dynamic_heuristic0(double throughput, double  abort_rate, double power, dou
 		#ifdef DEBUG_OVERHEAD
 			time_heuristic_end = get_time();
 			time_heuristic_microseconds = (((double) time_heuristic_end) - ((double) time_heuristic_start))/1000;
-			printf("DEBUG OVERHEAD - time spent in heuristic function: %lf microseconds\n", time_heuristic_microseconds);
+			printf("DEBUG OVERHEAD -  Inside heuristic(): %lf microseconds\n", time_heuristic_microseconds);
 		#endif 
 	}
