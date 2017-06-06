@@ -383,6 +383,15 @@ global_t _tinystm =
 
 	// Returns energy consumption of package 0 cores in micro Joule
 	long get_energy(){
+
+
+		#ifdef DEBUG_OVERHEAD
+			long time_heuristic_start;
+			long time_heuristic_end;
+			double time_heuristic_microseconds;
+
+			time_heuristic_start = get_time();
+		#endif 
 		
 		long energy;
 		int i;
@@ -409,6 +418,12 @@ global_t _tinystm =
 			fclose(energy_file);
 			total_energy+=energy;
 		}
+
+		#ifdef DEBUG_OVERHEAD
+			time_heuristic_end = get_time();
+			time_heuristic_microseconds = (((double) time_heuristic_end) - ((double) time_heuristic_start))/1000;
+			printf("DEBUG OVERHEAD -  Inside set_threads(): %lf microseconds\n", time_heuristic_microseconds);
+		#endif 
 
 		return total_energy;
 	}
