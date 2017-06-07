@@ -728,7 +728,11 @@ global_t _tinystm =
 		
 		double runtime; 
 		double package0_energy_consumed, package1_energy_consumed, dram0_energy_consumed, dram1_energy_consumed;
-		double package0_power, package1_power, dram0_power, dram1_power;
+		double package0_power, package1_power;
+
+		#ifndef REDUCED_VERBOSITY
+			double dram0_power, dram1_power;
+		#endif
 
 		long power; 
 

@@ -989,7 +989,7 @@ void dynamic_heuristic1(double throughput, double  abort_rate, double power, dou
 
 
 // Takes decision on frequency and number of active threads based on statistics of current round 
-	void heuristic(double throughput, double  abort_rate, double power, double energy_per_tx, long time_sum){
+	void heuristic(double throughput, double  abort_rate, double power, double energy_per_tx, long time){
 		
 		#ifdef DEBUG_HEURISTICS 
 			printf("Throughput: %lf - Abort rate: %lf percent - Power: %lf Watt - Energy per tx: %lf micro Joule\n",
