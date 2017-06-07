@@ -955,7 +955,7 @@ void update_high(double throughput, double power){
 		high_throughput = throughput; 
 		high_pstate = current_pstate;
 		high_threads = active_threads;
-		high_power = power
+		high_power = power;
 	} 
 }
 
@@ -1103,7 +1103,7 @@ void dynamic_heuristic1(double throughput, double  abort_rate, double power, dou
 				}
 
 				// Dynamic confiugration fluctuation used by dynamic_heuristic1
-				if(heuristic_mode = 10 && stopped_searching){
+				if(heuristic_mode == 10 && stopped_searching){
 
 					if(fluctuation_state == -1)
 						update_low(throughput, power);
