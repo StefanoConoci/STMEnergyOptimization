@@ -791,8 +791,11 @@ global_t _tinystm =
 
    		package0_power = (package0_energy_consumed)/runtime;
    		package1_power = (package1_energy_consumed)/runtime;
-   		dram0_power = (dram0_energy_consumed)/runtime;
-   		dram1_power = (dram1_energy_consumed)/runtime;
+
+   		#ifndef REDUCED_VERBOSITY
+   			dram0_power = (dram0_energy_consumed)/runtime;
+   			dram1_power = (dram1_energy_consumed)/runtime;
+   		#endif
 
    		summed_energy = package0_energy_consumed+package1_energy_consumed;
    		summed_power = package0_power+package1_power;
