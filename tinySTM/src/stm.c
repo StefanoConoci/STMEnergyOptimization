@@ -108,20 +108,24 @@ global_t _tinystm =
 		
 		if(input_pstate > max_pstate)
 			return -1;
-		int frequency = pstate[input_pstate];
+			
 
-		for(i=0; i<nb_cores;i++){
-			sprintf(fname, "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_setspeed", i);
-			frequency_file = fopen(fname,"w+");
-			if(frequency_file == NULL){
-				printf("Error opening cpu%d scaling_setspeed file. Must be superuser\n", i);
-				exit(0);		
-			}		
-			fprintf(frequency_file, "%d", frequency);
-			fflush(frequency_file);
-			fclose(frequency_file);
+		if(current_pstate != input_pstate){
+			int frequency = pstate[input_pstate];
+
+			for(i=0; i<nb_cores; i++){
+				sprintf(fname, "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_setspeed", i);
+				frequency_file = fopen(fname,"w+");
+				if(frequency_file == NULL){
+					printf("Error opening cpu%d scaling_setspeed file. Must be superuser\n", i);
+					exit(0);		
+				}		
+				fprintf(frequency_file, "%d", frequency);
+				fflush(frequency_file);
+				fclose(frequency_file);
+			}
+			current_pstate = input_pstate;
 		}
-		current_pstate = input_pstate;
 
 		#ifdef DEBUG_OVERHEAD
 			time_heuristic_end = get_time();
@@ -359,8 +363,8 @@ global_t _tinystm =
 			printf("Error opening STM_HOPE configuration file.\n");
 			exit(1);
 		}
-		if (fscanf(config_file, "STARTING_THREADS=%d STATIC_PSTATE=%d POWER_LIMIT=%lf COMMITS_ROUND=%d ENERGY_PER_TX_LIMIT=%lf HEURISTIC_MODE=%d JUMP_PERCENTAGE=%lf DETECTION_MODE=%d DETECTION_TP_THRESHOLD=%lf DETECTION_PWR_THRESHOLD=%lf EXPLOIT_STEPS=%d", 
-				 &starting_threads, &static_pstate, &power_limit, &total_commits_round, &energy_per_tx_limit, &heuristic_mode, &jump_percentage, &detection_mode, &detection_tp_threshold, &detection_pwr_threshold, &exploit_steps)!=11) {
+		if (fscanf(config_file, "STARTING_THREADS=%d STATIC_PSTATE=%d POWER_LIMIT=%lf COMMITS_ROUND=%d ENERGY_PER_TX_LIMIT=%lf HEURISTIC_MODE=%d JUMP_PERCENTAGE=%lf DETECTION_MODE=%d DETECTION_TP_THRESHOLD=%lf DETECTION_PWR_THRESHOLD=%lf EXPLOIT_STEPS=%d EXTRA_RANGE_PERCENTAGE=%lf WINDOW_SIZE=%d HYSTERESIS=%d", 
+				 &starting_threads, &static_pstate, &power_limit, &total_commits_round, &energy_per_tx_limit, &heuristic_mode, &jump_percentage, &detection_mode, &detection_tp_threshold, &detection_pwr_threshold, &exploit_steps, &extra_range_percentage, &window_size, &hysteresis)!=14) {
 			printf("The number of input parameters of the STM_HOPE configuration file does not match the number of required parameters.\n");
 			exit(1);
 		}
@@ -369,13 +373,24 @@ global_t _tinystm =
 			exit(1);
 		}
 
+	  	if(extra_range_percentage < 0 || extra_range_percentage > 100){
+	  		printf("Extra_range_percentage value is not a percentage. Should be a floating point number in the range from 0 to 100\n");
+	  		exit(1);
+	  	}
+
+
+		if(hysteresis < 0 || hysteresis > 100){
+	  		printf("Hysteresis value is not a percentage. Should be a floating point number in the range from 0 to 100\n");
+	  		exit(1);
+	  	}
+
+	  	// Necessary for the static execution in order to avoid running for the first step with a different frequency than manually set in hope_config.txt
 	  	if(heuristic_mode == 8){
 	  		if(static_pstate >= 0 && static_pstate <= max_pstate)
 	  			set_pstate(static_pstate);
 	  		else 
 	  			printf("The parameter manual_pstate is set outside of the valid range for this CPU. Setting the CPU to the slowest frequency/voltage\n");
 	  	}
-
 
 		fclose(config_file);
 	}
@@ -493,6 +508,18 @@ global_t _tinystm =
 		effective_commits = 0;
 		phase = 0; 
 		current_exploit_steps = 0;
+
+		high_throughput = -1;
+		high_threads = -1;
+		high_pstate = -1;
+
+		low_throughput = -1;
+		low_threads = -1;
+		low_pstate = -1;
+
+		current_window_slot = 0;
+		window_time = 0;
+		window_power = 0;
 	}
 
 #endif/* ! STM_HOPE */
@@ -1177,7 +1204,7 @@ stm_start(stm_tx_attr_t attr)
 
 			// We don't call the heuristic if the energy results are out or range due to an overflow 
 			if(power > 0 && energy_per_tx > 0)
-				heuristic(throughput, abort_rate, power, energy_per_tx);
+				heuristic(throughput, abort_rate, power, energy_per_tx, time_sum);
 		
 			//Setup next round
 			int slice = total_commits_round/active_threads;
