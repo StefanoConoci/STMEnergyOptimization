@@ -1031,7 +1031,7 @@ void stm_init(int threads) {
 	for(i = starting_threads; i<total_threads;i++){
 		pause_thread(i);
 	}
-		}
+	
 	
 #else
 
@@ -1042,6 +1042,7 @@ void stm_init(){
 #if CM == CM_MODULAR
   char *s;
 #endif /* CM == CM_MODULAR */
+
 #ifdef SIGNAL_HANDLER
   struct sigaction act;
 #endif /* SIGNAL_HANDLER */
