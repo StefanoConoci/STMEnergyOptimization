@@ -1010,6 +1010,14 @@ void stm_init(int threads) {
 	init_stats_array_pointer(threads);
 	load_config_file();
 
+	#ifdef LOCK_BASED_TRANSACTIONS
+		int ret_spin_init = pthread_spin_init(&spinlock_variable, PTHREAD_PROCESS_PRIVATE);
+		if(ret_spin_init != 0){
+			printf("Error initiliazing the spinlock. Aborting application\n");
+			exit(1);
+		}
+	#endif
+
 	#ifdef DEBUG_HEURISTICS
 		printf("Heuristic mode: %d\n", heuristic_mode);
 	#endif
@@ -1023,6 +1031,7 @@ void stm_init(int threads) {
 	for(i = starting_threads; i<total_threads;i++){
 		pause_thread(i);
 	}
+		}
 	
 #else
 
@@ -1242,7 +1251,7 @@ stm_start(stm_tx_attr_t attr)
   #endif
 
   #if defined(STM_HOPE) && defined (LOCK_BASED_TRANSACTIONS)
-  		// Retrieve LOCK
+  		pthread_spin_lock(&spinlock_variable);
   		return NULL;
   #else
 	  ret=int_stm_start(tx, attr);
@@ -1307,6 +1316,7 @@ stm_commit(void)
 	int ret;
 
 	#if defined(STM_HOPE) && defined(LOCK_BASED_TRANSACTIONS)
+		pthread_spin_unlock(&spinlock_variable);
 		ret=0;
 	#else
 		ret=int_stm_commit(tx);
