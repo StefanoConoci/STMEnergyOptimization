@@ -584,6 +584,23 @@
 
 #  include <wrappers.h>
 
+#ifdef defined(LOCK_BASED_TRANSACTIONS) && defined(STM_HOPE)
+
+#  define TM_SHARED_READ(var)           (var)
+#  define TM_SHARED_READ_P(var)         (var)
+#  define TM_SHARED_READ_F(var)         (var)
+
+#  define TM_SHARED_WRITE(var, val)     ({var = val; var;})
+#  define TM_SHARED_WRITE_P(var, val)   ({var = val; var;})
+#  define TM_SHARED_WRITE_F(var, val)   ({var = val; var;})
+
+#  define TM_LOCAL_WRITE(var, val)      ({var = val; var;})
+#  define TM_LOCAL_WRITE_P(var, val)    ({var = val; var;})
+#  define TM_LOCAL_WRITE_F(var, val)    ({var = val; var;})
+
+#else //* !LOCK_BASED_TRANSACTIONS */
+
+
 /* We could also map macros to the stm_(load|store)_long functions if needed */
 
 #  define TM_SHARED_READ(var)           stm_load((volatile stm_word_t *)(void *)&(var))
@@ -597,6 +614,8 @@
 #  define TM_LOCAL_WRITE(var, val)      ({var = val; var;})
 #  define TM_LOCAL_WRITE_P(var, val)    ({var = val; var;})
 #  define TM_LOCAL_WRITE_F(var, val)    ({var = val; var;})
+
+#endif
 
 #endif /* !OTM */
 
