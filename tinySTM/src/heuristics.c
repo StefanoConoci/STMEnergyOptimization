@@ -962,7 +962,7 @@ void update_high(double throughput, double power){
 // Utility function used for updating the values of the HIGH configurations
 void update_low(double throughput, double power){
 
-	if( power < power_limit*(1-(extra_range_percentage/100)) && throughput > low_throughput){
+	if( power < power_limit*(1-(extra_range_percentage/100/2)) && throughput > low_throughput){
 		low_throughput = throughput; 
 		low_pstate = current_pstate;
 		low_threads = active_threads; 
