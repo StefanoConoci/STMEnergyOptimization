@@ -1,4 +1,4 @@
-ITERATIONS=3
+ITERATIONS=5
 export STM_STATS=1
 
 for i in $(seq 0 11)
