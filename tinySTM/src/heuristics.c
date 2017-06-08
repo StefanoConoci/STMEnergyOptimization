@@ -1136,6 +1136,7 @@ void dynamic_heuristic1(double throughput, double  abort_rate, double power, dou
 						current_window_slot = 0;
 
 						#ifdef DEBUG_HEURISTICS
+							printf(" - Next configuration = BEST (restart)\n");
 							printf("BEST - threads %d - pstate %d - power %lf\n", best_threads, best_pstate, best_power);
 							printf("HIGH - threads %d - pstate %d - power %lf\n", high_threads, high_pstate, high_power);
 							printf("LOW - threads %d - pstate %d - power %lf\n", low_threads, low_pstate, low_power);
