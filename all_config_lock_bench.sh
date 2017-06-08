@@ -12,7 +12,7 @@ do
 			echo  "Threads=$j"
 	        echo "Iteration $b"
 			echo ""
-			numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/intruder/./intruder a20 -l16 -n127680 -s1 -t$j >> all_config_lock/intruder-$i-$j.txt
+			numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/intruder/./intruder -a20 -l16 -n127680 -s1 -t$j >> all_config_lock/intruder-$i-$j.txt
 		done
 	done 
 done
