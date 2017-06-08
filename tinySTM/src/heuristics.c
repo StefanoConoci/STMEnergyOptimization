@@ -1183,7 +1183,7 @@ void dynamic_heuristic1(double throughput, double  abort_rate, double power, dou
 							}
 						}
 						else{	// Window_power is within the hysteresis variation of window_power
-							if(high_power < power_limit){
+							if(high_power < power_limit*(1+hysteresis/100)){
 								set_threads(high_threads);
 								set_pstate(high_pstate);
 								fluctuation_state = 1;
@@ -1191,7 +1191,7 @@ void dynamic_heuristic1(double throughput, double  abort_rate, double power, dou
 								#ifdef DEBUG_HEURISTICS
 									printf(" - Next configuration = HIGH (hysteresis)\n");
 								#endif
-							}else if(best_power < power_limit){
+							}else if(best_power < power_limit*(1+hysteresis/100)){
 								set_threads(best_threads);
 								set_pstate(best_pstate);
 								fluctuation_state = 0;
