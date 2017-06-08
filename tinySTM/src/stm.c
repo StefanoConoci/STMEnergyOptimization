@@ -785,9 +785,10 @@ global_t _tinystm =
     	package0_energy_consumed = ( (double) end_package0_energy - start_package0_energy)/1000000;
     	package1_energy_consumed = ( (double) end_package1_energy - start_package1_energy)/1000000;
 
-    	dram0_energy_consumed = ( (double) end_dram0_energy - start_dram0_energy)/1000000;
-    	dram1_energy_consumed = ( (double) end_dram1_energy - start_dram1_energy)/1000000;
-
+    	#ifndef REDUCED_VERBOSITY
+    		dram0_energy_consumed = ( (double) end_dram0_energy - start_dram0_energy)/1000000;
+    		dram1_energy_consumed = ( (double) end_dram1_energy - start_dram1_energy)/1000000;
+    	#endif
 
    		package0_power = (package0_energy_consumed)/runtime;
    		package1_power = (package1_energy_consumed)/runtime;
