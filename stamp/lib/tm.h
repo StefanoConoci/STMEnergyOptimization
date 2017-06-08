@@ -467,8 +467,20 @@
 
 #      define P_MALLOC(size)            malloc(size)
 #      define P_FREE(ptr)               free(ptr)
+
+#if defined(STM_HOPE) && defined(LOCK_BASED_TRANSACTIONS) 
+
+#      define TM_MALLOC(size)           malloc(size)
+#      define TM_FREE(ptr)              free(ptr)
+
+#else   
+
 #      define TM_MALLOC(size)           stm_malloc(size)
 #      define TM_FREE(ptr)              stm_free(ptr, sizeof(stm_word_t))
+
+#endif
+
+
 
 #    endif /* !OTM */
 
@@ -479,6 +491,7 @@
 #    define TM_BEGIN()                  _Pragma ("omp transaction") {
 #    define TM_BEGIN_RO()               _Pragma ("omp transaction") {
 #    define TM_END()                    }
+
 #    define TM_RESTART()                omp_abort()
 
 #    define TM_EARLY_RELEASE(var)       /* nothing */
@@ -493,12 +506,17 @@
 
 #    define TM_BEGIN(id)                TM_START(id,0)
 
-#    define TM_BEGIN()                TM_START(0,0)
+#    define TM_BEGIN()                  TM_START(0,0)
 
 #    define TM_BEGIN_RO()               TM_START(1)
 
 #    define TM_END()                    stm_commit()
+
+#if defined(STM_HOPE) && defined(LOCK_BASED_TRANSACTIONS) 
+#    define TM_RESTART()                assert(0)                              
+#else 
 #    define TM_RESTART()                stm_abort(0)
+#endif
 
 #    define TM_EARLY_RELEASE(var)       /* nothing */
 

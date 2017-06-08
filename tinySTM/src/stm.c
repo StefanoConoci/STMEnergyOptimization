@@ -1173,6 +1173,7 @@ stm_start(stm_tx_attr_t attr)
 
   TX_GET;
   sigjmp_buf * ret;
+  
   #ifdef STM_HOPE
   	int i;
   	stm_wait(tx->thread_number);
@@ -1237,13 +1238,16 @@ stm_start(stm_tx_attr_t attr)
 
   		stats->nb_tx++;
   	}
-	
-  #else
-  	stm_wait(attr.id);
+
   #endif
 
-  ret=int_stm_start(tx, attr);
-  return ret;
+  #if defined(STM_HOPE) && defined (LOCK_BASED_TRANSACTIONS)
+  		// Retrieve LOCK
+  		return NULL;
+  #else
+	  ret=int_stm_start(tx, attr);
+	  return ret;
+  #endif
 }
 
 
@@ -1302,37 +1306,39 @@ stm_commit(void)
 	TX_GET;
 	int ret;
 
-	ret=int_stm_commit(tx);
+	#if defined(STM_HOPE) && defined(LOCK_BASED_TRANSACTIONS)
+		ret=0;
+	#else
+		ret=int_stm_commit(tx);
+	#endif
 
-#ifdef STM_HOPE
-	
-	// Retrive stats if collector 
-  	if(tx->stats_ptr->collector == 1){
-  		
-  		stats_t* stats = tx->stats_ptr;
-  		stats->commits++;
+	#ifdef STM_HOPE
+		// Retrive stats if collector 
+	  	if(tx->stats_ptr->collector == 1){
+	  		
+	  		stats_t* stats = tx->stats_ptr;
+	  		stats->commits++;
 
-  		// Round completed 
-  		if(stats->commits == stats->total_commits){
+	  		// Round completed 
+	  		if(stats->commits == stats->total_commits){
 
-  			stats->end_energy = get_energy();
-  			stats->end_time = get_time();
-  			stats->collector = 0;
+	  			stats->end_energy = get_energy();
+	  			stats->end_time = get_time();
+	  			stats->collector = 0;
 
-  			if(tx->thread_number == (active_threads-1)){
-  				stats_array[0]->collector = 1;
-  				round_completed = 1;
-  			}
-  			else{  				
-  				int next = (tx->thread_number)+1;
-  				stats_array[next]->collector = 1;
-  			}
-  		}
-  	}
+	  			if(tx->thread_number == (active_threads-1)){
+	  				stats_array[0]->collector = 1;
+	  				round_completed = 1;
+	  			}
+	  			else{  				
+	  				int next = (tx->thread_number)+1;
+	  				stats_array[next]->collector = 1;
+	  			}
+	  		}
+	  	}
+	#endif
 
-#endif
-
-  return ret;
+	return ret;
 }
 
 _CALLCONV int
