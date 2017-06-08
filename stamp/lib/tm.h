@@ -584,7 +584,7 @@
 
 #  include <wrappers.h>
 
-#ifdef defined(LOCK_BASED_TRANSACTIONS) && defined(STM_HOPE)
+#if defined(LOCK_BASED_TRANSACTIONS) && defined(STM_HOPE)
 
 #  define TM_SHARED_READ(var)           (var)
 #  define TM_SHARED_READ_P(var)         (var)
