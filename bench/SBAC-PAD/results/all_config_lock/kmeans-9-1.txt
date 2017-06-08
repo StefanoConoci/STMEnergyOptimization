@@ -1,5 +1,0 @@
-Threads: 1	Elapsed time: 1.864907	Commits: 0	Aborts: 0	P-state: 9	Best-threads: 1	Steps: 0	Throughput: 0.000000
-Threads: 1	Elapsed time: 1.860826	Commits: 0	Aborts: 0	P-state: 9	Best-threads: 1	Steps: 0	Throughput: 0.000000
-Threads: 1	Elapsed time: 1.867718	Commits: 0	Aborts: 0	P-state: 9	Best-threads: 1	Steps: 0	Throughput: 0.000000
-Threads: 1	Elapsed time: 1.865324	Commits: 0	Aborts: 0	P-state: 9	Best-threads: 1	Steps: 0	Throughput: 0.000000
-Threads: 1	Elapsed time: 1.866742	Commits: 0	Aborts: 0	P-state: 9	Best-threads: 1	Steps: 0	Throughput: 0.000000
