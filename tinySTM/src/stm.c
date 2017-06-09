@@ -1331,8 +1331,6 @@ stm_commit(void)
 		    for (cb = 0; cb < _tinystm.nb_commit_cb; cb++)
 		      _tinystm.commit_cb[cb].f(_tinystm.commit_cb[cb].arg);
 		}
-  }
-
 
 		ret=0;
 	#else
