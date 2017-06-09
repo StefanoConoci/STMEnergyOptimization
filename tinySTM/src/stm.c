@@ -1013,6 +1013,7 @@ void stm_init(int threads) {
 	load_profile_file();
 	init_stats_array_pointer(threads);
 	load_config_file();
+	init_global_variables();
 
 	#ifdef LOCK_BASED_TRANSACTIONS
 		int ret_spin_init = pthread_spin_init(&spinlock_variable, PTHREAD_PROCESS_PRIVATE);
@@ -1277,7 +1278,6 @@ _CALLCONV stm_tx_t *stm_pre_init_thread(int id){
 		// Thread 0 sets itself as a collector and inits global variables
 		if( id == 0){
 			tx->stats_ptr->collector = 1;
-			init_global_variables();
 
 			#ifdef ENERGY_DESKTOP
   			set_start_energy_counters();
