@@ -1322,6 +1322,7 @@ stm_commit(void)
 
 	#if defined(STM_HOPE) && defined(LOCK_BASED_TRANSACTIONS)
 		pthread_spin_unlock(&spinlock_variable);
+		tx->stat_commits++;
 		ret=0;
 	#else
 		ret=int_stm_commit(tx);
