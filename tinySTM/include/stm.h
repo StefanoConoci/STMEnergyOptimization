@@ -2,7 +2,7 @@
 # define _STM_H_
 #define STM_HOPE
 //#define ENERGY_DESKTOP
-//#define ENERGY_SERVER
+#define ENERGY_SERVER
 //#define DEBUG_HEURISTICS
 //#define DEBUG_OVERHEAD
 #define REDUCED_VERBOSITY

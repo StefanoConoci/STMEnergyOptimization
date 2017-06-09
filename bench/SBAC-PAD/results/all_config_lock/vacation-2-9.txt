@@ -1,3 +1,0 @@
-Effective_runtime: 0.556341	Effective_commits: 90000	Effective_throughput: 161771.179875	Effective_energy_per_tx: 323.031122	Pkg_power: 52.257126	Threads: 9	Elapsed time: 0.575406	Commits: 0	Aborts: 0	P-state: 2	Best-threads: 9	Steps: 0	Throughput: 0.000000
-Effective_runtime: 0.652679	Effective_commits: 0	Effective_throughput: 0.000000	Effective_energy_per_tx: inf	Pkg_power: 53.019666	Threads: 9	Elapsed time: 0.669031	Commits: 0	Aborts: 0	P-state: 0	Best-threads: 0	Steps: 0	Throughput: 0.000000
-Effective_runtime: 0.560778	Effective_commits: 0	Effective_throughput: 0.000000	Effective_energy_per_tx: inf	Pkg_power: 52.232984	Threads: 9	Elapsed time: 0.579872	Commits: 0	Aborts: 0	P-state: 0	Best-threads: 0	Steps: 0	Throughput: 0.000000
