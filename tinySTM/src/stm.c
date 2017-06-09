@@ -1322,7 +1322,18 @@ stm_commit(void)
 
 	#if defined(STM_HOPE) && defined(LOCK_BASED_TRANSACTIONS)
 		pthread_spin_unlock(&spinlock_variable);
-		tx->stat_commits++;
+
+		/* Set status to COMMITTED */
+  		SET_STATUS(tx->status, TX_COMMITTED);
+		 /* Callbacks */
+		 if (likely(_tinystm.nb_commit_cb != 0)) {
+		    unsigned int cb;
+		    for (cb = 0; cb < _tinystm.nb_commit_cb; cb++)
+		      _tinystm.commit_cb[cb].f(_tinystm.commit_cb[cb].arg);
+		}
+  }
+
+
 		ret=0;
 	#else
 		ret=int_stm_commit(tx);
