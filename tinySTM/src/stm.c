@@ -492,6 +492,10 @@ global_t _tinystm =
 	// Initialization of global variables 
 	inline void init_global_variables(){
 
+		#ifdef DEBUG_HEURISTICS
+			printf("Initializing global variables\n");
+		#endif
+
 		round_completed=0;
 		old_throughput = -1;
 		old_power = -1;
