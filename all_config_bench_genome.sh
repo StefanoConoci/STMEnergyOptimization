@@ -5,14 +5,14 @@ for i in $(seq 0 11)
 do
 	for j in $(seq 1 20)
 	do
-		/home/conoci/git/STMEnergyOptimization/./set_profile $j $i 80.0 10000 50 8 10 0 10 10
+		/home/conoci/git/STMEnergyOptimization/./set_profile $j $i 80.0 10000 50 8 10 0 10 10 100 10.0 10 1.0
 		for b in $(seq 1 $ITERATIONS)	
 		do	
 			echo "P-state=$i"
 			echo  "Threads=$j"
 	        echo "Iteration $b"
 			echo ""
-			numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/genome/./genome -s32 -g32768 -n8388608 -t$j >> all_config/genome-$i-$j.txt
+			numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/genome/./genome -s32 -g32768 -n8388608 -t$j >> bench/SBAC-PAD/results/all_config/genome-$i-$j.txt
 		done
 	done 
 done
