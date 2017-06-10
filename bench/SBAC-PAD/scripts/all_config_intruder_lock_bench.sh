@@ -1,4 +1,4 @@
-ITERATIONS=3
+ITERATIONS=5
 export STM_STATS=1
 
 for i in $(seq 0 11)
@@ -10,9 +10,9 @@ do
 		do	
 			echo "P-state=$i"
 			echo  "Threads=$j"
-	        echo "Iteration $b"
+	       		echo "Iteration $b"
 			echo ""
-			numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/intruder/./intruder -a20 -l16 -n127680 -s1 -t$j >> ../results/all_config_lock/intruder-$i-$j.txt
+			numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/intruder/./intruder -a20 -l16 -n127680 -s1 -t$j >> /home/conoci/git/STMEnergyOptimization/results/all_config_lock/intruder-$i-$j.txt
 		done
 	done 
 done
