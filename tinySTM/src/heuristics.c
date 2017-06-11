@@ -987,10 +987,20 @@ void dynamic_heuristic1(double throughput, double  abort_rate, double power, dou
 
 
 void update_highest_threads(double throughput, double power){
-	if( power < power_limit && active_threads >= best_threads && current_pstate < best_pstate){
-		best_throughput = throughput;
-		best_threads = active_threads;
-		best_pstate = current_pstate;
+	
+	if( power < power_limit){
+		if(current_threads == best_threads){
+			if(best_pstate == -1 || current_pstate < best_pstate){
+				best_throughput = throughput;
+				best_threads = active_threads;
+				best_pstate = current_pstate;
+			}
+		}
+		else if( current_threads > best_threads){
+			best_throughput = throughput;
+			best_threads = active_threads;
+			best_pstate = current_pstate;
+		}					
 	}
 }
 

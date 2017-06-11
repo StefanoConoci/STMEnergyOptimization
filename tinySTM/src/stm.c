@@ -503,7 +503,6 @@ global_t _tinystm =
 		level_best_throughput = -1; 
 		level_best_threads = 0;
 		level_starting_threads = starting_threads;
-		best_throughput = -1;
 		new_pstate = 1;
 		decreasing = 0;
 		stopped_searching = 0;
@@ -518,6 +517,10 @@ global_t _tinystm =
 		high_throughput = -1;
 		high_threads = -1;
 		high_pstate = -1;
+
+		best_throughput = -1;
+		best_pstate = -1;
+		best_threads = -1;
 
 		lock_commits = 0; 
 
