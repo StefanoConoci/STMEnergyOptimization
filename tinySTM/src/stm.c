@@ -1392,7 +1392,7 @@ stm_commit(void)
 		ret=int_stm_commit(tx);
 	#endif
 
-	#ifdef STM_HOPE && !defined(LOCK_BASED_TRANSACTIONS)
+	#if defined(STM_HOPE) && !defined(LOCK_BASED_TRANSACTIONS)
 		// Retrive stats if collector 
 	  	if(tx->stats_ptr->collector == 1){
 	  		

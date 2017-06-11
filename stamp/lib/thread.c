@@ -69,6 +69,7 @@
  */
 
 
+#define STM_HOPE
 
 #include <assert.h>
 #include <stdlib.h>
@@ -80,6 +81,7 @@
 #include "stdio.h"
 #include "rapl.h"
 //#include <stdio.h> //debug
+#include "../../tinySTM/src/stm_hope.h" 
 
 static THREAD_LOCAL_T    global_threadId;
 static long              global_numThread       = 1;
@@ -570,6 +572,7 @@ thread_barrier_wait()
 
     #ifdef STM_HOPE
         printf("STM_HOPE detected a barrier\n");
+        printf("Time from stm_hope code =  %ld", get_time());
     #endif
     THREAD_BARRIER(global_barrierPtr, threadId);
 }
