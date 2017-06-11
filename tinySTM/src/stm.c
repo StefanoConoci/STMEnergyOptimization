@@ -1254,7 +1254,7 @@ stm_start(stm_tx_attr_t attr)
 				set_threads(pre_barrier_threads);
 				barrier_detected = 0;
 				#ifdef DEBUG_HEURISTICS
-					printf("Set threads back to %d after barrier\n", pre_barrier_threads);
+					printf("Set threads back to %d after barrier. Statistics round skipped\n", pre_barrier_threads);
 				#endif
 				pre_barrier_threads = 0;
 			}
@@ -1309,9 +1309,20 @@ stm_start(stm_tx_attr_t attr)
 
 				effective_commits+= (commits_sum*active_threads);
 
-				// We don't call the heuristic if the energy results are out or range due to an overflow 
-				if(power > 0 && energy_per_tx > 0)
-					heuristic(throughput, abort_rate, power, energy_per_tx, time_sum);
+				//Don't call the heuristic function if detected a barrier in the last round. Had to activate all threads, should set back to the last configuration
+				if(barrier_detected == 1){
+					set_threads(pre_barrier_threads);
+					barrier_detected = 0;
+					#ifdef DEBUG_HEURISTICS
+						printf("Set threads back to %d after barrier. Statistics round skipped\n", pre_barrier_threads);
+					#endif
+					pre_barrier_threads = 0;
+				}
+				else{
+					// We don't call the heuristic if the energy results are out or range due to an overflow 
+					if(power > 0 && energy_per_tx > 0)
+						heuristic(throughput, abort_rate, power, energy_per_tx, time_interval);
+				}
 			
 				//Setup next round
 				int slice = total_commits_round/active_threads;
