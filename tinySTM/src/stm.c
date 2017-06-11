@@ -1193,7 +1193,9 @@ stm_exit_thread(void)
   	if(tx->thread_number == 0){
   		shutdown = 1;
 
-  		fclose(timeline_plot_file);
+  		#ifdef TIMELINE_PLOT
+  			fclose(timeline_plot_file);
+  		#endif
 
   		#ifdef ENERGY_DESKTOP
   			print_energy_counters();
