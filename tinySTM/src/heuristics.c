@@ -997,7 +997,7 @@ void update_highest_threads(double throughput, double power){
 // Heuristic similar to to Cap and Pack. Used as a comparison. Consider the best config the one with the most active threads. Within the same number of threads the one within the cap with the highest frequency is selected 
 void heuristic_highest_threads(double throughput, double  abort_rate, double power, double energy_per_tx){
 	
-	update_highest_threads(power);
+	update_highest_threads(throughput, power);
 
 	if(phase == 0){	// Find the highest number of threads at the lowest P-state
 		if(steps == 0){
