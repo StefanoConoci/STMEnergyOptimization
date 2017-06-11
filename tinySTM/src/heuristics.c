@@ -874,15 +874,9 @@ void dynamic_heuristic0(double throughput, double  abort_rate, double power, dou
 			}
 		}
 		else if(steps == 1 && !decreasing){ //Second exploration step, define if should set decreasing 
-			if(throughput >= best_throughput){
-				if(power > power_limit){ //In step 1 the power could be already outside the limit while it was within the limit for step 0 
-					from_phase0_to_next();
-				}else{ // TP increase and within the power limit
-					if(active_threads == total_threads){
-						from_phase0_to_next();
-					}else set_threads(active_threads+1);
-				}
-			} else{ // Decrease in throughput compared to step 0. Should set decreasing to 0 
+			if(throughput >= best_throughput*0.9 && power < power_limit && active_threads != total_threads){
+				set_threads(active_threads+1);
+			} else{ // Should set decreasing to 0 
 				if(starting_threads > 1){
 					decreasing = 1; 
 					set_threads(starting_threads-1);	
@@ -897,13 +891,13 @@ void dynamic_heuristic0(double throughput, double  abort_rate, double power, dou
 			}
 		} 
 		else if(decreasing){ // Decreasing threads  
-			if(throughput < best_throughput || active_threads == 1)
+			if(throughput < best_throughput*0.9 || active_threads == 1)
 				from_phase0_to_next();
 			else
 				set_threads(active_threads-1);
 			
 		} else{ // Increasing threads
-			if( power > power_limit || active_threads == total_threads){
+			if( power > power_limit || active_threads == total_threads || throughput < best_throughput*0.9){
 				from_phase0_to_next();
 			}
 			else set_threads(active_threads+1);
