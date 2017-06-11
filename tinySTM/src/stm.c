@@ -540,7 +540,7 @@ global_t _tinystm =
 
 		TX_GET;
 
-		if(tx->thread_number == 0 && !barrier_detected && active_threads!=total_threads {
+		if(tx->thread_number == 0 && !barrier_detected && active_threads!=total_threads) {
 		
 			#ifdef DEBUG_HEURISTICS
 				printf("Thread 0 detected a barrier\n");
