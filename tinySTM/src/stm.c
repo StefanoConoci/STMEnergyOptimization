@@ -530,27 +530,30 @@ global_t _tinystm =
 		window_power = 0;
 	}
 
-
+	// Reset all threads when reaching a barrier
 	void setup_before_barrier(){
 
 		int i;
 
-		#ifdef DEBUG_HEURISTICS
-			printf("STM_HOPE detected a barrier\n");
-		#endif
-			
-		// Next decision phase should be dropped
-		barrier_detected = 1;
+		TX_GET;
 
-		// Save number of threads that should be restored after the barrier
-		pre_barrier_threads = active_threads;
+		if(tx->thread_number == 0){
+		
+			#ifdef DEBUG_HEURISTICS
+				printf("Thread 0 detected a barrier\n");
+			#endif
+				
+			// Next decision phase should be dropped
+			barrier_detected = 1;
 
-		// Wake up all threads
-		for(i=active_threads; i< total_threads; i++){
-  			wake_up_thread(i);
-  		}	
+			// Save number of threads that should be restored after the barrier
+			pre_barrier_threads = active_threads;
 
-
+			// Wake up all threads
+			for(i=active_threads; i< total_threads; i++){
+	  			wake_up_thread(i);
+	  		}
+		}
 	}
 
 #endif/* ! STM_HOPE */
