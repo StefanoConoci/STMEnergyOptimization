@@ -567,6 +567,10 @@ thread_barrier_wait()
 #ifndef SIMULATOR
     long threadId = thread_getId();
 #endif /* !SIMULATOR */
+
+    #ifdef STM_HOPE
+        printf("STM_HOPE detected a barrier\n");
+    #endif
     THREAD_BARRIER(global_barrierPtr, threadId);
 }
 

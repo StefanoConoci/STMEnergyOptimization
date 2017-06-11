@@ -37,6 +37,8 @@ int detection_mode; 			// Defines the detection mode. Value 0 means detection is
 double detection_tp_threshold;	// Defines the percentage of throughput variation of the current optimal configuration compared to the results at the moment of convergece that should trigger a new exploration. Defined in hope_config.txt 
 double detection_pwr_threshold; // Defines the percentage of power consumption variation of the current optimal configuration compared to the results at the moment of convergece that should trigger a new exploration. Defined in hope_config.txt 
 
+int barrier_detected; 			// If set to 1 should drop current statistics round, had to wake up all threads in order to overcome a barrier 
+
 // Statistics of the last heuristic round
 double old_throughput;			
 double old_power;			

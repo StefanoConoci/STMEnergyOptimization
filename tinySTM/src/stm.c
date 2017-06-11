@@ -512,6 +512,7 @@ global_t _tinystm =
 		effective_commits = 0;
 		phase = 0; 
 		current_exploit_steps = 0;
+		barrier_detected = 0;
 
 		high_throughput = -1;
 		high_threads = -1;
