@@ -1206,16 +1206,22 @@ stm_start(stm_tx_attr_t attr)
 			double abort_rate;
 			double energy_per_tx;	// Expressed in micro Joule 
 
+			long time_interval, energy_interval;
+
 			lock_end_time = get_time();
 			lock_end_energy = get_energy();
 
-			long time_interval = lock_end_time - lock_start_time; //Expressed in nano seconds 
-			long energy_interval = lock_end_energy - lock_start_energy; // Expressed in micro Joule
+			time_interval = lock_end_time - lock_start_time; //Expressed in nano seconds 
+			energy_interval = lock_end_energy - lock_start_energy; // Expressed in micro Joule
 
 			throughput = ((double) lock_commits) / (((double) time_interval)/ 1000000000);
 			abort_rate = 0;
-			power = ((double) energy_interval) / (((double) time_interval) / 1000 );
+			power = ((double) energy_interval) / (((double) time_interval)/ 1000);
 			energy_per_tx = ((double) energy_interval) / (lock_commits);
+
+			//DEBUG
+			printf("Round lock_commits = %ld\n", lock_commits);
+			//
 
 			effective_commits += lock_commits;
 
