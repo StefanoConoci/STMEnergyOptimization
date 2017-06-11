@@ -985,6 +985,52 @@ void dynamic_heuristic1(double throughput, double  abort_rate, double power, dou
 	dynamic_heuristic0(throughput, abort_rate, power, energy_per_tx);
 }
 
+
+void update_highest_threads(double throughput, double power){
+	if( power < power_limit && active_threads >= best_threads && current_pstate < best_pstate){
+		best_throughput = throughput;
+		best_threads = active_threads;
+		best_pstate = current_pstate;
+	}
+}
+
+// Heuristic similar to to Cap and Pack. Used as a comparison. Consider the best config the one with the most active threads. Within the same number of threads the one within the cap with the highest frequency is selected 
+void heuristic_highest_threads(double throughput, double  abort_rate, double power, double energy_per_tx){
+	
+	update_highest_threads(power);
+
+	if(phase == 0){	// Find the highest number of threads at the lowest P-state
+		if(steps == 0){
+			if(active_threads == total_threads || power > power_limit){
+				decreasing = 1; 
+				set_threads(active_threads-1);
+			}
+			else 
+				set_threads(active_threads+1);
+		}else{
+			if(decreasing){
+				if(power < power_limit){
+					if(best_pstate != 0){
+						phase = 1; 
+						set_threads(best_threads);
+						set_pstate(best_pstate-1);
+					}else stop_searching();
+				} else set_threads(active_threads-1);
+			}else{	//Increasing
+				if( power > power_limit || active_threads == total_threads){
+					phase = 1;
+					set_threads(best_threads);
+					set_pstate(best_pstate-1);
+				} else set_threads(active_threads+1);
+			}
+		}
+	}
+	else if (phase == 1){
+		if(power > power_limit || current_pstate == 0 )
+			stop_searching();
+		else set_pstate(current_pstate-1);
+	}
+}
 	
 
 ///////////////////////////////////////////////////////////////
@@ -1049,6 +1095,9 @@ void dynamic_heuristic1(double throughput, double  abort_rate, double power, dou
 					break;
 				case 10: 
 					dynamic_heuristic1(throughput, abort_rate, power, energy_per_tx);
+					break;
+				case 11:
+					heuristic_highest_threads(throughput, abort_rate, power, energy_per_tx);
 					break;
 			}
 
