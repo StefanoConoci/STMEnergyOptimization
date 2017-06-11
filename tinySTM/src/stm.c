@@ -1321,7 +1321,7 @@ stm_start(stm_tx_attr_t attr)
 				else{
 					// We don't call the heuristic if the energy results are out or range due to an overflow 
 					if(power > 0 && energy_per_tx > 0)
-						heuristic(throughput, abort_rate, power, energy_per_tx, time_interval);
+						heuristic(throughput, abort_rate, power, energy_per_tx, time_sum);
 				}
 			
 				//Setup next round
