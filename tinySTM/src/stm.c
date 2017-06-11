@@ -533,6 +533,8 @@ global_t _tinystm =
 
 	void setup_before_barrier(){
 
+		int i;
+
 		#ifdef DEBUG_HEURISTICS
 			printf("STM_HOPE detected a barrier\n");
 		#endif
