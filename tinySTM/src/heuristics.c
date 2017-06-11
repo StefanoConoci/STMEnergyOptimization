@@ -898,7 +898,17 @@ void dynamic_heuristic0(double throughput, double  abort_rate, double power, dou
 			
 		} else{ // Increasing threads
 			if( power > power_limit || active_threads == total_threads || throughput < best_throughput*0.9){
-				from_phase0_to_next();
+				if(starting_threads > 1){
+					decreasing = 1; 
+					set_threads(starting_threads-1);	
+
+					#ifdef DEBUG_HEURISTICS
+						printf("PHASE 0 - DECREASING\n");
+					#endif
+				}
+				else{ // Cannot reduce number of thread more as starting_thread is already set to 1 
+					from_phase0_to_next();
+				}
 			}
 			else set_threads(active_threads+1);
 		}
