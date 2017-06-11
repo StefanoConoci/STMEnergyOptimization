@@ -571,9 +571,9 @@ thread_barrier_wait()
 #endif /* !SIMULATOR */
 
     #ifdef STM_HOPE
-        printf("STM_HOPE detected a barrier\n");
-        printf("Time from stm_hope code =  %ld", get_time());
+        setup_before_barrier();
     #endif
+
     THREAD_BARRIER(global_barrierPtr, threadId);
 }
 

@@ -40,6 +40,7 @@ double detection_tp_threshold;	// Defines the percentage of throughput variation
 double detection_pwr_threshold; // Defines the percentage of power consumption variation of the current optimal configuration compared to the results at the moment of convergece that should trigger a new exploration. Defined in hope_config.txt 
 
 int barrier_detected; 			// If set to 1 should drop current statistics round, had to wake up all threads in order to overcome a barrier 
+int pre_barrier_threads;	    // Number of threads before entering the barrier, should be restored afterwards
 
 // Statistics of the last heuristic round
 double old_throughput;			
@@ -118,3 +119,4 @@ inline void update_best_config(double, double);
 inline void stop_searching();
 int profiler_isoenergy(int, int, int*);
 void heuristic(double, double, double, double, long);
+void setup_before_barrier();

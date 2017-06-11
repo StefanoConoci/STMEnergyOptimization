@@ -513,6 +513,7 @@ global_t _tinystm =
 		phase = 0; 
 		current_exploit_steps = 0;
 		barrier_detected = 0;
+		pre_barrier_threads = 0;
 
 		high_throughput = -1;
 		high_threads = -1;
@@ -527,6 +528,27 @@ global_t _tinystm =
 		current_window_slot = 0;
 		window_time = 0;
 		window_power = 0;
+	}
+
+
+	void setup_before_barrier(){
+
+		#ifdef DEBUG_HEURISTICS
+			printf("STM_HOPE detected a barrier\n");
+		#endif
+			
+		// Next decision phase should be dropped
+		barrier_detected = 1;
+
+		// Save number of threads that should be restored after the barrier
+		pre_barrier_threads = active_threads;
+
+		// Wake up all threads
+		for(i=active_threads; i< total_threads; i++){
+  			wake_up_thread(i);
+  		}	
+
+
 	}
 
 #endif/* ! STM_HOPE */
@@ -1222,10 +1244,21 @@ stm_start(stm_tx_attr_t attr)
 
 			effective_commits += lock_commits;
 
-			// We don't call the heuristic if the energy results are out or range due to an overflow 
-			if(power > 0 && energy_per_tx > 0)
+			//Don't call the heuristic function if detected a barrier in the last round. Had to activate all threads, should set back to the last configuration
+			if(barrier_detected == 1){
+				set_threads(pre_barrier_threads);
+				barrier_detected = 0;
+				#ifdef DEBUG_HEURISTICS
+					printf("Set threads back to %d after barrier\n", pre_barrier_threads);
+				#endif
+				pre_barrier_threads = 0;
+			}
+			else{
+				// We don't call the heuristic if the energy results are out or range due to an overflow 
+				if(power > 0 && energy_per_tx > 0)
 					heuristic(throughput, abort_rate, power, energy_per_tx, time_interval);
-
+			}
+			
 			//Setup next round
 			lock_commits = 0;
 			lock_start_energy = get_energy();
@@ -1236,7 +1269,7 @@ stm_start(stm_tx_attr_t attr)
 			pthread_spin_unlock(&spinlock_variable);
 	  	}
 
-  	#else 
+  	#else // REGULAR STM-BASED STM_HOPE
 
 	  	// Retrive stats if collector 
 	  	if(tx->stats_ptr->collector == 1){
