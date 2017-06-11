@@ -1056,6 +1056,11 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 			         throughput, abort_rate, power, energy_per_tx);
 		#endif
 
+		#ifdef TIMELINE_PLOT
+			// Line Semantics -> Time(milliseconds), Power (Watt), Powercap (Watt), Throughput, P-state, threads 
+			fprintf(timeline_plot_file, "%lf,%lf,%lf,%lf,%d,%d\n", (((double) (time-time_application_startup))/1000000), power, power_limit, throughput, current_pstate, active_threads);
+		#endif
+
 		#ifdef DEBUG_OVERHEAD
 			long time_heuristic_start;
 			long time_heuristic_end;

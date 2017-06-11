@@ -1,4 +1,5 @@
 #include "stats_t.h"
+#include  <stdio.h>
 
 /////////////////////////////////////////////////////////////////
 //	Global variables
@@ -39,8 +40,13 @@ int detection_mode; 			// Defines the detection mode. Value 0 means detection is
 double detection_tp_threshold;	// Defines the percentage of throughput variation of the current optimal configuration compared to the results at the moment of convergece that should trigger a new exploration. Defined in hope_config.txt 
 double detection_pwr_threshold; // Defines the percentage of power consumption variation of the current optimal configuration compared to the results at the moment of convergece that should trigger a new exploration. Defined in hope_config.txt 
 
+// Barrier detection variables
 int barrier_detected; 			// If set to 1 should drop current statistics round, had to wake up all threads in order to overcome a barrier 
 int pre_barrier_threads;	    // Number of threads before entering the barrier, should be restored afterwards
+
+// Timeline plot related variables
+FILE* timeline_plot_file;		// File used to plot the timeline of execution 
+long time_application_startup;	// Application start time 
 
 // Statistics of the last heuristic round
 double old_throughput;			

@@ -1048,6 +1048,11 @@ void stm_init(int threads) {
 	load_config_file();
 	init_global_variables();
 
+	#ifdef TIMELINE_PLOT
+		timeline_plot_file = fopen("timeline.txt", "w+");
+		time_application_startup = get_time();
+	#endif
+
 	#ifdef LOCK_BASED_TRANSACTIONS
 		int ret_spin_init = pthread_spin_init(&spinlock_variable, PTHREAD_PROCESS_PRIVATE);
 		if(ret_spin_init != 0){

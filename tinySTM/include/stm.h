@@ -7,6 +7,7 @@
 //#define DEBUG_OVERHEAD
 #define REDUCED_VERBOSITY
 #define LOCK_BASED_TRANSACTIONS
+#define TIMELINE_PLOT
 
 
   
