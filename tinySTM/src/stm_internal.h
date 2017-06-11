@@ -1101,7 +1101,7 @@ stm_rollback(stm_tx_t *tx, unsigned int reason)
   reason |= STM_PATH_INSTRUMENTED;
 #endif /* ! IRREVOCABLE_ENABLED */
 
-#ifdef STM_HOPE
+#if defined(STM_HOPE) && !defined(LOCK_BASED_TRANSACTIONS)
   if(tx->stats_ptr->collector == 1){
     tx->stats_ptr->aborts++;
   }

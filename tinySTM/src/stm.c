@@ -517,6 +517,8 @@ global_t _tinystm =
 		high_threads = -1;
 		high_pstate = -1;
 
+		lock_commits = 0; 
+
 		low_throughput = -1;
 		low_threads = -1;
 		low_pstate = -1;
@@ -1193,66 +1195,108 @@ stm_start(stm_tx_attr_t attr)
   	int i;
   	stm_wait(tx->thread_number);
 
-  	// Retrive stats if collector 
-  	if(tx->stats_ptr->collector == 1){
+  	#ifdef LOCK_BASED_TRANSACTIONS
 
-  		// If thread 0 and round completed should collect stats and call heuristic
-  		if(tx->thread_number == 0 && round_completed){
+	  	if(tx->thread_number == 0 && lock_commits >= total_commits_round){
+	  		
+	  		pthread_spin_lock(&spinlock_variable);
 
-			// Compute aggregated statistics for the current round
-			
-			double throughput;		// Expressed as commit per second
+	  		double throughput;		// Expressed as commit per second
 			double power;			// Expressed in Watt
 			double abort_rate;
 			double energy_per_tx;	// Expressed in micro Joule 
 
+			lock_end_time = get_time();
+			lock_end_energy = get_energy();
 
-			long energy_sum = 0;	// Expressed in micro Joule
-			long time_sum = 0;		// Expressed in nano seconds 
-			long aborts_sum = 0; 
-			long commits_sum = 0;
+			long time_interval = lock_end_time - lock_start_time; //Expressed in nano seconds 
+			long energy_interval = lock_end_energy - lock_start_energy; // Expressed in micro Joule
 
-			for(i=0; i<active_threads; i++){
-				energy_sum += ((stats_array[i]->end_energy) - (stats_array[i]->start_energy));
-				time_sum += ((stats_array[i]->end_time) - (stats_array[i]->start_time));
-				aborts_sum += stats_array[i]->aborts;
-				commits_sum += stats_array[i]->commits;
-			}
+			throughput = ((double) lock_commits) / (((double) time_interval)/ 1000000000);
+			abort_rate = 0;
+			power = ((double) energy_interval) / ((double) time_interval / 1000 );
+			energy_per_tx = ((double) energy_interval) / (lock_commits);
 
-			throughput = (((double) commits_sum)*active_threads) / ( ((double) time_sum) / 1000000000 );
-			abort_rate = (((double) aborts_sum) / (aborts_sum+commits_sum))*100; 
-			power = ((double) energy_sum) / ( (double) time_sum / 1000 );
-			energy_per_tx = ((double) energy_sum) / (commits_sum*active_threads);
-
-			effective_commits+= (commits_sum*active_threads);
+			effective_commits += lock_commits;
 
 			// We don't call the heuristic if the energy results are out or range due to an overflow 
 			if(power > 0 && energy_per_tx > 0)
-				heuristic(throughput, abort_rate, power, energy_per_tx, time_sum);
-		
+					heuristic(throughput, abort_rate, power, energy_per_tx, time_interval);
+
 			//Setup next round
-			int slice = total_commits_round/active_threads;
-			for(i=0; i<active_threads; i++){
-				stats_array[i]->nb_tx = 0;
-				stats_array[i]->total_commits = slice; 
-			}
-			round_completed = 0;
-  		}
+			lock_commits = 0;
+			lock_start_energy = get_energy();
+			lock_start_time = get_time();
+			lock_end_energy = 0;
+			lock_start_energy = 0;
 
-  		stats_t* stats = tx->stats_ptr;
-  		
-  		// First tx for this round
-  		if(stats->nb_tx == 0){ 
-  			
-  			stats->commits = 0;
-  			stats->aborts = 0;
+			pthread_spin_unlock(&spinlock_variable);
+	  	}
 
-  			stats->start_energy = get_energy();
-  			stats->start_time = get_time();
-  		}
+  	#else 
 
-  		stats->nb_tx++;
-  	}
+	  	// Retrive stats if collector 
+	  	if(tx->stats_ptr->collector == 1){
+
+	  		// If thread 0 and round completed should collect stats and call heuristic
+	  		if(tx->thread_number == 0 && round_completed){
+
+				// Compute aggregated statistics for the current round
+				
+				double throughput;		// Expressed as commit per second
+				double power;			// Expressed in Watt
+				double abort_rate;
+				double energy_per_tx;	// Expressed in micro Joule 
+
+
+				long energy_sum = 0;	// Expressed in micro Joule
+				long time_sum = 0;		// Expressed in nano seconds 
+				long aborts_sum = 0; 
+				long commits_sum = 0;
+
+				for(i=0; i<active_threads; i++){
+					energy_sum += ((stats_array[i]->end_energy) - (stats_array[i]->start_energy));
+					time_sum += ((stats_array[i]->end_time) - (stats_array[i]->start_time));
+					aborts_sum += stats_array[i]->aborts;
+					commits_sum += stats_array[i]->commits;
+				}
+
+				throughput = (((double) commits_sum)*active_threads) / ( ((double) time_sum) / 1000000000 );
+				abort_rate = (((double) aborts_sum) / (aborts_sum+commits_sum))*100; 
+				power = ((double) energy_sum) / ( (double) time_sum / 1000 );
+				energy_per_tx = ((double) energy_sum) / (commits_sum*active_threads);
+
+				effective_commits+= (commits_sum*active_threads);
+
+				// We don't call the heuristic if the energy results are out or range due to an overflow 
+				if(power > 0 && energy_per_tx > 0)
+					heuristic(throughput, abort_rate, power, energy_per_tx, time_sum);
+			
+				//Setup next round
+				int slice = total_commits_round/active_threads;
+				for(i=0; i<active_threads; i++){
+					stats_array[i]->nb_tx = 0;
+					stats_array[i]->total_commits = slice; 
+				}
+				round_completed = 0;
+	  		}
+
+	  		stats_t* stats = tx->stats_ptr;
+	  		
+	  		// First tx for this round
+	  		if(stats->nb_tx == 0){ 
+	  			
+	  			stats->commits = 0;
+	  			stats->aborts = 0;
+
+	  			stats->start_energy = get_energy();
+	  			stats->start_time = get_time();
+	  		}
+
+	  		stats->nb_tx++;
+	  	}
+
+  	#endif
 
   #endif
 
@@ -1275,10 +1319,16 @@ _CALLCONV stm_tx_t *stm_pre_init_thread(int id){
 		pthread_ids[id] = pthread_self();
 		tx->stats_ptr = alloc_stats_buffer(id);
 
-		// Thread 0 sets itself as a collector and inits global variables
+		// Thread 0 sets itself as a collector and inits global variables or init global variables if lock based
 		if( id == 0){
-			tx->stats_ptr->collector = 1;
 
+			#ifdef LOCK_BASED_TRANSACTIONS
+				lock_start_energy = get_energy();
+				lock_start_time = get_time();
+			#else 
+				tx->stats_ptr->collector = 1;
+			#endif
+		
 			#ifdef ENERGY_DESKTOP
   			set_start_energy_counters();
 			#endif 
@@ -1321,6 +1371,8 @@ stm_commit(void)
 	int ret;
 
 	#if defined(STM_HOPE) && defined(LOCK_BASED_TRANSACTIONS)
+
+		lock_commits++;
 		pthread_spin_unlock(&spinlock_variable);
 
 		/* Set status to COMMITTED */
@@ -1337,7 +1389,7 @@ stm_commit(void)
 		ret=int_stm_commit(tx);
 	#endif
 
-	#ifdef STM_HOPE
+	#ifdef STM_HOPE && !defined(LOCK_BASED_TRANSACTIONS)
 		// Retrive stats if collector 
 	  	if(tx->stats_ptr->collector == 1){
 	  		

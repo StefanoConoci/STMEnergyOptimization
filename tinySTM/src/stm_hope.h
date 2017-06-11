@@ -84,8 +84,13 @@ double window_power; 			// Expressed in Watt. Current average power consumption 
 
 int fluctuation_state;			// Defines the configuration used during the last step, -1 for LOW, 0 for BEST, 1 for HIGH
 
-// Variable used when defined LOCK_BASED_SYNCHRONIZATION
-pthread_spinlock_t spinlock_variable;
+// Variables specific to LOCK_BASED_TRANSACTIONS. Statistics taken in global variables
+pthread_spinlock_t spinlock_variable;	
+long lock_start_time;
+long lock_end_time;
+long lock_start_energy;
+long lock_end_energy;
+long lock_commits; 
 
 
 /////////////////////////////////////////////////////////////////
