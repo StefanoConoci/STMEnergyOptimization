@@ -1214,7 +1214,7 @@ stm_start(stm_tx_attr_t attr)
 
 			throughput = ((double) lock_commits) / (((double) time_interval)/ 1000000000);
 			abort_rate = 0;
-			power = ((double) energy_interval) / ((double) time_interval / 1000 );
+			power = ((double) energy_interval) / (((double) time_interval) / 1000 );
 			energy_per_tx = ((double) energy_interval) / (lock_commits);
 
 			effective_commits += lock_commits;
