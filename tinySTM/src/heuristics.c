@@ -1160,9 +1160,7 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 						set_pstate(best_pstate);
 						set_threads(best_threads);
 						starting_threads = best_threads;
-
 					}
-					
 					
 					best_throughput = -1;
 					best_pstate = -1; 
