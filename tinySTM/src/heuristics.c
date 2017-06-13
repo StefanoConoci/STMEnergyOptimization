@@ -1221,7 +1221,7 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 							low_pstate = low_pstate+1;
 						} else if (low_throughput <= 0){
 							if(best_pstate ==  max_pstate)
-								low_pstate = best_pstate
+								low_pstate = best_pstate;
 							else low_pstate = best_pstate+1;
 							low_threads = best_threads;
 							low_throughput = best_throughput;
