@@ -843,7 +843,7 @@ inline void from_phase1_to_next(){
 	}
 	else{
 		phase = 2;
-		if(best_throughput > 0){
+		if(phase0_threads > 0){
 			set_threads(phase0_threads);
 			set_pstate(phase0_pstate+1);
 		}
