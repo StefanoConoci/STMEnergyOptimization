@@ -1153,9 +1153,16 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 						printf("EXPLORATION RESTARTED. PHASE 0 - INITIAL CONFIGURATION: #threads %d - p_state %d\n", best_threads, best_pstate);
 					#endif
 					
-					set_pstate(best_pstate);
-					set_threads(best_threads);
-					starting_threads = best_threads;
+					if(heuristic_mode == 11){
+						set_pstate(max_pstate);
+						set_threads(starting_threads);
+					}else{
+						set_pstate(best_pstate);
+						set_threads(best_threads);
+						starting_threads = best_threads;
+
+					}
+					
 					
 					best_throughput = -1;
 					best_pstate = -1; 
