@@ -807,8 +807,12 @@ inline void from_phase0_to_next(){
 		}
 		else{
 			phase = 2; 
-			set_threads(best_threads);
-			set_pstate(current_pstate+1);
+
+			if(best_throughput > 0){
+				set_threads(best_threads);
+				set_pstate(current_pstate+1);
+			}
+
 			level_best_throughput = 0;
 			level_best_threads = 0;
 			level_best_pstate = 0;
@@ -818,8 +822,10 @@ inline void from_phase0_to_next(){
 		}
 	}else{
 		phase = 1;
-		set_threads(best_threads);
-		set_pstate(current_pstate-1);
+		if(best_throughput > 0){
+			set_threads(best_threads);
+			set_pstate(current_pstate-1);
+		}
 		#ifdef DEBUG_HEURISTICS
 				printf("PHASE 0 -> PHASE 1\n");
 		#endif
@@ -837,8 +843,10 @@ inline void from_phase1_to_next(){
 	}
 	else{
 		phase = 2;
-		set_threads(phase0_threads);
-		set_pstate(phase0_pstate+1);
+		if(best_throughput > 0){
+			set_threads(phase0_threads);
+			set_pstate(phase0_pstate+1);
+		}
 		level_best_threads = 0;
 		level_best_throughput = 0;
 		level_best_pstate = 0;
