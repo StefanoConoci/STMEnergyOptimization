@@ -1205,7 +1205,7 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 							int old_best_pstate = best_pstate;
 
 							best_threads = high_threads;
-							best_throughtput = high_throughput;
+							best_throughput = high_throughput;
 							best_pstate = high_pstate;
 
 							high_threads = old_best_threads;
@@ -1224,7 +1224,7 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 							int old_best_pstate = best_pstate;
 
 							best_threads = low_threads;
-							best_throughtput = low_throughput;
+							best_throughput = low_throughput;
 							best_pstate = low_pstate;
 
 							low_threads = old_best_threads;
