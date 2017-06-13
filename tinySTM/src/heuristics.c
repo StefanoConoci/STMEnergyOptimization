@@ -1197,6 +1197,46 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 
 
 					if(current_window_slot == window_size){ // Last slot in the current window 
+					
+						// Reshuffle order of configurations
+						if((high_threads <= best_threads && high_pstate > best_pstate) || (high_throughput != -1 && high_power<best_power)){
+							double old_best_throughput = best_throughput;
+							int old_best_threads = best_threads;
+							int old_best_pstate = best_pstate;
+
+							best_threads = high_threads;
+							best_throughtput = high_throughput;
+							best_pstate = high_pstate;
+
+							high_threads = old_best_threads;
+							high_pstate = old_best_pstate;
+							high_throughput = old_best_throughput;
+
+							#ifdef DEBUG_HEURISTICS
+								printf("Swapped HIGH and BEST\n");
+							#endif
+						}
+
+						if((low_threads >= best_threads && low_pstate < best_pstate) || (low_throughput != -1 && low_power>best_power)){
+							
+							double old_best_throughput = best_throughput;
+							int old_best_threads = best_threads;
+							int old_best_pstate = best_pstate;
+
+							best_threads = low_threads;
+							best_throughtput = low_throughput;
+							best_pstate = low_pstate;
+
+							low_threads = old_best_threads;
+							low_pstate = old_best_pstate;
+							low_throughput = old_best_throughput;
+
+							#ifdef DEBUG_HEURISTICS
+								printf("Swapped LOW and BEST\n");
+							#endif
+						}
+
+
 						set_threads(best_threads);
 						set_pstate(best_pstate);
 						fluctuation_state = 0;
@@ -1204,6 +1244,8 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 						window_time = 0;
 						window_power = 0;
 						current_window_slot = 0;
+
+
 
 						#ifdef DEBUG_HEURISTICS
 							printf(" - Next configuration = BEST (restart)\n");
@@ -1214,7 +1256,7 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 					}
 					else{ // Regular slot, should decide configuration for next step 
 						if(window_power < power_limit*(1-hysteresis/100)){	// Should increase_window_power
-							if(best_power > power_limit){
+							if(best_power > power_limit || (high_throughput == -1)){
 								set_threads(best_threads);
 								set_pstate(best_pstate);
 								fluctuation_state = 0;
@@ -1233,7 +1275,7 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 								#endif
 							}
 						}else if (window_power > power_limit*(1+hysteresis/100)){ // Should decrease window_power
-							if(best_power < power_limit){
+							if(best_power < power_limit || (low_throughput == -1)){
 								set_threads(best_threads);
 								set_pstate(best_pstate);
 								fluctuation_state = 0;
@@ -1253,7 +1295,7 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 							}
 						}
 						else{	// Window_power is within the hysteresis variation of window_power
-							if(high_power < power_limit*(1+hysteresis/100)){
+							if(high_power < power_limit*(1+hysteresis/100) && high_throughput != -1){
 								set_threads(high_threads);
 								set_pstate(high_pstate);
 								fluctuation_state = 1;
@@ -1261,7 +1303,7 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 								#ifdef DEBUG_HEURISTICS
 									printf(" - Next configuration = HIGH (hysteresis)\n");
 								#endif
-							}else if(best_power < power_limit*(1+hysteresis/100)){
+							}else if(best_power < power_limit*(1+hysteresis/100) || low_throughput == -1){
 								set_threads(best_threads);
 								set_pstate(best_pstate);
 								fluctuation_state = 0;
