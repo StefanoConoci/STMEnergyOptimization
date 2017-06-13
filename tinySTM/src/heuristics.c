@@ -1211,61 +1211,32 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 
 					if(current_window_slot == window_size){ // Last slot in the current window 
 
-						if(high_throughput < best_throughput || (best_threads == high_threads && best_pstate == high_pstate)){
-							if(best_pstate != 0 )
-								high_pstate = best_pstate-1;
-							else high_pstate = best_pstate;
-							high_threads = best_threads;
-							high_throughput = throughput;
+						if(window_power < power_limit && best_power < power_limit && high_pstate > 0 && best_pstate > 0 && low_pstate > 0){
+							high_pstate = high_pstate-1;
+							best_pstate = best_pstate-1;
+							low_pstate = low_pstate-1;
+						else if (window_power > power_limit && low_power > power_limit && low_pstate < max_pstate && best_pstate < max_pstate && high_pstate < max_pstate){
+							high_pstate = high_pstate+1;
+							best_pstate = best_pstate+1;
+							low_pstate = low_pstate+1;
 						}
+						else{
+							if(high_throughput < best_throughput || (best_threads == high_threads && best_pstate == high_pstate)){
+								if(best_pstate != 0 )
+									high_pstate = best_pstate-1;
+								else high_pstate = best_pstate;
+								high_threads = best_threads;
+								high_throughput = throughput;
+							}
 
-						if(low_throughput == 0 || (best_threads == low_threads && best_pstate == low_pstate)){
-							if(best_pstate != max_pstate && best_power > power_limit)
-								low_pstate = best_pstate+1;
-							else low_pstate = best_pstate;
-							low_threads = best_threads;
-							low_throughput = best_throughput;
+							if(low_throughput == 0 || (best_threads == low_threads && best_pstate == low_pstate)){
+								if(best_pstate != max_pstate && best_power > power_limit)
+									low_pstate = best_pstate+1;
+								else low_pstate = best_pstate;
+								low_threads = best_threads;
+								low_throughput = best_throughput;
+							}
 						}
-
-						/*
-						// Reshuffle order of configurations
-						if((high_threads <= best_threads && high_pstate > best_pstate) || (high_throughput != -1 && high_power<best_power)){
-							double old_best_throughput = best_throughput;
-							int old_best_threads = best_threads;
-							int old_best_pstate = best_pstate;
-
-							best_threads = high_threads;
-							best_throughput = high_throughput;
-							best_pstate = high_pstate;
-
-							high_threads = old_best_threads;
-							high_pstate = old_best_pstate;
-							high_throughput = old_best_throughput;
-
-							#ifdef DEBUG_HEURISTICS
-								printf("Swapped HIGH and BEST\n");
-							#endif
-						}
-
-						if((low_threads >= best_threads && low_pstate < best_pstate) || (low_throughput != -1 && low_power>best_power)){
-							
-							double old_best_throughput = best_throughput;
-							int old_best_threads = best_threads;
-							int old_best_pstate = best_pstate;
-
-							best_threads = low_threads;
-							best_throughput = low_throughput;
-							best_pstate = low_pstate;
-
-							low_threads = old_best_threads;
-							low_pstate = old_best_pstate;
-							low_throughput = old_best_throughput;
-
-							#ifdef DEBUG_HEURISTICS
-								printf("Swapped LOW and BEST\n");
-							#endif
-						}*/
-
 
 						set_threads(best_threads);
 						set_pstate(best_pstate);
