@@ -1215,10 +1215,16 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 							high_pstate = high_pstate-1;
 							best_pstate = best_pstate-1;
 							low_pstate = low_pstate-1;
-						} else if (window_power > power_limit && low_power > power_limit && low_pstate < max_pstate && best_pstate < max_pstate && high_pstate < max_pstate){
+						} else if (window_power > power_limit && low_throughput > 0 && low_power > power_limit && low_pstate < max_pstate && best_pstate < max_pstate && high_pstate < max_pstate){
 							high_pstate = high_pstate+1;
 							best_pstate = best_pstate+1;
 							low_pstate = low_pstate+1;
+						} else if (low_throughput <= 0){
+							if(best_pstate ==  max_pstate)
+								low_pstate = best_pstate
+							else low_pstate = best_pstate+1;
+							low_threads = best_threads;
+							low_throughput = best_throughput;
 						}
 						else{
 							if(high_throughput < best_throughput || (best_threads == high_threads && best_pstate == high_pstate)){
