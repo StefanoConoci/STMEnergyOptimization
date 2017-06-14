@@ -1386,7 +1386,7 @@ stm_start(stm_tx_attr_t attr)
 
 					if(slot_time_passed > 1000000000){ //If higher than 1 second update the accumulator with the value of error compared to power_limit
 						long current_energy = get_energy();
-						long slot_energy_consumed = current_energy; - net_energy_slot_start;
+						long slot_energy_consumed = current_energy - net_energy_slot_start;
 						double slot_power = (((double) slot_energy_consumed)/ (((double) slot_time_passed)/1000));
 						printf("SLOT_POWER = %lf\n", slot_power);
 						double error_signed = power_limit ;
