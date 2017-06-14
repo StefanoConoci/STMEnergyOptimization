@@ -536,6 +536,12 @@ global_t _tinystm =
 	    net_energy_sum = 0;
 	    net_commits_sum = 0;
 		net_aborts_sum = 0;
+
+		net_time_slot_start= 0;
+ 	    net_energy_slot_start= 0;
+	    net_time_accumulator= 0;
+		net_error_accumulator= 0; 
+		net_discard_barrier= 0;
 	}
 
 	// Reset all threads when reaching a barrier
@@ -1168,8 +1174,8 @@ stm_exit(void)
   	double net_throughput =  ( (double) net_commits_sum) / time_in_seconds;
   	double net_avg_power = ( (double) net_energy_sum) / (( (double) net_time_sum) / 1000);
 
-  	printf("\tNet_runtime: %lf\tNet_throughput: %lf\tNet_power: %lf\tNet_commits: %ld\tNet_aborts: %ld"
-  			 ,time_in_seconds, net_throughput, net_avg_power, net_commits_sum, net_aborts_sum);
+  	printf("\tNet_runtime: %lf\tNet_throughput: %lf\tNet_power: %lf\tNet_commits: %ld\tNet_aborts: %ld\tNet_error: %lf"
+  			 ,time_in_seconds, net_throughput, net_avg_power, net_commits_sum, net_aborts_sum, net_error_accumulator);
 
   #endif
 
@@ -1277,6 +1283,31 @@ stm_start(stm_tx_attr_t attr)
 
 			effective_commits += lock_commits;
 
+			#ifdef NET_STATS
+				
+				// Manage the slot based power error 
+				long slot_time_passed = lock_end_time - net_time_slot_start;
+
+				if(slot_time_passed > 1000000000){ //If higher than 1 second update the accumulator with the value of error compared to power_limit
+					long slot_energy_consumed = lock_end_energy - net_energy_slot_start;
+					double error_signed = power_limit - (((double) slot_energy_consumed)/ (((double) slot_time_passed)/1000));
+					double error = 0;
+					if(error_signed > 0)
+						error = error_signed;
+					else error = - error_signed; 
+
+					// Add the error to the accumulator
+					net_error_accumulator = (net_error_accumulator*net_time_accumulator+error*slot_time_passed)/(net_time_accumulator+slot_time_passed);
+					net_time_accumulator+=slot_time_passed;
+
+					//Reset start counters
+					net_time_slot_start = lock_end_time;
+					net_energy_slot_start = lock_end_energy;
+				} 
+
+			#endif
+
+
 			//Don't call the heuristic function if detected a barrier in the last round. Had to activate all threads, should set back to the last configuration
 			if(barrier_detected == 1){
 				set_threads(pre_barrier_threads);
@@ -1345,6 +1376,33 @@ stm_start(stm_tx_attr_t attr)
 				energy_per_tx = ((double) energy_sum) / (commits_sum*active_threads);
 
 				effective_commits+= (commits_sum*active_threads);
+
+
+				#ifdef NET_STATS
+
+					// Manage the slot based power error 
+					long current_time = get_time();
+					long slot_time_passed = current_time - net_time_slot_start;
+
+					if(slot_time_passed > 1000000000){ //If higher than 1 second update the accumulator with the value of error compared to power_limit
+						long current_energy = get_energy();
+						long slot_energy_consumed = current_energy; - net_energy_slot_start;
+						double error_signed = power_limit - (((double) slot_energy_consumed)/ (((double) slot_time_passed)/1000));
+						double error = 0;
+						if(error_signed > 0)
+							error = error_signed;
+						else error = - error_signed; 
+
+						// Add the error to the accumulator
+						net_error_accumulator = (net_error_accumulator*net_time_accumulator+error*slot_time_passed)/(net_time_accumulator+slot_time_passed);
+						net_time_accumulator+=slot_time_passed;
+
+						//Reset start counters
+						net_time_slot_start = current_time;
+						net_energy_slot_start = current_energy;
+					} 
+
+				#endif
 
 				//Don't call the heuristic function if detected a barrier in the last round. Had to activate all threads, should set back to the last configuration
 				if(barrier_detected == 1){
@@ -1427,6 +1485,11 @@ _CALLCONV stm_tx_t *stm_pre_init_thread(int id){
 				tx->stats_ptr->collector = 1;
 			#endif
 		
+			#ifdef NET_STATS
+				net_time_slot_start = get_time();
+				net_energy_slot_start = get_energy();
+			#endif 
+
 			#ifdef ENERGY_DESKTOP
   			set_start_energy_counters();
 			#endif 

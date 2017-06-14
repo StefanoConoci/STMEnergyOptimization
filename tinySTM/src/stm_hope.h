@@ -109,6 +109,13 @@ long net_energy_sum;
 long net_commits_sum;
 long net_aborts_sum;
 
+// Variables necessary to compute the error percentage from power_limit, computed once every seconds 
+long net_time_slot_start;
+long net_energy_slot_start;
+long net_time_accumulator;
+double net_error_accumulator; 
+long net_discard_barrier;
+
 /////////////////////////////////////////////////////////////////
 //	Function declerations
 /////////////////////////////////////////////////////////////////
