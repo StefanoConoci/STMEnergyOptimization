@@ -1397,6 +1397,7 @@ stm_start(stm_tx_attr_t attr)
 
 						// Add the error to the accumulator
 						net_error_accumulator = (net_error_accumulator*((double)net_time_accumulator)+error*((double)slot_time_passed))/( ((double)net_time_accumulator)+( (double) slot_time_passed));
+						printf("NET_ERROR_ACCUMULATOR = %lf", net_error_accumulator);
 						net_time_accumulator+=slot_time_passed;
 
 						//Reset start counters
