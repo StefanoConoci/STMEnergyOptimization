@@ -1282,7 +1282,7 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 								#endif
 							}
 						}else if (window_power > power_limit*(1+hysteresis/100)){ // Should decrease window_power
-							if(best_power < power_limit || (low_throughput == -1)){
+							if(best_power < power_limit*(1+hysteresis/100) || (low_throughput == -1)){
 								set_threads(best_threads);
 								set_pstate(best_pstate);
 								fluctuation_state = 0;
