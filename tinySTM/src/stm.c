@@ -531,6 +531,11 @@ global_t _tinystm =
 		current_window_slot = 0;
 		window_time = 0;
 		window_power = 0;
+
+		net_time_sum = 0;
+	    net_energy_sum = 0;
+	    net_commits_sum = 0;
+		net_aborts_sum = 0;
 	}
 
 	// Reset all threads when reaching a barrier
@@ -1160,8 +1165,8 @@ stm_exit(void)
   #ifdef NET_STATS
 
   	double time_in_seconds = ( (double) net_time_sum) / 1000000000;
-  	double net_throughput =  ( (double) net_commits_sum) / ( (double) net_time_sum) / 1000000000;
-  	double net_avg_power = ( (double) net_energy_sum) / ( (double) net_time_sum) / 1000;
+  	double net_throughput =  ( (double) net_commits_sum) / time_in_seconds;
+  	double net_avg_power = ( (double) net_energy_sum) / (( (double) net_time_sum) / 1000);
 
   	printf("\tNet_runtime: %lf\tNet_throughput: %lf\tNet_power: %lf\tNet_commits: %ld\tNet_aborts: %ld"
   			 ,time_in_seconds, net_throughput, net_avg_power, net_commits_sum, net_aborts_sum);
@@ -1357,7 +1362,7 @@ stm_start(stm_tx_attr_t attr)
 						#ifdef NET_STATS
 							net_time_sum += time_sum;
 							net_energy_sum += energy_sum;
-							net_commits_sum += commits_sum;
+							net_commits_sum += commits_sum*active_threads;
 							net_aborts_sum += aborts_sum;
 						#endif 
 
