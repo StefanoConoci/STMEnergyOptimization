@@ -560,6 +560,9 @@ global_t _tinystm =
 			// Next decision phase should be dropped
 			barrier_detected = 1;
 
+			// Dont consider next slot for power_limit error measurements
+			net_discard_barrier = 1;
+
 			// Save number of threads that should be restored after the barrier
 			pre_barrier_threads = active_threads;
 
@@ -1289,17 +1292,21 @@ stm_start(stm_tx_attr_t attr)
 				long slot_time_passed = lock_end_time - net_time_slot_start;
 
 				if(slot_time_passed > 1000000000){ //If higher than 1 second update the accumulator with the value of error compared to power_limit
-					long slot_energy_consumed = lock_end_energy - net_energy_slot_start;
-					double error_signed = power_limit - (((double) slot_energy_consumed)/ (((double) slot_time_passed)/1000));
-					double error = 0;
-					if(error_signed > 0)
-						error = error_signed;
-					else error = - error_signed; 
+					if(net_discard_barrier == 0){
+						long slot_energy_consumed = lock_end_energy - net_energy_slot_start;
+						double error_signed = power_limit - (((double) slot_energy_consumed)/ (((double) slot_time_passed)/1000));
+						double error = 0;
+					
+						if(error_signed > 0)
+							error = error_signed/power_limit*100;
+						else error = (- error_signed)/power_limit*100; 
 
-					// Add the error to the accumulator
-					net_error_accumulator = (net_error_accumulator*net_time_accumulator+error*slot_time_passed)/(net_time_accumulator+slot_time_passed);
-					net_time_accumulator+=slot_time_passed;
-
+						// Add the error to the accumulator
+						net_error_accumulator = (net_error_accumulator*((double)net_time_accumulator)+error*((double)slot_time_passed))/( ((double)net_time_accumulator)+( (double) slot_time_passed));
+						net_time_accumulator+=slot_time_passed;
+					}
+					else net_discard_barrier = 0;
+					
 					//Reset start counters
 					net_time_slot_start = lock_end_time;
 					net_energy_slot_start = lock_end_energy;
@@ -1386,20 +1393,23 @@ stm_start(stm_tx_attr_t attr)
 
 					if(slot_time_passed > 1000000000){ //If higher than 1 second update the accumulator with the value of error compared to power_limit
 						long current_energy = get_energy();
-						long slot_energy_consumed = current_energy - net_energy_slot_start;
-						double slot_power = (((double) slot_energy_consumed)/ (((double) slot_time_passed)/1000));
-						printf("SLOT_POWER = %lf\n", slot_power);
-						double error_signed = power_limit - slot_power;
-						double error = 0;
-						if(error_signed > 0)
-							error = error_signed;
-						else error = - error_signed; 
-						printf("ERROR = %lf", error);
+						if(net_discard_barrier == 0){
+							long slot_energy_consumed = current_energy - net_energy_slot_start;
+							double slot_power = (((double) slot_energy_consumed)/ (((double) slot_time_passed)/1000));
 
-						// Add the error to the accumulator
-						net_error_accumulator = (net_error_accumulator*((double)net_time_accumulator)+error*((double)slot_time_passed))/( ((double)net_time_accumulator)+( (double) slot_time_passed));
-						printf("NET_ERROR_ACCUMULATOR = %lf", net_error_accumulator);
-						net_time_accumulator+=slot_time_passed;
+							double error_signed = power_limit - slot_power;
+							double error = 0;
+							if(error_signed > 0)
+								error = error_signed/power_limit*100;
+							else error = (- error_signed)/power_limit*100; 
+
+							// Add the error to the accumulator
+							net_error_accumulator = (net_error_accumulator*((double)net_time_accumulator)+error*((double)slot_time_passed))/( ((double)net_time_accumulator)+( (double) slot_time_passed));
+							net_time_accumulator+=slot_time_passed;
+						}else{
+							net_discard_barrier = 0;
+						}
+						
 
 						//Reset start counters
 						net_time_slot_start = current_time;
