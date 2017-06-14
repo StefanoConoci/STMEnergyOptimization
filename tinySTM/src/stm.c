@@ -1157,6 +1157,17 @@ stm_exit(void)
 
   terminate_rapl();
 
+  #ifdef NET_STATS
+
+  	double time_in_seconds = ( (double) net_time_sum) / 1000000000;
+  	double net_throughput =  ( (double) net_commits_sum) / ( (double) net_time_sum) / 1000000000;
+  	double net_avg_power = ( (double) net_energy_sum) / ( (double) net_time_sum) / 1000;
+
+  	printf("\tNet_runtime: %lf\tNet_throughput: %lf\tNet_power: %lf\tNet_commits: %ld\tNet_aborts: %ld"
+  			 ,time_in_seconds, net_throughput, net_avg_power, net_commits_sum, net_aborts_sum);
+
+  #endif
+
   #ifdef STM_HOPE
   	printf("\tP-state: %d\tBest-threads: %d\tSteps: %d", best_pstate, best_threads, steps);
   #endif
@@ -1272,8 +1283,17 @@ stm_start(stm_tx_attr_t attr)
 			}
 			else{
 				// We don't call the heuristic if the energy results are out or range due to an overflow 
-				if(power > 0 && energy_per_tx > 0)
+				if(power > 0 && energy_per_tx > 0){
+					
+					#ifdef NET_STATS
+						net_time_sum += time_interval;
+						net_energy_sum += energy_interval;
+						net_commits_sum += lock_commits;
+						net_aborts_sum += 0;
+					#endif 
+
 					heuristic(throughput, abort_rate, power, energy_per_tx, time_interval);
+				}
 			}
 			
 			//Setup next round
@@ -1332,8 +1352,17 @@ stm_start(stm_tx_attr_t attr)
 				}
 				else{
 					// We don't call the heuristic if the energy results are out or range due to an overflow 
-					if(power > 0 && energy_per_tx > 0)
+					if(power > 0 && energy_per_tx > 0){
+
+						#ifdef NET_STATS
+							net_time_sum += time_sum;
+							net_energy_sum += energy_sum;
+							net_commits_sum += commits_sum;
+							net_aborts_sum += aborts_sum;
+						#endif 
+
 						heuristic(throughput, abort_rate, power, energy_per_tx, time_sum);
+					}
 				}
 			
 				//Setup next round

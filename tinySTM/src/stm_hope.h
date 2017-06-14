@@ -103,6 +103,11 @@ long lock_start_energy;
 long lock_end_energy;
 long lock_commits; 
 
+// Variable specific to NET_STATS
+long net_time_sum;
+long net_energy_sum;
+long net_commits_sum;
+long net_aborts_sum;
 
 /////////////////////////////////////////////////////////////////
 //	Function declerations
