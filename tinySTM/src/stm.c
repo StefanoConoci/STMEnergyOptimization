@@ -1389,7 +1389,7 @@ stm_start(stm_tx_attr_t attr)
 						long slot_energy_consumed = current_energy - net_energy_slot_start;
 						double slot_power = (((double) slot_energy_consumed)/ (((double) slot_time_passed)/1000));
 						printf("SLOT_POWER = %lf\n", slot_power);
-						double error_signed = power_limit ;
+						double error_signed = power_limit - slot_power;
 						double error = 0;
 						if(error_signed > 0)
 							error = error_signed;
