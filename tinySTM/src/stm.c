@@ -1294,12 +1294,11 @@ stm_start(stm_tx_attr_t attr)
 				if(slot_time_passed > 1000000000){ //If higher than 1 second update the accumulator with the value of error compared to power_limit
 					if(net_discard_barrier == 0){
 						long slot_energy_consumed = lock_end_energy - net_energy_slot_start;
-						double error_signed = power_limit - (((double) slot_energy_consumed)/ (((double) slot_time_passed)/1000));
+						double error_signed = (((double) slot_energy_consumed)/ (((double) slot_time_passed)/1000)) - power_limit;
 						double error = 0;
 					
 						if(error_signed > 0)
 							error = error_signed/power_limit*100;
-						else error = (- error_signed)/power_limit*100; 
 
 						// Add the error to the accumulator
 						net_error_accumulator = (net_error_accumulator*((double)net_time_accumulator)+error*((double)slot_time_passed))/( ((double)net_time_accumulator)+( (double) slot_time_passed));
@@ -1397,11 +1396,10 @@ stm_start(stm_tx_attr_t attr)
 							long slot_energy_consumed = current_energy - net_energy_slot_start;
 							double slot_power = (((double) slot_energy_consumed)/ (((double) slot_time_passed)/1000));
 
-							double error_signed = power_limit - slot_power;
+							double error_signed = slot_power - power_limit;
 							double error = 0;
 							if(error_signed > 0)
 								error = error_signed/power_limit*100;
-							else error = (- error_signed)/power_limit*100; 
 
 							// Add the error to the accumulator
 							net_error_accumulator = (net_error_accumulator*((double)net_time_accumulator)+error*((double)slot_time_passed))/( ((double)net_time_accumulator)+( (double) slot_time_passed));
