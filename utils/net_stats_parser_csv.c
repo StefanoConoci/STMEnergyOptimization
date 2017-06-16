@@ -93,7 +93,7 @@ int main(int argc, char *argv[]){
                               &net_runtime, &net_throughput, &net_power, &net_commits, &net_aborts, &net_error,
                               &pstate, &best_threads, &steps, &throughput);
 
-                if(net_power > 0 && net_error < 100 && net_error > 0){   
+                if(net_power > 0 && net_error <= 100 && net_error >= 0){   
                     total_throughput+=net_throughput;
                     total_error+=net_error;
                                     
