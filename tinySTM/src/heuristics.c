@@ -795,8 +795,14 @@ void explore_all_configurations(double throughput, double  abort_rate, double po
 // Helper function for dynamic heuristic0, called in phase 0
 inline void from_phase0_to_next(){
 	
-	phase0_threads = best_threads;
-	phase0_pstate = current_pstate;
+	if(best_throughput > 0){
+		phase0_threads = best_threads;
+		phase0_pstate = current_pstate;
+	}
+	else{
+		phase0_threads = 1;
+		phase0_pstate = current_pstate;
+	}
 
 	if(current_pstate == 0){
 		if(best_threads == total_threads){
@@ -872,13 +878,16 @@ void dynamic_heuristic0(double throughput, double  abort_rate, double power, dou
 			if(active_threads != total_threads && power < power_limit){
 				set_threads(active_threads+1);
 			}
-			else{
+			else if(active_threads > 1){
 				decreasing = 1;
 				set_threads(active_threads-1);
 				
 				#ifdef DEBUG_HEURISTICS
 					printf("PHASE 0 - DECREASING\n");
 				#endif
+			}
+			else{ //Starting from 1 thread and cannote increase 
+				from_phase0_to_next();
 			}
 		}
 		else if(steps == 1 && !decreasing){ //Second exploration step, define if should set decreasing 
