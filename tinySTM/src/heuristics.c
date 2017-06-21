@@ -1197,12 +1197,17 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 				// Dynamic confiugration fluctuation used by dynamic_heuristic1
 				if(heuristic_mode == 10 && stopped_searching){
 
-					if(fluctuation_state == -1)
-						update_low(throughput, power);
-					else if (fluctuation_state == 0)
-						update_best_config(throughput, power);
-					else if (fluctuation_state == 1)
-						update_high(throughput, power);
+					if(fluctuation_state == -1){
+						low_power = power;
+						low_throughput = throughput;
+					}
+					else if (fluctuation_state == 0){
+						best_power = power;
+						best_throughput = throughput;					}
+					else if (fluctuation_state == 1){
+						high_power = power;
+						high_throughput = throughput;
+					}
 					else{
 						printf("Invalid value of fluctuation_state. Aborting execution\n");
 						exit(1);
