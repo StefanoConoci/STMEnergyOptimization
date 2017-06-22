@@ -1156,7 +1156,7 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 			}
 			else if(detection_mode == 2){
 
-				if(current_pstate == 0 && boost == 1 && power > (power_limit*(1+hysteresis))){
+				if(current_pstate == 0 && boost == 1 && power > (power_limit*(1+(hysteresis/100))) ){
 					#ifdef DEBUG_HEURISTICS
 						printf("Disabling power boost\n");
 					#endif
