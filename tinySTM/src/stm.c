@@ -542,8 +542,6 @@ global_t _tinystm =
 	    net_time_accumulator= 0;
 		net_error_accumulator= 0; 
 		net_discard_barrier= 0;
-
-		boost = 1;
 	}
 
 	// Reset all threads when reaching a barrier
