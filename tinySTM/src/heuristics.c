@@ -1156,6 +1156,15 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 			}
 			else if(detection_mode == 2){
 
+				if(current_pstate == 0 && boost == 1 && power > (power_limit*(1+hysteresis))){
+					#ifdef DEBUG_HEURISTICS
+						printf("Disabling power boost\n");
+					#endif
+
+					set_boost(0);
+					boost = 0;
+				}
+
 				if(current_exploit_steps++ == exploit_steps){
 					
 					#ifdef DEBUG_HEURISTICS
@@ -1190,6 +1199,11 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 					window_time = 0;
 					window_power = 0;
 					current_window_slot = 0;
+
+					if(boost == 0){
+						boost = 1;
+						set_boost(1);
+					}
 
 					stopped_searching = 0;
 				}

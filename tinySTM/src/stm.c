@@ -542,6 +542,8 @@ global_t _tinystm =
 	    net_time_accumulator= 0;
 		net_error_accumulator= 0; 
 		net_discard_barrier= 0;
+
+		boost = 1;
 	}
 
 	// Reset all threads when reaching a barrier
@@ -571,6 +573,42 @@ global_t _tinystm =
 	  			wake_up_thread(i);
 	  		}
 		}
+	}
+
+
+
+	// Used to either enable or disable boosting facilities such as TurboBoost. Boost is disabled whenever the current config goes out of the powercap 
+	inline void set_boost(int value){
+
+		int i;
+		char fname[64];
+		FILE* boost_file;
+
+		#ifdef DEBUG_OVERHEAD
+			long time_heuristic_start;
+			long time_heuristic_end;
+			double time_heuristic_microseconds;
+
+			time_heuristic_start = get_time();
+		#endif 
+		
+		if(value != 0 && value != 1){
+			printf("Set_boost parameter invalid. Shutting down application\n");
+			exit(1);
+		}
+		
+		boost_file = fopen("/sys/devices/system/cpu/cpufreq/boost", "w+");
+		fprintf(boost_file, "%d", value);
+		fflush(boost_file);
+		fclose(boost_file);
+
+		#ifdef DEBUG_OVERHEAD
+			time_heuristic_end = get_time();
+			time_heuristic_microseconds = (((double) time_heuristic_end) - ((double) time_heuristic_start))/1000;
+			printf("DEBUG OVERHEAD - inside set_boost() %lf microseconds\n", time_heuristic_microseconds);
+		#endif 
+		
+		return 0;
 	}
 
 #endif/* ! STM_HOPE */
@@ -1061,6 +1099,7 @@ void stm_init(int threads) {
 	init_stats_array_pointer(threads);
 	load_config_file();
 	init_global_variables();
+	set_boost(1);
 
 	#ifdef TIMELINE_PLOT
 		timeline_plot_file = fopen("timeline.txt", "w+");

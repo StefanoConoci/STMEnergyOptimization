@@ -95,6 +95,8 @@ double window_power; 			// Expressed in Watt. Current average power consumption 
 
 int fluctuation_state;			// Defines the configuration used during the last step, -1 for LOW, 0 for BEST, 1 for HIGH
 
+int boost;					    // Defines if currently boost (such as TurboBoost) is either enabled or disabled 
+
 // Variables specific to LOCK_BASED_TRANSACTIONS. Statistics taken in global variables
 pthread_spinlock_t spinlock_variable;	
 long lock_start_time;
@@ -138,3 +140,4 @@ inline void stop_searching();
 int profiler_isoenergy(int, int, int*);
 void heuristic(double, double, double, double, long);
 void setup_before_barrier();
+void set_boost(int);
