@@ -7,33 +7,33 @@ do
 	echo "Iteration $b"
 
 	/home/conoci/git/STMEnergyOptimization/./set_profile 4 0 70.0 5000 50 11 10 2 10 10 150 10.0 10 1.0
-	numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/vacation/./vacation -n4 -q60 -u90 -r1048576 -t30194304 -c20 >> bench/SBAC-PAD/results/heuristics_lock_comparison2/vacation-70-stm-baseline.txt
+	numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/vacation/./vacation -n4 -q60 -u90 -r1048576 -t20194304 -c20 >> bench/SBAC-PAD/results/heuristics_lock_comparison2/vacation-70-stm-baseline.txt
 	
 	/home/conoci/git/STMEnergyOptimization/./set_profile 4 0 70.0 5000 50 9 10 2 10 10 150 10.0 10 1.0
-	numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/vacation/./vacation -n4 -q60 -u90 -r1048576 -t30194304 -c20 >> bench/SBAC-PAD/results/heuristics_lock_comparison2/vacation-70-stm-h0.txt
+	numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/vacation/./vacation -n4 -q60 -u90 -r1048576 -t20194304 -c20 >> bench/SBAC-PAD/results/heuristics_lock_comparison2/vacation-70-stm-h0.txt
 
 	/home/conoci/git/STMEnergyOptimization/./set_profile 4 0 70.0 5000 50 10 10 2 10 10 150 10.0 10 1.0
-	numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/vacation/./vacation -n4 -q60 -u90 -r1048576 -t30194304 -c20 >> bench/SBAC-PAD/results/heuristics_lock_comparison2/vacation-70-stm-h1.txt
+	numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/vacation/./vacation -n4 -q60 -u90 -r1048576 -t20194304 -c20 >> bench/SBAC-PAD/results/heuristics_lock_comparison2/vacation-70-stm-h1.txt
 
 
 	/home/conoci/git/STMEnergyOptimization/./set_profile 4 0 60.0 5000 50 11 10 2 10 10 150 10.0 10 1.0
-	numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/vacation/./vacation -n4 -q60 -u90 -r1048576 -t30194304 -c20 >> bench/SBAC-PAD/results/heuristics_lock_comparison2/vacation-60-stm-baseline.txt
+	numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/vacation/./vacation -n4 -q60 -u90 -r1048576 -t20194304 -c20 >> bench/SBAC-PAD/results/heuristics_lock_comparison2/vacation-60-stm-baseline.txt
 	
 	/home/conoci/git/STMEnergyOptimization/./set_profile 4 0 60.0 5000 50 9 10 2 10 10 150 10.0 10 1.0
-	numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/vacation/./vacation -n4 -q60 -u90 -r1048576 -t30194304 -c20 >> bench/SBAC-PAD/results/heuristics_lock_comparison2/vacation-60-stm-h0.txt
+	numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/vacation/./vacation -n4 -q60 -u90 -r1048576 -t20194304 -c20 >> bench/SBAC-PAD/results/heuristics_lock_comparison2/vacation-60-stm-h0.txt
 
 	/home/conoci/git/STMEnergyOptimization/./set_profile 4 0 60.0 5000 50 10 10 2 10 10 150 10.0 10 1.0
-	numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/vacation/./vacation -n4 -q60 -u90 -r1048576 -t30194304 -c20 >> bench/SBAC-PAD/results/heuristics_lock_comparison2/vacation-60-stm-h1.txt
+	numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/vacation/./vacation -n4 -q60 -u90 -r1048576 -t20194304 -c20 >> bench/SBAC-PAD/results/heuristics_lock_comparison2/vacation-60-stm-h1.txt
 
 
 	/home/conoci/git/STMEnergyOptimization/./set_profile 4 0 50.0 5000 50 11 10 2 10 10 150 10.0 10 1.0
-	numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/vacation/./vacation -n4 -q60 -u90 -r1048576 -t30194304 -c20 >> bench/SBAC-PAD/results/heuristics_lock_comparison2/vacation-50-stm-baseline.txt
+	numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/vacation/./vacation -n4 -q60 -u90 -r1048576 -t20194304 -c20 >> bench/SBAC-PAD/results/heuristics_lock_comparison2/vacation-50-stm-baseline.txt
 	
 	/home/conoci/git/STMEnergyOptimization/./set_profile 4 0 50.0 5000 50 9 10 2 10 10 150 10.0 10 1.0
-	numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/vacation/./vacation -n4 -q60 -u90 -r1048576 -t30194304 -c20 >> bench/SBAC-PAD/results/heuristics_lock_comparison2/vacation-50-stm-h0.txt
+	numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/vacation/./vacation -n4 -q60 -u90 -r1048576 -t20194304 -c20 >> bench/SBAC-PAD/results/heuristics_lock_comparison2/vacation-50-stm-h0.txt
 
 	/home/conoci/git/STMEnergyOptimization/./set_profile 4 0 50.0 5000 50 10 10 2 10 10 150 10.0 10 1.0
-	numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/vacation/./vacation -n4 -q60 -u90 -r1048576 -t30194304 -c20 >> bench/SBAC-PAD/results/heuristics_lock_comparison2/vacation-50-stm-h1.txt
+	numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/vacation/./vacation -n4 -q60 -u90 -r1048576 -t20194304 -c20 >> bench/SBAC-PAD/results/heuristics_lock_comparison2/vacation-50-stm-h1.txt
 
 	echo "Vacation completed"
 
