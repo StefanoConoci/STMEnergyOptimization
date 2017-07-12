@@ -1060,6 +1060,35 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 }
 	
 
+int min_pstate_search;
+int max_pstate_search;
+
+int min_thread_search;
+int max_thread_search;
+
+int last_threads;
+int last_pstate;
+int last_throughput;
+int last_power; 
+
+
+void heuristic_binary_search(double throughput, double  abort_rate, double power, double energy_per_tx){
+	
+	if(phase == 0){ // Thread tuning
+		if(min_thread_search >= max_thread_search){
+			phase = 1; 
+			set_pstate(current_pstate-1);
+		}
+		
+	}else{ // DVFS tuning, phase == 1 
+		if(min_pstate_search >= max_pstate_search){
+			stop_searching();
+		}
+	}
+}
+
+
+
 ///////////////////////////////////////////////////////////////
 // Main heuristic function
 ///////////////////////////////////////////////////////////////
@@ -1132,6 +1161,9 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 					break;
 				case 11:
 					heuristic_highest_threads(throughput, abort_rate, power, energy_per_tx);
+					break;
+				case 12:
+					heuristic_binary_search(throughput, abort_rate, power, energy_per_tx);
 					break;
 			}
 
