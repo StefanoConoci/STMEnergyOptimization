@@ -1065,7 +1065,7 @@ void heuristic_binary_search(double throughput, double  abort_rate, double power
 	
 	// Update best thread config
 	if(power < power_limit)
-			update_best_config();	
+			update_best_config(throughput, power);	
 
 	if(phase == 0){ // Thread tuning
 
