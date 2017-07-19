@@ -1062,10 +1062,6 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 // Explore the number active threads and DVFS settings indepedently. Implemented as a comparison to a state-of-the-art solution that considers the different power management knobs independently which might be sub-optimal. 
 // When this policy is set, the exploration starts with 1 thread at the maximum p-state
 void heuristic_binary_search(double throughput, double  abort_rate, double power, double energy_per_tx){
-	
-	// Update best thread config
-	if(power < power_limit)
-			update_best_config(throughput, power);	
 
 	if(phase == 0){ // Thread tuning
 
@@ -1120,7 +1116,7 @@ void heuristic_binary_search(double throughput, double  abort_rate, double power
 			#ifdef DEBUG_HEURISTICS
 					printf("PHASE 1 --> END\n");
 			#endif
-			
+			update_best_config();
 			stop_searching();
 		}else{ 	// Decreasing the p-state always improves performance
 			if(power < power_limit) 
