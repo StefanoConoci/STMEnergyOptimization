@@ -1,5 +1,6 @@
 #include "stats_t.h"
 #include  <stdio.h>
+#include <math.h>
 
 /////////////////////////////////////////////////////////////////
 //	Global variables

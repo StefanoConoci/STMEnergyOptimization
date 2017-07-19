@@ -1063,17 +1063,11 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 // When this policy is set, the exploration starts with 1 thread at the maximum p-state
 void heuristic_binary_search(double throughput, double  abort_rate, double power, double energy_per_tx){
 	
+	// Update best thread config
+	if(power < power_limit)
+			update_best_config();	
+
 	if(phase == 0){ // Thread tuning
-
-		#ifdef DEBUG_HEURISTICS
-			printf("Thread search range:%d - %d \n", min_thread_search, max_thread_search);
-		#endif
-
-		// Update best thread config
-		if(throughput > best_throughput && power < power_limit){
-			best_throughput = throughput;
-			best_threads = active_threads;	
-		}
 
 		// First two steps should check performance results with lowest number of active threads (1) and highest. If the latter performs worse than then former should directly move to DVFS tuning
 		if(steps == 0){
@@ -1112,21 +1106,15 @@ void heuristic_binary_search(double throughput, double  abort_rate, double power
 					min_thread_search = active_threads;
 					min_thread_search_throughput = throughput; 
 				}
-				set_threads(min_thread_search+((int) (max_thread_search - min_thread_search) /2));
+				set_threads(min_thread_search+( (int) ceil(((double) max_thread_search - (double) min_thread_search)/2)));
 			}
 		}
-	}else{ // DVFS tuning, phase == 1 
-
-		#ifdef DEBUG_HEURISTICS
-			printf("P-state search range:%d - %d \n", min_pstate_search, max_pstate_search);
-		#endif
 		
-		// Update best p-state config
-		if(throughput > best_throughput && power < power_limit){
-			best_throughput = throughput;
-			best_threads = active_threads;	
-			best_pstate = current_pstate;
-		}
+		#ifdef DEBUG_HEURISTICS
+			printf("Thread search range:%d - %d \n", min_thread_search, max_thread_search);
+		#endif
+
+	}else{ // DVFS tuning, phase == 1 
 
 		if(min_pstate_search >= max_pstate_search){
 			
@@ -1142,6 +1130,10 @@ void heuristic_binary_search(double throughput, double  abort_rate, double power
 
 			set_pstate(min_pstate_search+((int) (max_pstate_search - min_pstate_search) /2));
 		}
+
+		#ifdef DEBUG_HEURISTICS
+			printf("P-state search range:%d - %d \n", min_pstate_search, max_pstate_search);
+		#endif
 	}
 }
 
