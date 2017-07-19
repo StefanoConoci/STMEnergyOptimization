@@ -1106,7 +1106,7 @@ void heuristic_binary_search(double throughput, double  abort_rate, double power
 		}
 		
 		#ifdef DEBUG_HEURISTICS
-			printf("Thread search range:%d - %d \n", min_thread_search, max_thread_search);
+			printf("SEARCH RANGE - THREADS: %d - %d \n", min_thread_search, max_thread_search);
 		#endif
 
 	}else{ // DVFS tuning, phase == 1 
@@ -1116,7 +1116,7 @@ void heuristic_binary_search(double throughput, double  abort_rate, double power
 			#ifdef DEBUG_HEURISTICS
 					printf("PHASE 1 --> END\n");
 			#endif
-			update_best_config();
+			update_best_config(throughput, power);
 			stop_searching();
 		}else{ 	// Decreasing the p-state always improves performance
 			if(power < power_limit) 
@@ -1127,7 +1127,7 @@ void heuristic_binary_search(double throughput, double  abort_rate, double power
 		}
 
 		#ifdef DEBUG_HEURISTICS
-			printf("P-state search range:%d - %d \n", min_pstate_search, max_pstate_search);
+			printf("SEARCH RANGE - P-STATE: %d - %d \n", min_pstate_search, max_pstate_search);
 		#endif
 	}
 }
