@@ -1120,6 +1120,7 @@ void heuristic_binary_search(double throughput, double  abort_rate, double power
 			set_pstate(min_pstate_search+((int) (max_pstate_search - min_pstate_search) /2));
 		}
 	}
+}
 
 ///////////////////////////////////////////////////////////////
 // Main heuristic function
