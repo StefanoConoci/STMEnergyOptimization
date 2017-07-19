@@ -390,6 +390,9 @@ global_t _tinystm =
 	  			set_pstate(static_pstate);
 	  		else 
 	  			printf("The parameter manual_pstate is set outside of the valid range for this CPU. Setting the CPU to the slowest frequency/voltage\n");
+	  	}else if(heuristic_mode == 12){
+	  		set_pstate(max_pstate);
+	  		set_threads(1);
 	  	}
 
 		fclose(config_file);
