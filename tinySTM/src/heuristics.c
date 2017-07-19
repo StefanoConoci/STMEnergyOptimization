@@ -1074,7 +1074,6 @@ void heuristic_binary_search(double throughput, double  abort_rate, double power
 			max_thread_search_throughput = throughput;
 			if(max_thread_search_throughput < min_thread_search_throughput){
 				phase = 1;
-				steps = 0;
 				set_threads(1);
 				set_pstate((int) max_pstate/2);
 
@@ -1086,7 +1085,6 @@ void heuristic_binary_search(double throughput, double  abort_rate, double power
 		}else{ 	
 			if(min_thread_search >= max_thread_search){ // Stop the binary search on threads and move on dvfs
 				phase = 1; 
-				steps = 0;
 				set_pstate((int) max_pstate/2);
 
 				#ifdef DEBUG_HEURISTICS
