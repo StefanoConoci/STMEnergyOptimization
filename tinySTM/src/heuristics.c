@@ -1106,7 +1106,7 @@ void heuristic_binary_search(double throughput, double  abort_rate, double power
 					min_thread_search = active_threads;
 					min_thread_search_throughput = throughput; 
 				}
-				set_threads(min_thread_search+( (int) ceil(((double) max_thread_search - (double) min_thread_search)/2)));
+				set_threads(min_thread_search+((int) (max_thread_search - min_thread_search) /2));
 			}
 		}
 		
@@ -1127,8 +1127,8 @@ void heuristic_binary_search(double throughput, double  abort_rate, double power
 			if(power < power_limit) 
 				max_pstate_search = current_pstate;
 			else min_pstate_search = current_pstate;
-
-			set_pstate(min_pstate_search+((int) (max_pstate_search - min_pstate_search) /2));
+			
+			set_pstate(min_pstate_search+( (int) ceil(((double) max_pstate_search - (double) min_pstate_search)/2)));
 		}
 
 		#ifdef DEBUG_HEURISTICS
