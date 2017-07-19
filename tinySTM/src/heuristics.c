@@ -1093,7 +1093,7 @@ void heuristic_binary_search(double throughput, double  abort_rate, double power
 
 			}else{ // Keep searching
 				if(power > power_limit || throughput > max_thread_search_throughput){ // Should set current to high
-					max_thread_search = active_threads;
+					max_thread_search = active_threads-1;
 					max_thread_search_throughput = throughput; 
 				}else{ // Should set current to low 
 					min_thread_search = active_threads;
@@ -1119,7 +1119,7 @@ void heuristic_binary_search(double throughput, double  abort_rate, double power
 		}else{ 	// Decreasing the p-state always improves performance
 			if(power < power_limit) 
 				max_pstate_search = current_pstate;
-			else min_pstate_search = current_pstate;
+			else min_pstate_search = current_pstate+1;
 
 			set_pstate(min_pstate_search+( (int) ceil(((double) max_pstate_search - (double) min_pstate_search)/2)));
 		}
