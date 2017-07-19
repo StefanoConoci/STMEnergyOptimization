@@ -118,6 +118,15 @@ long net_time_accumulator;
 double net_error_accumulator; 
 long net_discard_barrier;
 
+// Variables used by the binary_search heuristic
+int min_pstate_search;
+int max_pstate_search;
+
+int min_thread_search;
+int max_thread_search;
+double min_thread_search_throughput;
+double max_thread_search_throughput;
+
 /////////////////////////////////////////////////////////////////
 //	Function declerations
 /////////////////////////////////////////////////////////////////

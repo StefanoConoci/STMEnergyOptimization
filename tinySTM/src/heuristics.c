@@ -1059,35 +1059,67 @@ void heuristic_highest_threads(double throughput, double  abort_rate, double pow
 	}
 }
 	
-
-int min_pstate_search;
-int max_pstate_search;
-
-int min_thread_search;
-int max_thread_search;
-
-int last_threads;
-int last_pstate;
-int last_throughput;
-int last_power; 
-
-
+// Explore the number active threads and DVFS settings indepedently. Implemented as a comparison to a state-of-the-art solution that considers the different power management knobs independently which might be sub-optimal. 
+// When this policy is set, the exploration starts with 1 thread at the maximum p-state
 void heuristic_binary_search(double throughput, double  abort_rate, double power, double energy_per_tx){
 	
 	if(phase == 0){ // Thread tuning
-		if(min_thread_search >= max_thread_search){
-			phase = 1; 
-			set_pstate(current_pstate-1);
+
+		// Update best thread config
+		if(throughput > best_throughput && power < power_limit){
+			best_throughput = throughput;
+			best_threads = active_threads;	
 		}
-		
+
+		// First two steps should check performance results with lowest number of active threads (1) and highest. If the latter performs worse than then former should directly move to DVFS tuning
+		if(steps == 0){
+			min_thread_search_throughput = throughput;
+			set_threads(total_threads);
+			steps++;
+		}else if(steps == 1){
+			max_thread_search_throughput = throughput;
+			if(max_thread_search_throughput < min_thread_search_throughput){
+				phase = 1;
+				steps = 0;
+				set_threads(1);
+				set_pstate((int) max_pstate/2);
+			}else set_threads(min_thread_search+((int) (max_thread_search - min_thread_search) /2));
+		}else{ 	
+			if(min_thread_search >= max_thread_search){ // Stop the binary search on threads and move on dvfs
+				phase = 1; 
+				steps = 0;
+				set_threads(best_threads);
+				set_pstate((int) max_pstate/2);
+			}else{ // Keep searching
+				if(power > power_limit || throughput > max_thread_search_throughput){ // Should set current to high
+					max_thread_search = active_threads;
+					max_thread_search_throughput = throughput; 
+				}else{ // Should set current to low 
+					min_thread_search = active_threads;
+					min_thread_search_throughput = throughput; 
+				}
+				set_threads(min_thread_search+((int) (max_thread_search - min_thread_search) /2));
+			}
+		}
 	}else{ // DVFS tuning, phase == 1 
+		
+		// Update best p-state config
+		if(throughput > best_throughput && power < power_limit){
+			best_throughput = throughput;
+			best_threads = active_threads;	
+			best_pstate = current_pstate;
+		}
+
 		if(min_pstate_search >= max_pstate_search){
 			stop_searching();
+		}else{ 	// Decreasing the p-state always improves performance
+			if(power < power_limit) 
+				max_pstate_search = current_pstate;
+			else min_pstate_search = current_pstate;
+
+			set_pstate(min_pstate_search+((int) (max_pstate_search - min_pstate_search) /2));
 		}
 	}
-}
-
-
 
 ///////////////////////////////////////////////////////////////
 // Main heuristic function

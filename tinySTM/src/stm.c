@@ -542,6 +542,14 @@ global_t _tinystm =
 	    net_time_accumulator= 0;
 		net_error_accumulator= 0; 
 		net_discard_barrier= 0;
+
+		min_pstate_search = 0;
+		max_pstate_search = max_pstate;
+
+		min_thread_search = 1;
+		max_thread_search = total_threads;
+		min_thread_search_throughput = -1;
+		max_thread_search_throughput = -1;
 	}
 
 	// Reset all threads when reaching a barrier
