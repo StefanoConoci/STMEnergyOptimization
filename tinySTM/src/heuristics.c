@@ -1143,7 +1143,7 @@ void heuristic_two_step_search(double throughput, double  abort_rate, double pow
 
 	if(phase == 0){ // Searching threads
 		if(power<power_limit && active_threads < total_threads && throughput > best_throughput*0.9){
-			set_threads(active_threads+1)
+			set_threads(active_threads+1);
 		}else{
 			set_threads(best_threads);
 			set_pstate(current_pstate-1);
