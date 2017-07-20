@@ -265,7 +265,11 @@ global_t _tinystm =
 	inline int pause_thread(int thread_id){
 
 		if( running_array[thread_id] == 0 ){
-			printf("Pausing a thread already paused\n");
+			
+			#ifdef DEBUG_HEURISTICS
+				printf("Pausing a thread already paused\n");
+			#endif
+
 			return -1;
 		}
 

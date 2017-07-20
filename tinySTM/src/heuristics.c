@@ -1278,6 +1278,9 @@ void heuristic_two_step_search(double throughput, double  abort_rate, double pow
 					if(heuristic_mode == 11){
 						set_pstate(max_pstate);
 						set_threads(starting_threads);
+					}else if(heuristic_mode == 12 || heuristic_mode == 13){
+						set_pstate(max_pstate);
+						set_threads(1);
 					}else{
 						set_pstate(best_pstate);
 						set_threads(best_threads);
