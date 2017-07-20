@@ -1133,6 +1133,32 @@ void heuristic_binary_search(double throughput, double  abort_rate, double power
 	}
 }
 
+// In phase 1 this heuristic first explores in the direction of increased active threads then,
+// if either performance decreases or the power consumption reaches the power limit, it to phase 2 where the DVFS setting, for that given amount of active threads, is tuned
+void heuristic_two_step_search(double throughput, double  abort_rate, double power, double energy_per_tx){
+
+	if(power<power_limit){
+		update_best_config(throughput,power);
+	}
+
+	if(phase == 0){ // Searching threads
+		if(power<power_limit && active_threads < total_threads && throughput > best_throughput*0.9){
+			set_threads(active_threads+1)
+		}else{
+			set_threads(best_threads);
+			set_pstate(current_pstate-1);
+			phase = 1; 
+		}
+	}else{ // Phase == 1. Optimizing DVFS
+		if(power<power_limit && current_pstate >= 0){
+			set_pstate(current_pstate-1);
+		}
+		else{
+			stop_searching();
+		}
+	}
+}
+
 ///////////////////////////////////////////////////////////////
 // Main heuristic function
 ///////////////////////////////////////////////////////////////
@@ -1208,6 +1234,9 @@ void heuristic_binary_search(double throughput, double  abort_rate, double power
 					break;
 				case 12:
 					heuristic_binary_search(throughput, abort_rate, power, energy_per_tx);
+					break;
+				case 13:
+					heuristic_two_step_search(throughput, abort_rate, power, energy_per_tx);
 					break;
 			}
 
