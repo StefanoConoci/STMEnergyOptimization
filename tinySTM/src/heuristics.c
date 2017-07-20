@@ -1308,6 +1308,15 @@ void heuristic_two_step_search(double throughput, double  abort_rate, double pow
 					current_window_slot = 0;
 
 					stopped_searching = 0;
+
+					min_thread_search = 1;
+					max_thread_search = total_threads;
+
+					min_pstate_search = 0; 
+					max_pstate_search = max_pstate;
+
+					min_thread_search_throughput = -1;
+					max_thread_search_throughput = -1;
 				}
 
 				// Dynamic confiugration fluctuation used by dynamic_heuristic1
