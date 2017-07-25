@@ -1,6 +1,0 @@
-intruder
-Threads: 2	Elapsed time: 18.133187	Commits: 13544276	Aborts: 2321004	Throughput: 746933.010644
-Threads: 3	Elapsed time: 14.901129	Commits: 13544277	Aborts: 3125055	Throughput: 908943.006488
-Threads: 4	Elapsed time: 12.574921	Commits: 13544278	Aborts: 5169294	Throughput: 1077086.537208
-Threads: 5	Elapsed time: 11.188259	Commits: 13544279	Aborts: 5714530	Throughput: 1210579.692300
-Threads: 6	Elapsed time: 9.823785	Commits: 13544280	Aborts: 4826093	Throughput: 1378723.160999

@@ -40,15 +40,17 @@
 #include "gc.h"
 #include "../../rapl-power/rapl.h"
 
+#ifdef ENERGY_DESKTOP
+	#include <time.h>
+#endif
+
 #ifdef STM_HOPE
 	#include <time.h>
 	#include "stm_hope.h"
 	#include "heuristics.c"
+	#include "powercap_internals.c"
 #endif
 
-#ifdef ENERGY_DESKTOP
-	#include <time.h>
-#endif
 
 /* ################################################################### *
  * DEFINES
