@@ -45,9 +45,10 @@
 
 #ifdef STM_HOPE
 	#include <time.h>
-	#include "stm_hope.h"
-	#include "heuristics.c"
-	#include "powercap_internals.c"
+	#include "../../powercap/powercap.h"
+	#include "../../powercap/heuristics.c"
+	#include "../../powercap/powercap.c"
+
 #endif
 
 

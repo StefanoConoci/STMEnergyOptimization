@@ -81,7 +81,7 @@
 #include "stdio.h"
 #include "rapl.h"
 //#include <stdio.h> //debug
-#include "../../tinySTM/src/stm_hope.h" 
+#include "../../powercap/powercap.h" 
 
 static THREAD_LOCAL_T    global_threadId;
 static long              global_numThread       = 1;

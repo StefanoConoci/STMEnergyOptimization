@@ -266,7 +266,7 @@ enum {                                  /* Transaction status */
 #endif /* MAX_SPECIFIC */
 
 #ifdef STM_HOPE
-  #include "stats_t.h"
+  #include "../../powercap/stats_t.h"
 #endif
 
 typedef struct r_entry {                /* Read set entry */
