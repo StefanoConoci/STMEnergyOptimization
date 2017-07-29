@@ -38,8 +38,6 @@
 extern "C" {
 # endif
 
-void setup_before_barrier();
-
 struct stm_tx;
 /**
  * Return the current transaction descriptor.
