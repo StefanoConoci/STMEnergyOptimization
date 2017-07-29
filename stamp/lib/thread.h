@@ -84,6 +84,7 @@
 extern "C" {
 #endif
 
+#include "../../powercap/powercap.h" 
 
 #define THREAD_T                            pthread_t
 #define THREAD_ATTR_T                       pthread_attr_t

@@ -68,9 +68,6 @@
  * =============================================================================
  */
 
-
-#define STM_HOPE
-
 #include <assert.h>
 #include <stdlib.h>
 #include <math.h> /*** TESI post ***/
@@ -80,8 +77,6 @@
 #include "errno.h"
 #include "stdio.h"
 #include "rapl.h"
-//#include <stdio.h> //debug
-#include "../../powercap/powercap.h" 
 
 static THREAD_LOCAL_T    global_threadId;
 static long              global_numThread       = 1;
