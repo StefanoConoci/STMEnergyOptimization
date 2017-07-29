@@ -8,8 +8,9 @@
   ((stm_time_t)hi) << 32 | lo; \
 })
   
-
-
+#ifdef STM_HOPE
+ void setup_before_barrier();
+#endif
 
 # include <setjmp.h>
 # include <stdint.h>
