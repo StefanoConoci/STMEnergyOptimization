@@ -19,6 +19,7 @@
 #include "stats_t.h"
 #include  <stdio.h>
 #include <math.h>
+#include <pthread.h>
 
 /////////////////////////////////////////////////////////////////
 //	Global variables

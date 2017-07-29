@@ -2,6 +2,8 @@
 #define _STM_H_
 
 #include "../../powercap/powercap.h"
+#include <pthread.h>
+
   
 #define STM_TIMER_READ() ({ \
   unsigned int lo; \
