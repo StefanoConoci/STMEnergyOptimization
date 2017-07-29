@@ -1,6 +1,16 @@
 #ifndef _STM_H_
 #define _STM_H_
 
+#define STM_HOPE
+
+
+#ifdef STM_HOPE
+  #include <time.h>
+  #include "../../powercap/powercap.h"
+  #include "../../powercap/heuristics.c"
+  #include "../../powercap/powercap.c"
+#endif
+
   
 #define STM_TIMER_READ() ({ \
   unsigned int lo; \

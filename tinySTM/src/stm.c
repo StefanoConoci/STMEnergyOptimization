@@ -43,14 +43,6 @@
 	#include <time.h>
 #endif
 
-#ifdef STM_HOPE
-	#include <time.h>
-	#include "../../powercap/powercap.h"
-	#include "../../powercap/heuristics.c"
-	#include "../../powercap/powercap.c"
-
-#endif
-
 
 /* ################################################################### *
  * DEFINES
