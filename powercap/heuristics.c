@@ -1159,6 +1159,99 @@ void heuristic_two_step_search(double throughput, double  abort_rate, double pow
 	}
 }
 
+// Equivalent to heuristic_two_step_search but when the exploration is restarted it starts from the previous best configuration instead of 1 Thread at lowest DVFS setting. 
+void heuristic_two_step_stateful(double throughput, double  abort_rate, double power, double energy_per_tx){
+	
+	if(phase == 0){	// Thread scheduling at lowest frequency
+		
+		if(power<power_limit){
+			update_best_config(throughput, power);
+		}
+
+		if(steps == 0){ // First exploration step
+			if(active_threads != total_threads && power < power_limit){
+				set_threads(active_threads+1);
+			}
+			else if(active_threads > 1){
+				decreasing = 1;
+				set_threads(active_threads-1);
+				
+				#ifdef DEBUG_HEURISTICS
+					printf("PHASE 0 - DECREASING\n");
+				#endif
+			}
+			else{ //Starting from 1 thread and cannote increase 
+				from_phase0_to_next();
+			}
+		}
+		else if(steps == 1 && !decreasing){ //Second exploration step, define if should set decreasing 
+			if(throughput >= best_throughput*0.9 && power < power_limit && active_threads != total_threads){
+				set_threads(active_threads+1);
+			} else{ // Should set decreasing to 0 
+				if(starting_threads > 1){
+					decreasing = 1; 
+					set_threads(starting_threads-1);	
+
+					#ifdef DEBUG_HEURISTICS
+						printf("PHASE 0 - DECREASING\n");
+					#endif
+				}
+				else{ // Cannot reduce number of thread more as starting_thread is already set to 1 
+					from_phase0_to_next();
+				}
+			}
+		} 
+		else if(decreasing){ // Decreasing threads  
+			if(throughput < best_throughput*0.9 || active_threads == 1)
+				from_phase0_to_next();
+			else
+				set_threads(active_threads-1);
+			
+		} else{ // Increasing threads
+			if( power > power_limit || active_threads == total_threads || throughput < best_throughput*0.9){
+				if(starting_threads > 1){
+					decreasing = 1; 
+					set_threads(starting_threads-1);	
+
+					#ifdef DEBUG_HEURISTICS
+						printf("PHASE 0 - DECREASING\n");
+					#endif
+				}
+				else{ // Cannot reduce number of thread more as starting_thread is already set to 1 
+					from_phase0_to_next();
+				}
+			}
+			else set_threads(active_threads+1);
+		}
+	}
+	else{ // Phase == 1 -> Increase DVFS until reaching the powercap
+		
+		if(power<power_limit){
+			update_best_config(throughput, power);
+		}
+
+		if( (power < power_limit && current_pstate == 0) || (power > power_limit && active_threads == 1) ){
+		
+			#ifdef DEBUG_HEURISTICS
+				printf("PHASE 1 - END\n");
+			#endif
+			
+			stop_searching();;
+		} else{ // Not yet completed to explore in phase 1 
+			if(power < power_limit)
+				set_pstate(current_pstate-1);
+			else{
+
+				#ifdef DEBUG_HEURISTICS
+					printf("PHASE 1 - END\n");
+				#endif
+
+				stop_searching();
+			} 
+		}	
+	}
+}
+
 ///////////////////////////////////////////////////////////////
 // Main heuristic function
 ///////////////////////////////////////////////////////////////
@@ -1237,6 +1330,9 @@ void heuristic_two_step_search(double throughput, double  abort_rate, double pow
 					break;
 				case 13:
 					heuristic_two_step_search(throughput, abort_rate, power, energy_per_tx);
+					break;
+				case 14:
+					heuristic_two_step_stateful(throughput, abort_rate, power, energy_per_tx);
 					break;
 			}
 
