@@ -78,6 +78,9 @@
 #include "stdio.h"
 #include "rapl.h"
 
+#include "../../powercap/macros.h"
+#include "../../powercap/powercap.h"
+
 static THREAD_LOCAL_T    global_threadId;
 static long              global_numThread       = 1;
 static THREAD_BARRIER_T* global_barrierPtr      = NULL;
