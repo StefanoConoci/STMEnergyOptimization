@@ -240,8 +240,6 @@ thread_getNumThread();
 void
 thread_barrier_wait();
 
-void setup_before_barrier();
-
 
 #ifdef __cplusplus
 }
