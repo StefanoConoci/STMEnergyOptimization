@@ -12,6 +12,7 @@ This software is developed for Linux operating systems in c programming language
 - DEBUG_OVERHEAD: if defined prints the time interval spent in the different portions of code specific of the proposed solution and not directly related to the application execution;
 - LOCK_BASED_TRANSACTIONS: if defined changes the synchronization paradigm used by the STAMP applications from transactions to coarse-grained locking implemented with spinlocks; 
 - TIMELINE_PLOT: if defined produces in the working directory a file that shows for each step (either explorative or exploitative) the selected configuration of threads and P-state, the average power consumption, the value of the powercap at the given time and the average throughput. 
+Compilation macros can be set from the file "powercap/macros.h"
 
 *Compile*
 
@@ -19,7 +20,7 @@ You can use "compile.sh" to compile the power capping solution, TinySTM and the 
 
 *Configuration file*
 
-The configuration file named "stm_hope.h" is loaded at the start of the execution and defines different parameters (some of which are currently deprecated). The meaning and supported values for these parameters are displayed as comments in the file "powercap/powercap.h", where each parameter is associated with a variable using the same name.
+The configuration file named "hope_config.txt" is loaded at the start of the execution and defines different parameters (some of which are currently deprecated). The meaning and supported values for these parameters are displayed as comments in the file "powercap/powercap.h", where each parameter is associated with a variable using the same name.
 
 *Run*
 
