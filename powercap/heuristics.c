@@ -1159,6 +1159,25 @@ void heuristic_two_step_search(double throughput, double  abort_rate, double pow
 	}
 }
 
+
+// Helper function for dynamic heuristic0, called in phase 0
+inline void from_phase0_to_next_stateful(){
+
+	phase == 1;
+
+	if(best_throughput == -1){
+		set_pstate(current_pstate+1);
+	else{
+
+		if(current_pstate == 0)
+			stop_searching();
+		else{
+			set_threads(best_threads);
+			set_pstate(current_pstate-1);
+		}
+	} 
+}
+
 // Equivalent to heuristic_two_step_search but when the exploration is restarted it starts from the previous best configuration instead of 1 Thread at lowest DVFS setting. 
 void heuristic_two_step_stateful(double throughput, double  abort_rate, double power, double energy_per_tx){
 	
@@ -1181,7 +1200,7 @@ void heuristic_two_step_stateful(double throughput, double  abort_rate, double p
 				#endif
 			}
 			else{ //Starting from 1 thread and cannote increase 
-				from_phase0_to_next();
+				from_phase0_to_next_stateful();
 			}
 		}
 		else if(steps == 1 && !decreasing){ //Second exploration step, define if should set decreasing 
@@ -1197,13 +1216,13 @@ void heuristic_two_step_stateful(double throughput, double  abort_rate, double p
 					#endif
 				}
 				else{ // Cannot reduce number of thread more as starting_thread is already set to 1 
-					from_phase0_to_next();
+					from_phase0_to_next_stateful();
 				}
 			}
 		} 
 		else if(decreasing){ // Decreasing threads  
 			if(throughput < best_throughput*0.9 || active_threads == 1)
-				from_phase0_to_next();
+				from_phase0_to_next_stateful();
 			else
 				set_threads(active_threads-1);
 			
@@ -1218,7 +1237,7 @@ void heuristic_two_step_stateful(double throughput, double  abort_rate, double p
 					#endif
 				}
 				else{ // Cannot reduce number of thread more as starting_thread is already set to 1 
-					from_phase0_to_next();
+					from_phase0_to_next_stateful();
 				}
 			}
 			else set_threads(active_threads+1);
@@ -1245,7 +1264,6 @@ void heuristic_two_step_stateful(double throughput, double  abort_rate, double p
 				if(best_throughput == -1)
 					set_pstate(current_pstate+1);
 				else{
-					
 					#ifdef DEBUG_HEURISTICS
 						printf("PHASE 1 - END\n");
 					#endif
