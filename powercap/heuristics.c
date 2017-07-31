@@ -1242,11 +1242,17 @@ void heuristic_two_step_stateful(double throughput, double  abort_rate, double p
 				set_pstate(current_pstate-1);
 			else{
 
-				#ifdef DEBUG_HEURISTICS
-					printf("PHASE 1 - END\n");
-				#endif
+				if(best_throughput == -1)
+					set_pstate(current_pstate+1);
+				else{
+					
+					#ifdef DEBUG_HEURISTICS
+						printf("PHASE 1 - END\n");
+					#endif
 
-				stop_searching();
+					stop_searching();
+				}
+				
 			} 
 		}	
 	}
