@@ -1150,7 +1150,7 @@ void heuristic_two_step_search(double throughput, double  abort_rate, double pow
 			phase = 1; 
 		}
 	}else{ // Phase == 1. Optimizing DVFS
-		if(power<power_limit && current_pstate >= 0){
+		if(power<power_limit && current_pstate > 0){
 			set_pstate(current_pstate-1);
 		}
 		else{
