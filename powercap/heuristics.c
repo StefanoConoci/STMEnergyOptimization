@@ -1167,7 +1167,7 @@ inline void from_phase0_to_next_stateful(){
 
 	if(best_throughput == -1){
 		set_pstate(current_pstate+1);
-	else{
+	}else{
 
 		if(current_pstate == 0)
 			stop_searching();
