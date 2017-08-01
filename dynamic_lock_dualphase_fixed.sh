@@ -11,7 +11,7 @@ do
 
 	/home/conoci/git/STMEnergyOptimization/./set_profile 4 0 60.0 5000 50 13 10 2 10 10 150 10.0 10 1.0
 	numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/vacation/./vacation -n4 -q60 -u90 -r1048576 -t20194304 -c20 >> bench/SBAC-PAD/results/heuristics_lock_dualphase_fixed/vacation-60-stm-dualphase.txt
-13
+
 	/home/conoci/git/STMEnergyOptimization/./set_profile 4 0 50.0 5000 50 13 10 2 10 10 150 10.0 10 1.0
 	numactl --physcpubind=+0-19 /home/conoci/git/STMEnergyOptimization/stamp/vacation/./vacation -n4 -q60 -u90 -r1048576 -t20194304 -c20 >> bench/SBAC-PAD/results/heuristics_lock_dualphase_fixed/vacation-50-stm-dualphase.txt
 	
