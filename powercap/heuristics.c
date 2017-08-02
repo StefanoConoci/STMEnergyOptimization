@@ -1,3 +1,4 @@
+
 ///////////////////////////////////////////////////////////////
 // Utility functions
 ///////////////////////////////////////////////////////////////
@@ -47,6 +48,11 @@ inline void stop_searching(){
 	phase = 0;
 
 	current_exploit_steps = 0;
+
+	if(best_throughput == -1){
+		best_threads = 1;
+		best_pstate = max_pstate;
+	}
 
 	set_pstate(best_pstate);
 	set_threads(best_threads);
