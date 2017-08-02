@@ -1,0 +1,1 @@
+Threads: 20	Elapsed time: 122.211495	Commits: 20194300	Aborts: 0	Net_runtime: 4.405105	Net_throughput: 229282.594402	Net_power: 46.430730	Net_commits: 1010014	Net_aborts: 0	Net_error: 0.000000	P-state: 0	Best-threads: 1	Steps: 0	Throughput: 165240.593880
